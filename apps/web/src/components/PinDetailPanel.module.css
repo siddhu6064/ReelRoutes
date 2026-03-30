@@ -1,0 +1,216 @@
+.panel {
+  width: 340px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.stopNum {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--coral);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.headerText { flex: 1; min-width: 0; }
+
+.placeName {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.address {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.close {
+  color: var(--text-faint);
+  font-size: 14px;
+  padding: 4px;
+  border-radius: var(--r-sm);
+  transition: color .1s, background .1s;
+  flex-shrink: 0;
+}
+
+.close:hover { color: var(--text); background: var(--surface-3); }
+
+.quote {
+  background: var(--surface-2);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  font-style: italic;
+  position: relative;
+}
+
+.quoteIcon {
+  font-size: 24px;
+  color: var(--coral);
+  font-style: normal;
+  line-height: 1;
+  margin-right: 2px;
+  opacity: .6;
+  font-family: Georgia, serif;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.metaChip {
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.section { display: flex; flex-direction: column; gap: 6px; }
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.textarea {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color .15s;
+}
+
+.textarea:focus { border-color: var(--coral); outline: none; }
+.textarea::placeholder { color: var(--text-faint); }
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  min-height: 40px;
+  align-items: center;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--surface-3);
+  border-radius: var(--r-full);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--coral);
+}
+
+.tagRemove {
+  font-size: 10px;
+  color: var(--text-faint);
+  line-height: 1;
+  padding: 0 2px;
+}
+.tagRemove:hover { color: var(--red); }
+
+.tagInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 12px;
+  color: var(--text);
+  min-width: 80px;
+  flex: 1;
+}
+.tagInput::placeholder { color: var(--text-faint); }
+
+.mapsLink {
+  font-size: 13px;
+  color: var(--coral);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.actions { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+
+.saveBtn {
+  padding: 11px;
+  border-radius: var(--r-md);
+  background: var(--coral);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background .15s;
+}
+.saveBtn:hover:not(:disabled) { background: var(--coral-dark); }
+.saveBtn:disabled { opacity: .5; }
+
+.deleteBtn {
+  padding: 10px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  transition: background .15s;
+}
+.deleteBtn:hover { background: color-mix(in srgb, var(--red) 12%, var(--surface-2)); }
+
+.confirmRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.confirmText { font-size: 13px; color: var(--text-muted); flex: 1; }
+.confirmYes {
+  padding: 6px 12px; border-radius: var(--r-sm);
+  background: var(--red); color: #fff; font-size: 12px; font-weight: 700;
+}
+.confirmNo {
+  padding: 6px 12px; border-radius: var(--r-sm);
+  background: var(--surface-3); color: var(--text); font-size: 12px; font-weight: 600;
+}

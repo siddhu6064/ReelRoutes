@@ -1,0 +1,160 @@
+.layout {
+  display: flex;
+  height: calc(100vh - 56px);
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.sidebarHeader {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.backBtn {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  display: inline-block;
+}
+.backBtn:hover { color: var(--text); }
+
+.tripTitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.tripMeta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+.sidebarActions { display: flex; gap: 8px; }
+
+.chatToggle {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: var(--r-md);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border-light);
+  transition: all .15s;
+}
+.chatToggle:hover { border-color: var(--coral); color: var(--coral); }
+
+.editBtn {
+  padding: 8px 14px;
+  border-radius: var(--r-md);
+  background: var(--coral);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  transition: background .15s;
+}
+.editBtn:hover { background: var(--coral-dark); }
+
+.stopList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  text-align: left;
+  width: 100%;
+  transition: all .12s;
+  cursor: pointer;
+}
+.stop:hover { background: var(--surface-2); border-color: var(--border); }
+.stop.active { background: color-mix(in srgb, var(--coral) 10%, var(--surface-2)); border-color: var(--coral); }
+
+.stopNum {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--coral);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.stop.active .stopNum { background: var(--coral-dark); }
+
+.stopInfo { flex: 1; min-width: 0; }
+.stopName { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stopCity { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.lowConf { font-size: 12px; color: var(--yellow); flex-shrink: 0; }
+
+.mapWrap { flex: 1; position: relative; }
+.map { width: 100%; height: 100%; }
+
+.mapPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.mockPins {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 400px;
+}
+
+.mockPin {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--coral);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: transform .15s, background .15s;
+}
+.mockPin:hover, .mockPin.active { background: var(--coral-dark); transform: scale(1.15); }
+
+.loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 15px;
+  gap: 8px;
+}
+
+.backLink { color: var(--coral); text-decoration: underline; }

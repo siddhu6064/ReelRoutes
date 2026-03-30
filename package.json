@@ -1,0 +1,51 @@
+{
+  "name": "reelroutes",
+  "version": "4.0.0",
+  "private": true,
+  "description": "ReelRoutes V4 — AI-powered travel video to trip planner",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "cd apps/api && poetry run uvicorn app.main:app --reload --port 8000",
+    "dev": "concurrently \"pnpm dev:api\" \"pnpm dev:web\"",
+    "build:web": "pnpm --filter web build",
+    "build:shared": "pnpm --filter shared build",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:api": "cd apps/api && poetry run pytest",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\" --ignore-path .gitignore",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "concurrently": "^9.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yaml,yml}": [
+      "prettier --write"
+    ],
+    "*.py": [
+      "ruff format",
+      "ruff check --fix"
+    ]
+  }
+}
