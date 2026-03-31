@@ -184,6 +184,14 @@ class JobDocument(Document):
     error: str | None = None
     error_code: JobErrorCode | None = None
 
+    # ── Extraction results (Task 7) ────────────────────────────
+    # Stored after AI extraction completes — before geocoding
+    extracted_places: list[dict] = Field(default_factory=list)
+    extraction_model: str | None = None
+    extraction_tokens: int = 0
+    raw_llm_response: str | None = None
+    extracted_at: datetime | None = None
+
     # Timestamps
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     started_at: datetime | None = None

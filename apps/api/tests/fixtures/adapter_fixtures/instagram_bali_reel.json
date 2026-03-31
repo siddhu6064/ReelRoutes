@@ -1,0 +1,17 @@
+{
+  "_comment": "yt-dlp info_dict fixture for an Instagram Reel about Bali travel.",
+  "id": "CaB123dEfGH",
+  "title": "Bali in 60 seconds ✈️🌿",
+  "description": "POV: you chose Bali and you'd do it again 🌴\n\nSpent 10 days island hopping and I'm obsessed. Here's everything we did:\n\n📍 Ubud Monkey Forest — feed the monkeys (carefully!)\n📍 Tegallalang Rice Terraces at sunrise\n📍 Tirta Empul Temple — the water purification ceremony is unreal\n📍 Mount Batur — woke up at 2am for this sunrise hike, worth every minute\n📍 Nusa Penida — Crystal Bay for snorkeling, Kelingking Beach for views\n📍 Seminyak Beach for sunsets and cocktails\n📍 Tanah Lot Temple at sunset (get there early!)\n\nFull vlog on YouTube — link in bio 🎬\n\n#bali #indonesia #travel #travelgram #balireels #explore #island #asia #wanderlust #solotravel #baliguide",
+  "uploader": "Sofia Explores",
+  "uploader_id": "sofiaexplores",
+  "channel": "sofiaexplores",
+  "duration": 58.0,
+  "thumbnail": "https://cdninstagram.com/thumbnail_abc123.jpg",
+  "timestamp": 1712275200,
+  "location": "Ubud, Bali, Indonesia",
+  "location_name": "Ubud, Bali, Indonesia",
+  "tags": ["bali", "indonesia", "travel", "travelgram", "balireels", "explore", "island", "asia", "wanderlust", "solotravel", "baliguide"],
+  "webpage_url": "https://www.instagram.com/reel/CaB123dEfGH/",
+  "extractor": "instagram"
+}

@@ -45,44 +45,73 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
         job = await JobService.get(job_id)
         await JobService.start(job)
 
-        # ── Step 1: Fetch video metadata ───────────────────────
+        # ── Step 1: Fetch video metadata & signals via adapter ──
         await JobService.update_progress(
             job, JobStep.FETCHING_VIDEO, 10, "Fetching video metadata…"
         )
-        # TODO Phase 3: platform adapter (YouTube API / yt-dlp)
-        await asyncio.sleep(0.5)  # placeholder for real fetch
+        from app.adapters.registry import fetch_from_url
+        adapter_output = await fetch_from_url(job.url, job.platform)
+
         await JobService.update_progress(
-            job, JobStep.FETCHING_VIDEO, 18, "Video metadata fetched."
+            job, JobStep.FETCHING_VIDEO, 18,
+            f"Video metadata fetched · {adapter_output.signal_quality} signal"
         )
 
         # ── Step 2: Transcription ──────────────────────────────
         await JobService.update_progress(
             job, JobStep.TRANSCRIBING, 22, "Transcribing audio…"
         )
-        # TODO Phase 3: Whisper API or YouTube CC extraction
-        await asyncio.sleep(1.0)  # placeholder
-        transcript = "Sample transcript — platform adapters built in Phase 3."
+
+        transcript = adapter_output.transcript or ""
+
+        if not transcript and not adapter_output.has_captions:
+            # TODO Phase 3 Week 6: run Whisper here
+            # For now, flag that Whisper is needed
+            transcript = (
+                adapter_output.description
+                or " ".join(f"#{h}" for h in adapter_output.hashtags)
+                or ""
+            )
+            if not transcript:
+                await JobService.fail(
+                    job,
+                    error="No transcript or description available for this video",
+                    error_code=JobErrorCode.TRANSCRIPT_FAILED,
+                )
+                return {"job_id": job_id, "status": "failed"}
+
         await JobService.update_progress(
-            job, JobStep.TRANSCRIBING, 42, "Transcription complete."
+            job, JobStep.TRANSCRIBING, 42,
+            f"Transcript ready · {len(transcript)} chars · source: {adapter_output.captions_source}"
         )
 
         # ── Step 3: AI location extraction ─────────────────────
         await JobService.update_progress(
             job, JobStep.EXTRACTING_LOCATIONS, 48, "Identifying locations with AI…"
         )
-        # TODO Phase 3: GPT-4o extraction service
-        await asyncio.sleep(0.8)
-        raw_locations: list[str] = []  # populated by extraction service in Phase 3
+        from app.services.extraction.service import ExtractionService
+        extraction_result = await ExtractionService.extract(adapter_output, job)
+
+        raw_locations = [loc.place_name for loc in extraction_result.locations]
+
+        if not raw_locations and not extraction_result.ok:
+            await JobService.fail(
+                job,
+                error=extraction_result.error or "Extraction failed",
+                error_code=JobErrorCode.NO_LOCATIONS_FOUND,
+            )
+            return {"job_id": job_id, "status": "failed"}
+
         await JobService.update_progress(
-            job, JobStep.EXTRACTING_LOCATIONS, 65, "Locations identified."
+            job, JobStep.EXTRACTING_LOCATIONS, 65,
+            f"{len(raw_locations)} locations found"
         )
 
         # ── Step 4: Geocoding ──────────────────────────────────
         await JobService.update_progress(
             job, JobStep.GEOCODING, 68, "Geocoding place names…"
         )
-        # TODO Phase 3: Google Places API geocoding
-        await asyncio.sleep(0.5)
+        # TODO Phase 3 Week 7: GeocodingService.geocode(raw_locations)
         await JobService.update_progress(
             job, JobStep.GEOCODING, 82, "Geocoding complete."
         )
@@ -91,8 +120,7 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
         await JobService.update_progress(
             job, JobStep.FINALIZING, 88, "Building your trip…"
         )
-        # TODO Phase 3: create TripDocument from geocoded pins
-        await asyncio.sleep(0.3)
+        # TODO Phase 3 Week 7: TripService.create_from_extraction_result(...)
 
         await JobService.complete(
             job,
@@ -100,7 +128,12 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
             raw_locations=raw_locations,
         )
 
-        logger.info("worker_task_completed", job_id=job_id)
+        logger.info(
+            "worker_task_completed",
+            job_id=job_id,
+            platform=job.platform,
+            signal_quality=adapter_output.signal_quality,
+        )
         return {"job_id": job_id, "status": "completed"}
 
     except Exception as exc:

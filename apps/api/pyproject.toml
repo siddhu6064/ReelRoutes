@@ -31,7 +31,7 @@ arq = "^0.26.0"
 redis = "^5.0.0"
 
 # AI / LLM
-openai = "^1.40.0"
+openai = ">=1.40.0"
 
 # Observability
 sentry-sdk = { extras = ["fastapi"], version = "^2.13.0" }
@@ -39,6 +39,12 @@ structlog = "^24.4.0"
 
 # Utilities
 python-ulid = "^2.7.0"
+
+# Platform adapters
+yt-dlp = ">=2024.8.0"
+youtube-transcript-api = ">=0.6.2"
+mutagen = "^1.47.0"
+tiktoken = ">=0.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"

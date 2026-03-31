@@ -1,0 +1,15 @@
+{
+  "_comment": "yt-dlp info_dict fixture for a TikTok travel video about Morocco.",
+  "id": "7384729104857362",
+  "title": "Morocco is underrated 🇲🇦 #morocco #marrakech #travel",
+  "description": "Morocco is completely underrated and everyone needs to go NOW 🇲🇦✈️\n\nHere's why: the Medina of Marrakech is absolutely insane. We got lost for hours in the souks and it was the best thing that happened to us. Jemaa el-Fna square at night with all the food stalls is a must. Day trip to the Sahara Desert from Marrakech took 9 hours but seeing the dunes was bucket list stuff. The blue streets of Chefchaouen are even more beautiful in person. And the food — tagine every single day, no complaints.\n\n#morocco #marrakech #sahara #chefchaouen #africa #traveltiktok #travelwithme #hidden gems",
+  "uploader": "Alex & Jamie Travel",
+  "uploader_id": "alexjamietravel",
+  "channel": "alexjamietravel",
+  "duration": 43.0,
+  "thumbnail": "https://p16-sign.tiktokcdn-us.com/thumbnail_abc.jpeg",
+  "timestamp": 1713484800,
+  "tags": ["morocco", "marrakech", "travel", "sahara", "chefchaouen", "africa", "traveltiktok", "travelwithme", "hiddengems"],
+  "webpage_url": "https://www.tiktok.com/@alexjamietravel/video/7384729104857362",
+  "extractor": "tiktok"
+}

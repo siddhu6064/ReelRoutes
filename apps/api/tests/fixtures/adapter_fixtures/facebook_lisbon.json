@@ -1,0 +1,16 @@
+{
+  "_comment": "yt-dlp info_dict fixture for a Facebook travel video about Portugal.",
+  "id": "10158234567891234",
+  "title": "Lisbon Travel Guide — The Ultimate 5 Day Itinerary",
+  "description": "Just got back from 5 incredible days in Lisbon and I'm already planning my return trip 🇵🇹\n\nHere's what we did:\n✅ Alfama district — the oldest neighbourhood, stunning viewpoints\n✅ Belém Tower right by the Tagus River\n✅ Jerónimos Monastery — free entry on Sunday mornings!\n✅ Sintra day trip — Pena Palace is absolutely magical\n✅ Time Out Market for the best food hall in Europe\n✅ LX Factory on a Sunday for vintage shopping\n✅ Cascais beach town — easy day trip from Lisbon\n\nFull blog post linked below! #lisbon #portugal #travel #europe",
+  "uploader": "The Travel Couple",
+  "uploader_id": "thetravelcouple",
+  "channel": "The Travel Couple",
+  "duration": 840.0,
+  "thumbnail": "https://external.fvideo.fbcdn.net/thumbnail_abc.jpg",
+  "timestamp": 1711238400,
+  "location": "Lisbon, Portugal",
+  "tags": ["lisbon", "portugal", "travel", "europe"],
+  "webpage_url": "https://www.facebook.com/watch/?v=10158234567891234",
+  "extractor": "facebook"
+}

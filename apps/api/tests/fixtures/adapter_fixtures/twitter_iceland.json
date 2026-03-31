@@ -1,0 +1,15 @@
+{
+  "_comment": "yt-dlp info_dict fixture for an X/Twitter travel video post about Iceland.",
+  "id": "1758392847562910",
+  "title": "Iceland's Skógafoss waterfall at golden hour is something else 🇮🇸 #iceland #travel #waterfall",
+  "description": "Iceland's Skógafoss waterfall at golden hour is something else 🇮🇸 Drove the Ring Road from Reykjavik through Vik and this was the highlight. Also stopped at Seljalandsfoss — you can walk behind it! #iceland #travel #waterfall #roadtrip #goldenring",
+  "uploader": "Marco V",
+  "uploader_id": "marcovtravel",
+  "channel": "Marco V",
+  "duration": 28.0,
+  "thumbnail": "https://pbs.twimg.com/ext_tw_video_thumb/abc/pu/img/thumb.jpg",
+  "timestamp": 1710806400,
+  "tags": ["iceland", "travel", "waterfall", "roadtrip", "goldenring"],
+  "webpage_url": "https://x.com/marcovtravel/status/1758392847562910",
+  "extractor": "twitter"
+}
