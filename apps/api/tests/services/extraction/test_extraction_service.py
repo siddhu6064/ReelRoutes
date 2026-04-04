@@ -240,8 +240,8 @@ class TestExtractionServiceChunking:
     """Long transcripts are split and results merged."""
 
     async def test_chunked_extraction_called_for_long_transcript(self) -> None:
-        # Generate a transcript long enough to trigger chunking
-        long_transcript = "We visited Shibuya Crossing. " * 500
+        # 800x = ~4801 tokens, above the 4000-token CHUNK_THRESHOLD
+        long_transcript = "We visited Shibuya Crossing. " * 800
         out = _make_output(
             Platform.YOUTUBE,
             transcript=long_transcript,
@@ -262,7 +262,7 @@ class TestExtractionServiceChunking:
         assert result.ok
 
     async def test_merged_results_deduplicated(self) -> None:
-        long_transcript = "We visited Shibuya. " * 500
+        long_transcript = "We visited Shibuya. " * 800
         out = _make_output(
             Platform.YOUTUBE,
             transcript=long_transcript,

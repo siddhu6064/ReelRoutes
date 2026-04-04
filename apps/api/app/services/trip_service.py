@@ -29,6 +29,8 @@ class TripService:
         user_id: str | None = None,
         thumbnail_url: str | None = None,
         video_duration: float | None = None,
+        video_creator: str | None = None,
+        video_channel: str | None = None,
         job_id: str | None = None,
         pins: list[PinDocument] | None = None,
     ) -> TripDocument:
@@ -39,6 +41,8 @@ class TripService:
             platform=platform,
             thumbnail_url=thumbnail_url,
             video_duration=video_duration,
+            video_creator=video_creator,
+            video_channel=video_channel,
             job_id=job_id,
             pins=pins or [],
         )

@@ -13,8 +13,9 @@ Pins are embedded inside Trip documents — no separate collection.
 """
 from __future__ import annotations
 
+import uuid
 from datetime import UTC, datetime
-from enum import StrEnum
+from enum import StrEnum as Enum
 from typing import Annotated
 
 from beanie import Document, Indexed
@@ -24,7 +25,7 @@ from pymongo import ASCENDING, DESCENDING, IndexModel
 
 # ── Enums ──────────────────────────────────────────────────────
 
-class Platform(StrEnum):
+class Platform(Enum):
     YOUTUBE = "youtube"
     INSTAGRAM = "instagram"
     TIKTOK = "tiktok"
@@ -33,14 +34,14 @@ class Platform(StrEnum):
     UNKNOWN = "unknown"
 
 
-class JobStatus(StrEnum):
+class JobStatus(Enum):
     QUEUED = "queued"
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"
 
 
-class JobStep(StrEnum):
+class JobStep(Enum):
     FETCHING_VIDEO = "fetching_video"
     TRANSCRIBING = "transcribing"
     EXTRACTING_LOCATIONS = "extracting_locations"
@@ -48,7 +49,7 @@ class JobStep(StrEnum):
     FINALIZING = "finalizing"
 
 
-class JobErrorCode(StrEnum):
+class JobErrorCode(Enum):
     UNSUPPORTED_PLATFORM = "UNSUPPORTED_PLATFORM"
     VIDEO_UNAVAILABLE = "VIDEO_UNAVAILABLE"
     PRIVATE_VIDEO = "PRIVATE_VIDEO"
@@ -59,7 +60,95 @@ class JobErrorCode(StrEnum):
     UNKNOWN_ERROR = "UNKNOWN_ERROR"
 
 
+
+# ── Expense models ─────────────────────────────────────────────
+
+class SplitType(Enum):
+    EQUAL = "equal"
+    EXACT = "exact"
+    PERCENTAGE = "percentage"
+
+
+class ExpenseCategory(Enum):
+    ACCOMMODATION = "accommodation"
+    FOOD = "food"
+    TRANSPORT = "transport"
+    ACTIVITIES = "activities"
+    SHOPPING = "shopping"
+    OTHER = "other"
+
+
+class ExpenseSplit(BaseModel):
+    member_name: str
+    member_id: str | None = None
+    amount: float = 0.0
+    percentage: float | None = None
+    settled: bool = False
+
+
+class TripExpense(BaseModel):
+    """
+    A single expense. Works in two modes:
+    - Solo (split_with=[]): personal budget tracking only
+    - Split (split_with has members): tracks who paid and who owes what
+    Other people don\'t need a ReelRoutes account — just a name.
+    """
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    amount: float
+    currency: str = "USD"
+    category: ExpenseCategory = ExpenseCategory.OTHER
+    paid_by_name: str
+    paid_by_id: str | None = None
+    split_type: SplitType = SplitType.EQUAL
+    split_with: list[ExpenseSplit] = Field(default_factory=list)
+    notes: str | None = None
+    pin_id: str | None = None
+    date: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+    @property
+    def is_solo(self) -> bool:
+        return len(self.split_with) == 0
+
+
+# ── Collaborator model ─────────────────────────────────────────
+
+class CollaboratorRole(Enum):
+    EDITOR = "editor"
+    VIEWER = "viewer"
+
+
+class TripCollaborator(BaseModel):
+    """
+    A person invited to collaborate on a trip.
+    Pending = invite sent, not yet accepted.
+    Active = signed in and accepted.
+    Editors can add/edit pins and add expenses.
+    """
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    email: str | None = None
+    clerk_id: str | None = None
+    role: CollaboratorRole = CollaboratorRole.VIEWER
+    invite_token: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    status: str = "pending"
+    invited_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    joined_at: datetime | None = None
+
+
 # ── Embedded: Pin ─────────────────────────────────────────────
+
+class TripDay(BaseModel):
+    """
+    One day in a structured itinerary.
+    Pins are referenced by id, ordered for the day's visit sequence.
+    """
+    day_number: int                     # 1-indexed
+    label: str | None = None           # e.g. "Day 1 — Tokyo"
+    pin_ids: list[str] = Field(default_factory=list)
+    notes: str | None = None
+
 
 class PinDocument(BaseModel):
     """
@@ -102,6 +191,7 @@ class UserDocument(Document):
     name: str
     avatar_url: str | None = None
     google_id: str | None = None
+    push_token: str | None = None  # Expo push token for mobile notifications
     apple_id: str | None = None
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -131,6 +221,21 @@ class TripDocument(Document):
     job_id: str | None = None  # provenance reference
 
     pins: list[PinDocument] = Field(default_factory=list)
+
+    # Structured itinerary (Feature 2)
+    itinerary: list[TripDay] = Field(default_factory=list)
+
+    # Expenses — solo tracking + optional splitting
+    expenses: list[TripExpense] = Field(default_factory=list)
+    expense_currency: str = "USD"       # default currency for trip
+    expense_budget: float | None = None # optional total budget
+
+    # Collaborators — people invited to view or edit this trip
+    collaborators: list[TripCollaborator] = Field(default_factory=list)
+
+    # Source video attribution (Feature 1 — deep link)
+    video_creator: str | None = None    # e.g. "@kara_and_nate"
+    video_channel: str | None = None    # e.g. "Kara and Nate"
 
     # Sharing
     share_token: str | None = None
@@ -184,13 +289,20 @@ class JobDocument(Document):
     error: str | None = None
     error_code: JobErrorCode | None = None
 
-    # ── Extraction results (Task 7) ────────────────────────────
-    # Stored after AI extraction completes — before geocoding
+    # ── Extraction results (Task 7 Week 6) ────────────────────
     extracted_places: list[dict] = Field(default_factory=list)
     extraction_model: str | None = None
     extraction_tokens: int = 0
     raw_llm_response: str | None = None
     extracted_at: datetime | None = None
+
+    # ── Geocoding results (Task 4 + 6 Week 7) ─────────────────
+    geocoded_places: list[dict] = Field(default_factory=list)
+    place_resolution_candidates: dict = Field(default_factory=dict)
+    unresolved_places: list[dict] = Field(default_factory=list)  # surfaced in 'Did we miss anything?'
+    geocoded_at: datetime | None = None
+    signal_type_used: str | None = None
+    geocoding_stats: dict = Field(default_factory=dict)
 
     # Timestamps
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

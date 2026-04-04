@@ -58,8 +58,12 @@ class TikTokAdapter(BaseAdapter):
         )
 
         try:
-            info = await ytdlp_extract(url)
-            output = self._parse_info(info, url, vid_id, canonical_url, output)
+            from app.adapters._ytdlp_health import ytdlp_extract_with_retry
+            info, extra_warnings = await ytdlp_extract_with_retry(url, max_retries=2, base_delay=3.0)
+            for w in extra_warnings:
+                output.add_warning(w)
+            if info:
+                output = self._parse_info(info, url, vid_id, canonical_url, output)
         except Exception as exc:
             err_str = str(exc).lower()
             if "rate" in err_str or "429" in err_str or "too many" in err_str:

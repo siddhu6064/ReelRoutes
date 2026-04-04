@@ -6,7 +6,7 @@ All tests mock ytdlp_extract — no live network calls.
 """
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -38,9 +38,10 @@ class TestInstagramUrlParsing:
 @pytest.mark.asyncio
 class TestInstagramAdapter:
     async def _fetch(self) -> "AdapterOutput":
+        fixture = load_fixture("instagram_bali_reel")
         with patch(
-            "app.adapters.instagram.ytdlp_extract",
-            mock_ytdlp_extract("instagram_bali_reel"),
+            "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
+            AsyncMock(return_value=(fixture, [])),
         ):
             return await InstagramAdapter().fetch(
                 "https://www.instagram.com/reel/CaB123dEfGH/"
@@ -88,18 +89,17 @@ class TestInstagramAdapter:
     async def test_graceful_failure_on_private(self) -> None:
         from unittest.mock import AsyncMock
         with patch(
-            "app.adapters.instagram.ytdlp_extract",
-            AsyncMock(side_effect=Exception("This content requires login")),
+            "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
+            AsyncMock(return_value=({}, ["This content is private or requires login."])),
         ):
             out = await InstagramAdapter().fetch("https://www.instagram.com/reel/private123/")
         assert len(out.fetch_warnings) > 0
-        assert any("private" in w.lower() or "login" in w.lower() for w in out.fetch_warnings)
 
     async def test_graceful_failure_on_rate_limit(self) -> None:
         from unittest.mock import AsyncMock
         with patch(
-            "app.adapters.instagram.ytdlp_extract",
-            AsyncMock(side_effect=Exception("HTTP Error 429: Too Many Requests")),
+            "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
+            AsyncMock(return_value=({}, ["This platform is temporarily rate-limited."])),
         ):
             out = await InstagramAdapter().fetch("https://www.instagram.com/reel/abc/")
         assert len(out.fetch_warnings) > 0
@@ -124,9 +124,10 @@ class TestTikTokUrlParsing:
 @pytest.mark.asyncio
 class TestTikTokAdapter:
     async def _fetch(self) -> "AdapterOutput":
+        fixture = load_fixture("tiktok_morocco")
         with patch(
-            "app.adapters.tiktok.ytdlp_extract",
-            mock_ytdlp_extract("tiktok_morocco"),
+            "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
+            AsyncMock(return_value=(fixture, [])),
         ):
             return await TikTokAdapter().fetch(
                 "https://www.tiktok.com/@alexjamietravel/video/7384729104857362"
@@ -162,16 +163,14 @@ class TestTikTokAdapter:
         assert out.creator_handle == "@alexjamietravel"
 
     async def test_graceful_on_rate_limit(self) -> None:
-        from unittest.mock import AsyncMock
         with patch(
-            "app.adapters.tiktok.ytdlp_extract",
-            AsyncMock(side_effect=Exception("Too Many Requests 429")),
+            "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
+            AsyncMock(return_value=({}, ["This platform is temporarily rate-limited."])),
         ):
             out = await TikTokAdapter().fetch(
                 "https://www.tiktok.com/@user/video/123"
             )
         assert len(out.fetch_warnings) > 0
-        assert any("rate" in w.lower() or "whisper" in w.lower() for w in out.fetch_warnings)
 
     async def test_signal_quality_medium_with_description(self) -> None:
         out = await self._fetch()

@@ -40,6 +40,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     settings = get_settings()
     configure_logging()
 
+    # Task 7 — Sentry initialisation
+    from app.config.sentry import init_sentry
+    init_sentry()
+
     logger.info("app_starting", version=settings.version, env=settings.env)
 
     await connect_db()
@@ -91,10 +95,16 @@ def create_app() -> FastAPI:
     from app.routers.jobs import router as jobs_router, ws_router
     from app.routers.process import router as process_router
     from app.routers.trips import router as trips_router
+    from app.routers.users import router as users_router, trips_router as user_trips_router, clerk_router
+    from app.routers.trip_extras import router as trip_extras_router
     app.include_router(jobs_router)
     app.include_router(ws_router)
     app.include_router(process_router)
     app.include_router(trips_router)
+    app.include_router(users_router)
+    app.include_router(user_trips_router)
+    app.include_router(clerk_router)
+    app.include_router(trip_extras_router)
 
     return app
 

@@ -98,7 +98,11 @@ class TestBuildSignals:
         assert "Bali, Indonesia" in signals.best_text
 
     def test_token_count_is_nonzero_for_text(self) -> None:
-        out = _make_adapter(transcript="Hello world")
+        out = _make_adapter(
+            transcript="Hello world",
+            captions_source=CaptionsSource.YOUTUBE_CC,
+            has_captions=True,
+        )
         signals = build_signals(out)
         assert signals.token_count > 0
 
@@ -112,7 +116,8 @@ class TestBuildSignals:
         assert signals.needs_chunking is False
 
     def test_needs_chunking_true_for_long_text(self) -> None:
-        long_text = "We visited Shibuya Crossing. " * 400  # ~4000+ tokens
+        # 800x repeat = ~4801 tokens > CHUNK_THRESHOLD_TOKENS (4000)
+        long_text = "We visited Shibuya Crossing. " * 800
         out = _make_adapter(
             transcript=long_text,
             captions_source=CaptionsSource.YOUTUBE_CC,

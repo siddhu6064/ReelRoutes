@@ -51,6 +51,12 @@ class Settings(BaseSettings):
 
     # ── Sentry ────────────────────────────────────────────────
     sentry_dsn: str = ""
+    sentry_environment: str = "development"
+    sentry_traces_rate: float = 0.1
+
+    # ── PostHog analytics ─────────────────────────────────────
+    posthog_api_key: str = ""
+    posthog_host: str = "https://app.posthog.com"
 
     # ── Computed helpers ──────────────────────────────────────
     @property

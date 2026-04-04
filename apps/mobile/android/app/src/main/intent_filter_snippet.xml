@@ -1,0 +1,44 @@
+<!--
+  Android Share Intent Handler — Task 5
+  
+  This snippet goes inside the <activity> element in AndroidManifest.xml.
+  Expo automatically generates AndroidManifest.xml from app.json plugins,
+  but if you need to add it manually, merge this into the manifest.
+
+  The intentFilters in app.json handle this automatically:
+    "intentFilters": [
+      {
+        "action": "android.intent.action.SEND",
+        "data": [{ "mimeType": "text/plain" }],
+        "category": ["android.intent.category.DEFAULT"]
+      }
+    ]
+
+  When the user taps Share in YouTube/TikTok/Instagram on Android:
+  1. Android shows "Add to ReelRoutes" in the share sheet
+  2. The app opens and expo-linking fires a URL event
+  3. new-trip.tsx handles it via Linking.addEventListener
+
+  For testing on Android:
+    adb shell am start -a android.intent.action.SEND \
+      -t "text/plain" \
+      --es android.intent.extra.TEXT "https://www.youtube.com/watch?v=abc123" \
+      app.reelroutes.mobile
+-->
+
+<intent-filter>
+    <action android:name="android.intent.action.SEND" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <data android:mimeType="text/plain" />
+</intent-filter>
+
+<!--
+  Deep link scheme for reelroutes://import?url=...
+  Handles the URL passed back from the iOS Share Extension.
+-->
+<intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="reelroutes" />
+</intent-filter>

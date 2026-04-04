@@ -8,6 +8,7 @@ const ImportPage = lazy(() => import("@/pages/ImportPage"));
 const ProcessingPage = lazy(() => import("@/pages/ProcessingPage"));
 const TripMapPage = lazy(() => import("@/pages/TripMapPage"));
 const EditTripPage = lazy(() => import("@/pages/EditTripPage"));
+const SharedTripPage = lazy(() => import("@/pages/SharedTripPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,7 +38,7 @@ export default function App() {
             <Route path="/processing/:jobId" element={<ProcessingPage />} />
             <Route path="/trips/:tripId" element={<TripMapPage />} />
             <Route path="/trips/:tripId/edit" element={<EditTripPage />} />
-            <Route path="/share/:shareToken" element={<TripMapPage />} />
+            <Route path="/share/:shareToken" element={<SharedTripPage />} />
             <Route path="*" element={
               <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
                 <h1 style={{ fontFamily: "var(--font-display)", fontSize: 48, fontWeight: 800, color: "var(--text-faint)" }}>404</h1>

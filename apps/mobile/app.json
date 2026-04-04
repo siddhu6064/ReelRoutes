@@ -1,0 +1,73 @@
+{
+  "expo": {
+    "name": "ReelRoutes",
+    "slug": "reelroutes",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0f0d"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.reelroutes.mobile",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "ReelRoutes uses your location to show nearby places on your trip map.",
+        "NSCameraUsageDescription": "ReelRoutes uses your camera to scan QR codes for trip sharing."
+      },
+      "appStoreUrl": "https://apps.apple.com/app/reelroutes/idXXXXXXXXXX"
+    },
+    "android": {
+      "package": "app.reelroutes.mobile",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f0f0d"
+      },
+      "intentFilters": [
+        {
+          "action": "android.intent.action.SEND",
+          "autoVerify": true,
+          "data": [{ "mimeType": "text/plain" }],
+          "category": ["android.intent.category.DEFAULT"]
+        }
+      ],
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-share-intent",
+        {
+          "iosActivationRules": {
+            "NSExtensionActivationSupportsWebURLWithMaxCount": 1,
+            "NSExtensionActivationSupportsWebPageWithMaxCount": 1
+          },
+          "androidIntentFilters": ["text/*"],
+          "iosShareExtensionName": "ReelRoutes Share"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": { "usesCleartextTraffic": false },
+          "ios": { "deploymentTarget": "15.1" }
+        }
+      ],
+      [
+        "react-native-maps",
+        {
+          "googleMapsApiKey": "$(GOOGLE_MAPS_API_KEY)"
+        }
+      ]
+    ],
+    "scheme": "reelroutes",
+    "experiments": { "typedRoutes": true }
+  }
+}

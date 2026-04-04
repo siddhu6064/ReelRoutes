@@ -111,16 +111,38 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
         await JobService.update_progress(
             job, JobStep.GEOCODING, 68, "Geocoding place names…"
         )
-        # TODO Phase 3 Week 7: GeocodingService.geocode(raw_locations)
+        from app.services.geocoding import geocode_locations, persist_geocoding_to_job, geocoded_locations_to_pins
+        from app.services.extraction.parser import ExtractedLocation
+
+        geo_result = await geocode_locations(extraction_result.locations)
+        await persist_geocoding_to_job(job, geo_result, extraction_result)
+
         await JobService.update_progress(
-            job, JobStep.GEOCODING, 82, "Geocoding complete."
+            job, JobStep.GEOCODING, 82,
+            f"{geo_result.geocoded_count} places geocoded"
+            + (f" · {geo_result.unresolved_count} unresolved" if geo_result.unresolved_count else "")
         )
 
-        # ── Step 5: Finalize ───────────────────────────────────
+        # ── Step 5: Finalize — create Trip ────────────────────
         await JobService.update_progress(
             job, JobStep.FINALIZING, 88, "Building your trip…"
         )
-        # TODO Phase 3 Week 7: TripService.create_from_extraction_result(...)
+        from app.services.trip_service import TripService
+        from app.models.documents import Platform as PlatformEnum
+
+        pins = geocoded_locations_to_pins(geo_result.locations)
+        trip = await TripService.create(
+            title=adapter_output.title or f"Trip from {job.platform}",
+            source_url=job.url,
+            platform=job.platform,
+            user_id=job.user_id,
+            thumbnail_url=adapter_output.thumbnail_url,
+            video_duration=adapter_output.duration_seconds,
+            video_creator=adapter_output.creator_handle,
+            video_channel=adapter_output.channel_name,
+            job_id=str(job.id),
+            pins=pins,
+        )
 
         await JobService.complete(
             job,
@@ -128,13 +150,24 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
             raw_locations=raw_locations,
         )
 
+        # Fix 3 — push notification: let the user know their trip is ready
+        from app.services.push_notifications import send_trip_ready
+        await send_trip_ready(
+            user_id=job.user_id,
+            trip_id=str(trip.id),
+            trip_title=trip.title,
+            pin_count=len(pins),
+        )
+
         logger.info(
             "worker_task_completed",
             job_id=job_id,
             platform=job.platform,
             signal_quality=adapter_output.signal_quality,
+            trip_id=str(trip.id),
+            pin_count=len(pins),
         )
-        return {"job_id": job_id, "status": "completed"}
+        return {"job_id": job_id, "status": "completed", "trip_id": str(trip.id)}
 
     except Exception as exc:
         logger.error("worker_task_failed", job_id=job_id, error=str(exc))
@@ -144,6 +177,13 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
                 job,
                 error=str(exc),
                 error_code=JobErrorCode.UNKNOWN_ERROR,
+            )
+            # Fix 3 — push notification on failure
+            from app.services.push_notifications import send_import_failed
+            await send_import_failed(
+                user_id=job.user_id,
+                job_id=job_id,
+                reason="We couldn't extract locations from this video.",
             )
         except Exception:
             pass

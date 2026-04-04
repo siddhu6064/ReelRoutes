@@ -11,10 +11,10 @@ from __future__ import annotations
 import re
 
 from fastapi import APIRouter, Request
-from pydantic import BaseModel, HttpUrl
 
 from app.middleware.rate_limit import check_rate_limit
 from app.models.documents import Platform
+from app.routers.schemas import ProcessRequest
 from app.services.job_service import JobService
 
 router = APIRouter(prefix="/api", tags=["process"])
@@ -33,13 +33,6 @@ def detect_platform(url: str) -> Platform:
         if pattern.search(url):
             return platform
     return Platform.UNKNOWN
-
-
-class ProcessRequest(BaseModel):
-    url: str
-    # Optional: user_id injected by auth middleware in Phase 5
-    # For now accepted from body to support guest mode
-    user_id: str | None = None
 
 
 @router.post("/process", summary="Start video processing", status_code=202)
@@ -75,6 +68,10 @@ async def process_video(body: ProcessRequest, request: Request) -> dict:
         platform=platform,
         user_id=body.user_id,
     )
+
+    # Track analytics event
+    from app.config.analytics import track_import_started
+    track_import_started(body.user_id, url, platform.value)
 
     # Enqueue ARQ task (falls back gracefully if Redis unavailable in local dev)
     try:

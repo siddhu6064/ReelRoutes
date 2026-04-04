@@ -24,6 +24,10 @@ os.environ.setdefault("ENV", "test")
 os.environ.setdefault("MONGODB_URL", "mongodb://localhost:27017")
 os.environ.setdefault("MONGODB_DB", "reelroutes_test")
 os.environ.setdefault("CLERK_SECRET_KEY", "sk_test_dummy")
+# Fake key — non-empty so service uses GPT-4o path (mocked in tests, never hits OpenAI)
+os.environ.setdefault("OPENAI_API_KEY", "sk-test-fake-key-for-tests")
+# Fake Places key — non-empty so geocoder uses real path (mocked in tests, never hits Google)
+os.environ.setdefault("GOOGLE_PLACES_API_KEY", "fake-places-key-for-tests")
 
 from app.config.settings import get_settings  # noqa: E402
 from app.main import create_app  # noqa: E402
