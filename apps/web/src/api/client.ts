@@ -472,3 +472,172 @@ export function useAddSuggestedPin() {
     onSuccess: (data) => qc.setQueryData(["trip", data.id], data),
   });
 }
+
+// ── Phase 3 W12 — Budget / Expenses ──────────────────────────
+
+export const EXPENSE_CATEGORIES = [
+  "accommodation",
+  "food",
+  "transport",
+  "activities",
+  "shopping",
+  "other",
+] as const;
+
+export const EXPENSE_CATEGORY_ICONS: Record<string, string> = {
+  accommodation: "🏨",
+  food: "🍜",
+  transport: "🚗",
+  activities: "🎭",
+  shopping: "🛍️",
+  other: "📎",
+};
+
+export type ExpenseCategory =
+  | "accommodation"
+  | "food"
+  | "transport"
+  | "activities"
+  | "shopping"
+  | "other";
+
+export interface Expense {
+  id: string;
+  title: string;
+  amount: number;
+  currency: string;
+  category: ExpenseCategory;
+  paidByName: string;
+  notes: string | null;
+  pinId: string | null;
+  date: string;
+}
+
+export interface ExpenseListData {
+  expenses: Expense[];
+  budget: number | null;
+  currency: string;
+}
+
+export interface ExpenseSummaryData {
+  totalSpent: number;
+  currency: string;
+  budget: number | null;
+  remaining: number | null;
+  budgetUsedPercent: number | null;
+  expenseCount: number;
+  byCategory: Record<string, number>;
+}
+
+export function useExpenses(tripId: string | null, userId?: string) {
+  return useQuery({
+    queryKey: ["expenses", tripId],
+    queryFn: () =>
+      apiFetch<ExpenseListData>(
+        `/api/trips/${tripId}/expenses${userId ? `?user_id=${userId}` : ""}`,
+      ),
+    enabled: !!tripId,
+  });
+}
+
+export function useExpenseSummary(tripId: string | null, userId?: string) {
+  return useQuery({
+    queryKey: ["expense-summary", tripId],
+    queryFn: () =>
+      apiFetch<ExpenseSummaryData>(
+        `/api/trips/${tripId}/expenses/summary${userId ? `?user_id=${userId}` : ""}`,
+      ),
+    enabled: !!tripId,
+  });
+}
+
+export function useAddExpense() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      userId,
+      title,
+      amount,
+      category,
+      notes,
+    }: {
+      tripId: string;
+      userId?: string;
+      title: string;
+      amount: number;
+      category: ExpenseCategory;
+      notes?: string;
+    }) =>
+      apiFetch<Expense>(`/api/trips/${tripId}/expenses`, {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: userId ?? null,
+          title,
+          amount,
+          category,
+          paid_by_name: "Me",
+          ...(notes ? { notes } : {}),
+        }),
+      }),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
+      qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });
+    },
+  });
+}
+
+export function useDeleteExpense() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      expenseId,
+      userId,
+    }: {
+      tripId: string;
+      expenseId: string;
+      userId?: string;
+    }) =>
+      apiFetch<{ deleted: boolean }>(
+        `/api/trips/${tripId}/expenses/${expenseId}${userId ? `?user_id=${userId}` : ""}`,
+        { method: "DELETE" },
+      ),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
+      qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });
+    },
+  });
+}
+
+export function useSetBudget() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      userId,
+      budget,
+      currency,
+    }: {
+      tripId: string;
+      userId?: string;
+      budget: number;
+      currency?: string;
+    }) =>
+      apiFetch<{ budget: number; currency: string }>(
+        `/api/trips/${tripId}/budget`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            user_id: userId ?? null,
+            budget,
+            currency: currency ?? "USD",
+          }),
+        },
+      ),
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
+      qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });
+    },
+  });
+}
