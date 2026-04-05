@@ -4,8 +4,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 
 import styles from "./TripMapPage.module.css";
 
-import type { Pin , type Trip, useTrip } from "@/api/client";
-
+import { type Pin, type Trip, useTrip } from "@/api/client";
 import ChatPanel from "@/components/ChatPanel";
 import PinDetailPanel from "@/components/PinDetailPanel";
 import { useAppStore } from "@/stores/appStore";
