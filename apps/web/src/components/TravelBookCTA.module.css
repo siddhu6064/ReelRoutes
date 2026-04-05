@@ -1,0 +1,123 @@
+.cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 24px;
+  background: linear-gradient(135deg, #fef3ee 0%, #fff 100%);
+  border: 1.5px solid #fdd5c4;
+  border-radius: 14px;
+  text-align: center;
+}
+.ctaIcon {
+  font-size: 40px;
+}
+.ctaTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+.ctaDesc {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 380px;
+}
+.ctaBtn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: none;
+  background: #d85a30;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.ctaBtn:hover:not(:disabled) {
+  background: #b84820;
+}
+.ctaBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+}
+.bookIcon {
+  font-size: 32px;
+  text-align: center;
+}
+.bookTitle {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+}
+.bookMeta {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  text-align: center;
+}
+.specs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 12px;
+}
+.specRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.specLabel {
+  color: #6b7280;
+}
+.specValue {
+  font-weight: 700;
+  color: #111827;
+  text-transform: capitalize;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.printBtn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  background: #d85a30;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.12s;
+}
+.printBtn:hover {
+  background: #b84820;
+}
+.regenerateBtn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #6b7280;
+}
+.regenerateBtn:hover {
+  background: #f3f4f6;
+}

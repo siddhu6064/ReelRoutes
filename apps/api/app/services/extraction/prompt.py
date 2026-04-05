@@ -12,6 +12,8 @@ Design goals:
   - context_quote must be verbatim from the source text (≤ 120 chars)
   - timestamp_hint is seconds from video start — only set when timed
     transcript segments are available
+  - Non-English transcripts (W20): place names normalised to canonical English
+    equivalents; local names used when no English form exists
 """
 
 from __future__ import annotations
@@ -47,7 +49,9 @@ Max 120 characters.
 6. Return [] if no specific places are found — never invent locations.
 7. Deduplicate: if the same place is mentioned multiple times, include it once \
 with the best context_quote.
-8. Return ONLY the JSON array. No markdown, no explanation, no preamble.\
+8. Return ONLY the JSON array. No markdown, no explanation, no preamble.
+9. NON-ENGLISH TRANSCRIPTS: The transcript may be in any language. Extract place names in their most widely recognised English form when one exists (e.g. "Tokyo" not "東京", "Munich" not "München") unless the local name is the canonical English name too. If no English equivalent exists, use the local name.
+10. TRANSLITERATED NAMES: When a place is written phonetically in a non-Latin script transcript, include it if you can identify it as a real location with ≥0.7 confidence.\
 """
 
 USER_PROMPT_TEMPLATE = """\
