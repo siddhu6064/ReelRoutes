@@ -19,8 +19,8 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "test:api": "cd apps/api && poetry run pytest",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\" --ignore-path .gitignore",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\" --ignore-path .gitignore",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\" --ignore-path .gitignore --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\" --ignore-path .gitignore --ignore-path .prettierignore",
     "prepare": "husky"
   },
   "devDependencies": {
