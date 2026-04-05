@@ -155,6 +155,18 @@ class TripCollaborator(BaseModel):
     joined_at: datetime | None = None
 
 
+# ── GPS tracking (W18) ───────────────────────────────────────
+
+
+class LocationPoint(BaseModel):
+    """A single recorded GPS location during a live trip."""
+
+    lat: float
+    lng: float
+    recorded_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    accuracy_meters: float | None = None  # GPS accuracy radius
+
+
 # ── Edit history (W15) ────────────────────────────────────────
 
 
@@ -328,6 +340,9 @@ class TripDocument(Document):
 
     # Undo history (W15) — last 20 pin-state snapshots
     trip_edit_history: list[EditSnapshot] = Field(default_factory=list)
+
+    # GPS breadcrumb trail (W18) — recorded during active trip
+    visited_path: list[LocationPoint] = Field(default_factory=list)
 
     # Reservations (W16) — parsed from confirmation emails
     reservations: list[ReservationDocument] = Field(default_factory=list)
