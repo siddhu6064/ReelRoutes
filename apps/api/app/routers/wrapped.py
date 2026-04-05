@@ -47,7 +47,9 @@ async def get_trip_wrapped(
     # Visited pins in chronological order
     visited = sorted(
         (p for p in pins if p.visited_at is not None),
-        key=lambda p: p.visited_at.replace(tzinfo=UTC) if p.visited_at.tzinfo is None else p.visited_at,
+        key=lambda p: (
+            p.visited_at.replace(tzinfo=UTC) if p.visited_at.tzinfo is None else p.visited_at
+        ),
     )
 
     # Cumulative Haversine distance between consecutive visited pins
@@ -62,10 +64,7 @@ async def get_trip_wrapped(
         for p in pins
         if p.category
     )
-    top_categories = [
-        {"category": cat, "count": cnt}
-        for cat, cnt in cat_counter.most_common(5)
-    ]
+    top_categories = [{"category": cat, "count": cnt} for cat, cnt in cat_counter.most_common(5)]
 
     # Date range
     first_visit = visited[0].visited_at if visited else None
@@ -91,6 +90,8 @@ async def get_trip_wrapped(
             "topCategories": top_categories,
             "firstVisit": first_visit.isoformat() if first_visit else None,
             "lastVisit": last_visit.isoformat() if last_visit else None,
-            "createdAt": trip.created_at.isoformat() if hasattr(trip, "created_at") and trip.created_at else None,
+            "createdAt": trip.created_at.isoformat()
+            if hasattr(trip, "created_at") and trip.created_at
+            else None,
         },
     }

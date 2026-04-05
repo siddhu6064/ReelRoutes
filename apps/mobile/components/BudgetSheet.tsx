@@ -71,7 +71,7 @@ export default function BudgetSheet({
     finally { setAdding(false); }
   }
 
-  async function handleDelete(id: string, amt: number) {
+  async function handleDelete(id: string) {
     await api(`/api/trips/${tripId}/expenses/${id}?user_id=${userId ?? ""}`, { method: "DELETE" });
     setExpenses(prev => prev.filter(e => e.id !== id));
   }
@@ -107,7 +107,7 @@ export default function BudgetSheet({
                       <Text style={s.itemIcon}>{ICONS[e.category] ?? "📎"}</Text>
                       <Text style={s.itemTitle} numberOfLines={1}>{e.title}</Text>
                       <Text style={s.itemAmt}>{money(e.amount, currency)}</Text>
-                      <TouchableOpacity onPress={() => handleDelete(e.id, e.amount)}>
+                      <TouchableOpacity onPress={() => handleDelete(e.id)}>
                         <Text style={s.del}>✕</Text>
                       </TouchableOpacity>
                     </View>

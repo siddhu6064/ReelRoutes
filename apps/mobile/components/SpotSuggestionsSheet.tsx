@@ -4,9 +4,8 @@
 import { useState } from "react";
 import {
   ActivityIndicator, Modal, ScrollView,
-  StyleSheet, Text, TouchableOpacity, View,
+  StyleSheet, Text, TouchableOpacity, Vibration, View,
 } from "react-native";
-import * as Haptics from "expo-haptics";
 
 interface Spot { name: string; address: string; lat: number; lng: number; category: string; reason: string; }
 
@@ -38,7 +37,7 @@ export default function SpotSuggestionsSheet({
   async function handleAdd(spot: Spot) {
     if (addedNames.has(spot.name)) return;
     setAddingName(spot.name);
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Vibration.vibrate(30);
     try { await onAddPin(spot); setAddedNames(p => new Set(p).add(spot.name)); }
     finally { setAddingName(null); }
   }

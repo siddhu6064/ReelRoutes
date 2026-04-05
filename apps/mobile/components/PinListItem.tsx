@@ -3,9 +3,8 @@
  * Swipe left → green ✓ (visit) or red ✗ (unvisit).
  */
 import { useRef } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, Vibration, View } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
-import * as Haptics from "expo-haptics";
 
 export interface Pin {
   id: string;
@@ -29,8 +28,8 @@ export default function PinListItem({ pin, onVisit, onUnvisit, onPress }: Props)
   const ref = useRef<Swipeable>(null);
   const isVisited = pin.visitedAt !== null;
 
-  async function handleSwipe() {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  async function handleSwipe(): Promise<void> {
+    Vibration.vibrate(40);
     ref.current?.close();
     if (isVisited) {
       await onUnvisit(pin.id);

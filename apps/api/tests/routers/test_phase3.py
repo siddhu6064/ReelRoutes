@@ -72,6 +72,7 @@ def _patch_trip_service(trip: MagicMock):
 
 def _patch_trip_not_found():
     from app.middleware.error_handler import NotFoundError
+
     return patch(
         "app.services.trip_service.TripService.get",
         new_callable=AsyncMock,
@@ -200,35 +201,27 @@ class TestUnmarkPinVisited:
         pin = _make_pin(visited_at=datetime.now(UTC), diary_entry="Great!")
         trip = _make_trip(pins=[pin])
         with _patch_trip_service(trip):
-            resp = await client.delete(
-                "/api/trips/trip-abc/pins/pin-001/visit?user_id=user-1"
-            )
+            resp = await client.delete("/api/trips/trip-abc/pins/pin-001/visit?user_id=user-1")
         assert resp.status_code == 200
 
     async def test_response_unvisited_true(self, client: AsyncClient) -> None:
         pin = _make_pin(visited_at=datetime.now(UTC))
         trip = _make_trip(pins=[pin])
         with _patch_trip_service(trip):
-            resp = await client.delete(
-                "/api/trips/trip-abc/pins/pin-001/visit?user_id=user-1"
-            )
+            resp = await client.delete("/api/trips/trip-abc/pins/pin-001/visit?user_id=user-1")
         assert resp.json()["data"]["unvisited"] is True
 
     async def test_idempotent_on_unvisited_pin(self, client: AsyncClient) -> None:
         pin = _make_pin(visited_at=None)
         trip = _make_trip(pins=[pin])
         with _patch_trip_service(trip):
-            resp = await client.delete(
-                "/api/trips/trip-abc/pins/pin-001/visit?user_id=user-1"
-            )
+            resp = await client.delete("/api/trips/trip-abc/pins/pin-001/visit?user_id=user-1")
         assert resp.status_code == 200
 
     async def test_pin_not_found_returns_404(self, client: AsyncClient) -> None:
         trip = _make_trip(pins=[])
         with _patch_trip_service(trip):
-            resp = await client.delete(
-                "/api/trips/trip-abc/pins/ghost/visit?user_id=user-1"
-            )
+            resp = await client.delete("/api/trips/trip-abc/pins/ghost/visit?user_id=user-1")
         assert resp.status_code == 404
 
 

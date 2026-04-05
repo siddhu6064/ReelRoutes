@@ -1,4 +1,5 @@
 import { useWrapped, type WrappedStats } from "../api/client";
+
 import styles from "./WrappedCard.module.css";
 
 interface WrappedCardProps {

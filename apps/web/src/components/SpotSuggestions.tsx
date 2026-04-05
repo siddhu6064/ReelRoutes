@@ -1,9 +1,11 @@
 import { useState } from "react";
+
 import {
   useAddSuggestedPin,
   useSuggestSpots,
   type SpotSuggestion,
 } from "../api/client";
+
 import styles from "./SpotSuggestions.module.css";
 
 const CAT_ICONS: Record<string, string> = {

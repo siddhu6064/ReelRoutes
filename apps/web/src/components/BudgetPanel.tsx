@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
   EXPENSE_CATEGORY_ICONS,
   EXPENSE_CATEGORIES,
@@ -10,6 +11,7 @@ import {
   type Expense,
   type ExpenseCategory,
 } from "../api/client";
+
 import styles from "./BudgetPanel.module.css";
 
 // ── helpers ────────────────────────────────────────────────────
