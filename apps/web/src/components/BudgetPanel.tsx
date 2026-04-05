@@ -179,7 +179,7 @@ function AddExpenseForm({
     addMutation.mutate(
       {
         tripId,
-        userId,
+        ...(userId !== undefined ? { userId } : {}),
         title: title.trim(),
         amount: parsed,
         category,
@@ -282,7 +282,7 @@ function SetBudgetRow({
     const parsed = parseFloat(val);
     if (isNaN(parsed) || parsed <= 0) return;
     setBudgetMutation.mutate(
-      { tripId, userId, budget: parsed, currency },
+      { tripId, ...(userId !== undefined ? { userId } : {}), budget: parsed, currency },
       { onSuccess: () => setEditing(false) },
     );
   }
@@ -394,9 +394,9 @@ export default function BudgetPanel({ tripId, userId }: BudgetPanelProps) {
 
       <SetBudgetRow
         tripId={tripId}
-        userId={userId}
         current={budget}
         currency={currency}
+        {...(userId !== undefined ? { userId } : {})}
       />
 
       <CategoryBreakdown
@@ -415,7 +415,11 @@ export default function BudgetPanel({ tripId, userId }: BudgetPanelProps) {
               expense={exp}
               currency={currency}
               onDelete={() =>
-                deleteMutation.mutate({ tripId, expenseId: exp.id, userId })
+                deleteMutation.mutate({
+                  tripId,
+                  expenseId: exp.id,
+                  ...(userId !== undefined ? { userId } : {}),
+                })
               }
               isDeleting={
                 deleteMutation.isPending &&
@@ -426,7 +430,11 @@ export default function BudgetPanel({ tripId, userId }: BudgetPanelProps) {
         </div>
       )}
 
-      <AddExpenseForm tripId={tripId} userId={userId} currency={currency} />
+      <AddExpenseForm
+        tripId={tripId}
+        currency={currency}
+        {...(userId !== undefined ? { userId } : {})}
+      />
     </section>
   );
 }

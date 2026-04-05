@@ -38,11 +38,11 @@ export default function SpotSuggestions({
 
   function handleFetch() {
     setAddedNames(new Set());
-    suggestMutation.mutate({ tripId, userId });
+    suggestMutation.mutate({ tripId, ...(userId !== undefined ? { userId } : {}) });
   }
 
   function handleAdd(spot: SpotSuggestion) {
-    addPinMutation.mutate({ tripId, spot, userId });
+    addPinMutation.mutate({ tripId, spot, ...(userId !== undefined ? { userId } : {}) });
     setAddedNames((prev) => new Set(prev).add(spot.name));
   }
 

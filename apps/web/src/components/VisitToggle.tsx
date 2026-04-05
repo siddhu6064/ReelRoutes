@@ -31,7 +31,7 @@ export default function VisitToggle({
 
   function handleClick() {
     if (isVisited) {
-      unvisitMutation.mutate({ tripId, pinId, userId });
+      unvisitMutation.mutate({ tripId, pinId, ...(userId !== undefined ? { userId } : {}) });
     } else {
       setShowModal(true);
     }
@@ -41,14 +41,14 @@ export default function VisitToggle({
     visitMutation.mutate({
       tripId,
       pinId,
-      userId,
+      ...(userId !== undefined ? { userId } : {}),
       ...(entry.trim() ? { diaryEntry: entry } : {}),
     });
     setShowModal(false);
   }
 
   function handleSkip() {
-    visitMutation.mutate({ tripId, pinId, userId });
+    visitMutation.mutate({ tripId, pinId, ...(userId !== undefined ? { userId } : {}) });
     setShowModal(false);
   }
 

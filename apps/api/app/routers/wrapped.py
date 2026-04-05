@@ -12,7 +12,6 @@ from datetime import UTC
 
 from fastapi import APIRouter, Query
 
-from app.middleware.error_handler import NotFoundError
 from app.services.trip_service import TripService
 
 router = APIRouter(prefix="/api/trips", tags=["wrapped"])
