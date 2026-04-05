@@ -243,3 +243,106 @@ class TestGoogleMapsExport:
         data = json.loads(result["content"])
         assert data["type"] == "FeatureCollection"
         assert len(data["features"]) == len(trip.pins)
+
+
+# ── Gap fixes ─────────────────────────────────────────────────
+
+@pytest.mark.asyncio
+class TestItineraryInTripResponse:
+    async def test_trip_response_includes_empty_itinerary_by_default(self, beanie_init) -> None:
+        trip = await SeedFactory.trip()
+        from app.routers.trips import _trip_response
+        data = _trip_response(trip)
+        assert "itinerary" in data
+        assert data["itinerary"] == []
+
+    async def test_trip_response_includes_generated_itinerary(self, beanie_init) -> None:
+        from app.models.documents import TripDay
+        trip = await SeedFactory.trip(pin_count=4)
+        trip.itinerary = [
+            TripDay(day_number=1, label="Day 1 — Tokyo", pin_ids=[trip.pins[0].id, trip.pins[1].id]),
+            TripDay(day_number=2, label="Day 2 — Kyoto", pin_ids=[trip.pins[2].id, trip.pins[3].id]),
+        ]
+        await trip.save()
+
+        from app.routers.trips import _trip_response
+        data = _trip_response(trip)
+        assert len(data["itinerary"]) == 2
+        assert data["itinerary"][0]["dayNumber"] == 1
+        assert data["itinerary"][0]["label"] == "Day 1 — Tokyo"
+        assert len(data["itinerary"][0]["pinIds"]) == 2
+        assert data["itinerary"][1]["dayNumber"] == 2
+
+    async def test_trip_response_includes_collaborators(self, beanie_init) -> None:
+        from app.models.documents import TripCollaborator, CollaboratorRole
+        trip = await SeedFactory.trip()
+        trip.collaborators = [
+            TripCollaborator(name="Alice", role=CollaboratorRole.EDITOR, status="active"),
+            TripCollaborator(name="Bob", role=CollaboratorRole.VIEWER, status="pending"),
+        ]
+        await trip.save()
+
+        from app.routers.trips import _trip_response
+        data = _trip_response(trip)
+        assert len(data["collaborators"]) == 2
+        assert data["collaborators"][0]["name"] == "Alice"
+        assert data["collaborators"][0]["role"] == "editor"
+        assert data["collaborators"][1]["status"] == "pending"
+
+
+@pytest.mark.asyncio
+class TestPinEditPermissions:
+    async def test_owner_can_edit_pin(self, beanie_init) -> None:
+        trip = await SeedFactory.trip()
+        from app.services.expense_service import check_can_edit
+        assert check_can_edit(trip, trip.user_id) is True
+
+    async def test_stranger_cannot_edit_pin(self, beanie_init) -> None:
+        trip = await SeedFactory.trip()
+        from app.services.expense_service import check_can_edit
+        assert check_can_edit(trip, "stranger-clerk-id") is False
+
+    async def test_none_user_cannot_edit_owned_trip(self, beanie_init) -> None:
+        """Guest trips (user_id=None) are open, but owned trips require auth."""
+        trip = await SeedFactory.trip()
+        trip.user_id = "owner-clerk-id"  # make it an owned trip
+        await trip.save()
+        from app.services.expense_service import check_can_edit
+        assert check_can_edit(trip, None) is False
+
+    async def test_active_editor_collaborator_can_edit(self, beanie_init) -> None:
+        from app.models.documents import TripCollaborator, CollaboratorRole
+        from app.services.expense_service import check_can_edit
+        trip = await SeedFactory.trip()
+        collab = TripCollaborator(
+            name="Alice", clerk_id="alice-clerk-id",
+            role=CollaboratorRole.EDITOR, status="active",
+        )
+        trip.collaborators = [collab]
+        await trip.save()
+        assert check_can_edit(trip, "alice-clerk-id") is True
+
+    async def test_viewer_collaborator_cannot_edit(self, beanie_init) -> None:
+        from app.models.documents import TripCollaborator, CollaboratorRole
+        from app.services.expense_service import check_can_edit
+        trip = await SeedFactory.trip()
+        collab = TripCollaborator(
+            name="Bob", clerk_id="bob-clerk-id",
+            role=CollaboratorRole.VIEWER, status="active",
+        )
+        trip.collaborators = [collab]
+        await trip.save()
+        assert check_can_edit(trip, "bob-clerk-id") is False
+
+    async def test_pending_editor_cannot_edit(self, beanie_init) -> None:
+        """Pending = invite sent but not yet accepted — no edit rights yet."""
+        from app.models.documents import TripCollaborator, CollaboratorRole
+        from app.services.expense_service import check_can_edit
+        trip = await SeedFactory.trip()
+        collab = TripCollaborator(
+            name="Charlie", clerk_id="charlie-clerk-id",
+            role=CollaboratorRole.EDITOR, status="pending",  # not accepted yet
+        )
+        trip.collaborators = [collab]
+        await trip.save()
+        assert check_can_edit(trip, "charlie-clerk-id") is False

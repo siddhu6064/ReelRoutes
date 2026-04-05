@@ -55,10 +55,26 @@ export interface Trip {
   videoChannel?: string;
   pinCount: number;
   pins: Pin[];
+  itinerary: ItineraryDay[];
+  collaborators: TripCollaborator[];
   shareToken?: string;
   isShared: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ItineraryDay {
+  dayNumber: number;
+  label: string | null;
+  pinIds: string[];
+  notes: string | null;
+}
+
+export interface TripCollaborator {
+  id: string;
+  name: string;
+  role: "editor" | "viewer";
+  status: "pending" | "active";
 }
 
 export interface JobStatus {

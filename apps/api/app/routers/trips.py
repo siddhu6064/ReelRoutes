@@ -5,8 +5,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.middleware.error_handler import AppError
+from app.middleware.error_handler import AppError, ForbiddenError
 from app.models.documents import Platform, TripDocument
+from app.services.expense_service import check_can_edit
 from app.routers.schemas import (
     AddPinRequest, ChatRequest, CreateTripRequest, ReorderPinsRequest,
     UpdatePinRequest, UpdateTripRequest,
@@ -85,6 +86,24 @@ def _trip_response(trip: TripDocument) -> dict:
                 "cityGroup": p.city_group,
             }
             for p in sorted(trip.pins, key=lambda p: p.order)
+        ],
+        "itinerary": [
+            {
+                "dayNumber": d.day_number,
+                "label": d.label,
+                "pinIds": d.pin_ids,
+                "notes": d.notes,
+            }
+            for d in trip.itinerary
+        ],
+        "collaborators": [
+            {
+                "id": c.id,
+                "name": c.name,
+                "role": c.role,
+                "status": c.status,
+            }
+            for c in trip.collaborators
         ],
         "shareToken": trip.share_token,
         "isShared": trip.is_shared,
@@ -169,9 +188,18 @@ async def unshare_trip(trip_id: str, user_id: str) -> dict:
 
 # ── Pin operations ─────────────────────────────────────────────
 
+async def _pin_edit_guard(trip_id: str, user_id: str | None) -> tuple[str, "TripDocument"]:
+    """Require auth + editor/owner rights. Returns (uid, trip)."""
+    uid = _require_user_id(user_id, "edit pins in")
+    trip = await TripService.get(trip_id)
+    if not check_can_edit(trip, uid):
+        raise ForbiddenError("You don't have permission to edit pins in this trip.")
+    return uid, trip
+
+
 @router.post("/{trip_id}/pins", summary="Add pin manually", status_code=201)
 async def add_pin(trip_id: str, body: AddPinRequest) -> dict:
-    uid = _require_user_id(body.user_id, "add pins to")
+    uid, _ = await _pin_edit_guard(trip_id, body.user_id)
     trip = await TripService.add_pin(
         trip_id=trip_id, user_id=uid,
         place_name=body.place_name, lat=body.lat, lng=body.lng,
@@ -182,7 +210,7 @@ async def add_pin(trip_id: str, body: AddPinRequest) -> dict:
 
 @router.put("/{trip_id}/pins/{pin_id}", summary="Update pin")
 async def update_pin(trip_id: str, pin_id: str, body: UpdatePinRequest) -> dict:
-    uid = _require_user_id(body.user_id, "edit pins in")
+    uid, _ = await _pin_edit_guard(trip_id, body.user_id)
     trip = await TripService.update_pin(
         trip_id=trip_id, pin_id=pin_id, user_id=uid,
         place_name=body.place_name, notes=body.notes, tags=body.tags,
@@ -192,14 +220,14 @@ async def update_pin(trip_id: str, pin_id: str, body: UpdatePinRequest) -> dict:
 
 @router.delete("/{trip_id}/pins/{pin_id}", summary="Delete pin")
 async def delete_pin(trip_id: str, pin_id: str, user_id: str) -> dict:
-    uid = _require_user_id(user_id, "delete pins from")
+    uid, _ = await _pin_edit_guard(trip_id, user_id)
     trip = await TripService.delete_pin(trip_id=trip_id, pin_id=pin_id, user_id=uid)
     return {"ok": True, "data": _trip_response(trip)}
 
 
 @router.post("/{trip_id}/pins/reorder", summary="Reorder pins")
 async def reorder_pins(trip_id: str, body: ReorderPinsRequest) -> dict:
-    uid = _require_user_id(body.user_id, "reorder pins in")
+    uid, _ = await _pin_edit_guard(trip_id, body.user_id)
     trip = await TripService.reorder_pins(
         trip_id=trip_id, user_id=uid, pin_ids=body.pin_ids,
     )
@@ -208,7 +236,7 @@ async def reorder_pins(trip_id: str, body: ReorderPinsRequest) -> dict:
 
 @router.post("/{trip_id}/merge/{source_trip_id}", summary="Merge pins from another trip")
 async def merge_trips(trip_id: str, source_trip_id: str, user_id: str) -> dict:
-    uid = _require_user_id(user_id, "merge trips")
+    uid, _ = await _pin_edit_guard(trip_id, user_id)
     trip = await TripService.merge_pins(
         target_trip_id=trip_id, source_trip_id=source_trip_id, user_id=uid,
     )
