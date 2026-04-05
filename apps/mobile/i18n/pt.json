@@ -1,0 +1,87 @@
+{
+  "nav": { "explore": "Explorar", "myTrips": "Minhas viagens", "newTrip": "Nova viagem" },
+  "trip": {
+    "stops": "paradas",
+    "stop": "parada",
+    "visited": "visitado",
+    "unvisited": "não visitado",
+    "markVisited": "Marcar como visitado",
+    "markUnvisited": "Marcar como não visitado",
+    "addNote": "Adicionar nota…",
+    "saveNote": "Salvar nota",
+    "optimiseRoute": "Optimizar rota",
+    "planMyTrip": "Planejar viagem",
+    "exportToGoogleMaps": "Abrir no Google Maps",
+    "duplicateTrip": "Duplicar viagem",
+    "shareTrip": "Compartilhar viagem",
+    "deleteTrip": "Excluir viagem",
+    "noTripsYet": "Sem viagens ainda",
+    "importVideo": "Importar do vídeo",
+    "travelTime": "{{time}} de viagem",
+    "distance": "{{km}} km"
+  },
+  "pin": {
+    "watchInVideo": "▶ Ver no vídeo",
+    "openNow": "Aberto agora",
+    "closedNow": "Fechado",
+    "rating": "{{rating}} · {{count}} avaliações",
+    "directions": "Direções",
+    "website": "Site",
+    "phone": "Ligar"
+  },
+  "explore": {
+    "title": "Explorar Viagens",
+    "subtitle": "Descubra rotas criadas a partir de vídeos de viagem",
+    "searchPlaceholder": "Buscar destino…",
+    "trending": "🔥 Em alta",
+    "noResults": "Ainda não há viagens públicas.",
+    "beFirst": "Seja o primeiro — torne uma viagem pública nas configurações!"
+  },
+  "chat": {
+    "placeholder": "Pergunte-me sobre esta viagem…",
+    "reconnect": "Reconecte-se para usar a IA"
+  },
+  "budget": {
+    "addExpense": "Adicionar gasto",
+    "totalBudget": "Orçamento total",
+    "spent": "Gasto",
+    "remaining": "Restante",
+    "settleUp": "Acertar contas"
+  },
+  "reservation": {
+    "import": "Importar do e-mail",
+    "paste": "Cole seu e-mail de confirmação aqui…",
+    "parsing": "Processando…",
+    "importBtn": "Importar reserva",
+    "noReservations": "Sem reservas ainda."
+  },
+  "undo": {
+    "undo": "↩ Desfazer",
+    "undoing": "↩ Desfazendo…",
+    "nothingToUndo": "Nada para desfazer",
+    "restoredAt": "✓ Restaurado para {{time}}"
+  },
+  "directions": {
+    "title": "Direções",
+    "driving": "De carro",
+    "transit": "Transporte público",
+    "walking": "A pé",
+    "totalTime": "Tempo total de viagem",
+    "loadingDirections": "Carregando direções…"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "close": "Fechar",
+    "loading": "Carregando…",
+    "error": "Algo deu errado",
+    "retry": "Tentar novamente",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "next": "Próximo →",
+    "prev": "← Anterior",
+    "page": "Página {{n}}"
+  }
+}

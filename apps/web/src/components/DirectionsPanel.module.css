@@ -1,0 +1,110 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+.modeGroup {
+  display: flex;
+  gap: 6px;
+}
+.mode,
+.modeActive {
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid #e5e7eb;
+  transition: all 0.12s;
+}
+.mode {
+  background: #fff;
+  color: #374151;
+}
+.mode:hover {
+  background: #f3f4f6;
+}
+.modeActive {
+  background: #fef3ee;
+  color: #d85a30;
+  border-color: #d85a30;
+}
+.loading {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+.summary {
+  display: flex;
+  gap: 16px;
+  padding: 10px 14px;
+  background: #f9fafb;
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+.summaryItem {
+  font-size: 13px;
+  color: #374151;
+}
+.legs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.leg {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.legRoute {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.legFrom,
+.legTo {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+.legArrow {
+  font-size: 11px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+.legStats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+.legDot {
+  color: #d1d5db;
+}

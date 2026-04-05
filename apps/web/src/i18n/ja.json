@@ -1,0 +1,87 @@
+{
+  "nav": { "explore": "探索", "myTrips": "マイトリップ", "newTrip": "新しいトリップ" },
+  "trip": {
+    "stops": "か所",
+    "stop": "か所",
+    "visited": "訪問済み",
+    "unvisited": "未訪問",
+    "markVisited": "訪問済みにする",
+    "markUnvisited": "未訪問にする",
+    "addNote": "メモを追加…",
+    "saveNote": "メモを保存",
+    "optimiseRoute": "ルートを最適化",
+    "planMyTrip": "旅程を作成",
+    "exportToGoogleMaps": "Googleマップで開く",
+    "duplicateTrip": "トリップを複製",
+    "shareTrip": "トリップを共有",
+    "deleteTrip": "トリップを削除",
+    "noTripsYet": "トリップがまだありません",
+    "importVideo": "動画からインポート",
+    "travelTime": "移動時間 {{time}}",
+    "distance": "{{km}} km"
+  },
+  "pin": {
+    "watchInVideo": "▶ 動画で見る",
+    "openNow": "営業中",
+    "closedNow": "閉店",
+    "rating": "{{rating}} · {{count}} 件の口コミ",
+    "directions": "経路",
+    "website": "ウェブサイト",
+    "phone": "電話"
+  },
+  "explore": {
+    "title": "トリップを探索",
+    "subtitle": "旅行動画から作られたルートを発見",
+    "searchPlaceholder": "目的地を検索…",
+    "trending": "🔥 トレンド",
+    "noResults": "公開トリップはまだありません。",
+    "beFirst": "最初になりましょう — 設定でトリップを公開してください！"
+  },
+  "chat": {
+    "placeholder": "このトリップについて質問してください…",
+    "reconnect": "AIを使うには再接続してください"
+  },
+  "budget": {
+    "addExpense": "支出を追加",
+    "totalBudget": "総予算",
+    "spent": "使用済み",
+    "remaining": "残り",
+    "settleUp": "精算する"
+  },
+  "reservation": {
+    "import": "メールからインポート",
+    "paste": "予約確認メールを貼り付けてください…",
+    "parsing": "解析中…",
+    "importBtn": "予約をインポート",
+    "noReservations": "予約がまだありません。"
+  },
+  "undo": {
+    "undo": "↩ 元に戻す",
+    "undoing": "↩ 元に戻しています…",
+    "nothingToUndo": "元に戻す操作はありません",
+    "restoredAt": "✓ {{time}} に復元しました"
+  },
+  "directions": {
+    "title": "経路案内",
+    "driving": "車",
+    "transit": "公共交通機関",
+    "walking": "徒歩",
+    "totalTime": "合計移動時間",
+    "loadingDirections": "経路を読み込み中…"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "loading": "読み込み中…",
+    "error": "エラーが発生しました",
+    "retry": "再試行",
+    "copy": "コピー",
+    "copied": "コピーしました！",
+    "next": "次へ →",
+    "prev": "← 前へ",
+    "page": "{{n}} ページ"
+  }
+}

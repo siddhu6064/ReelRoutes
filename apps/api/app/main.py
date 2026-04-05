@@ -130,6 +130,11 @@ def create_app() -> FastAPI:
     app.include_router(wrapped_router)
     app.include_router(suggestions_router)
 
+    # Phase 5 — W17
+    from app.routers.directions import router as directions_router
+
+    app.include_router(directions_router)
+
     # Phase 4 — W13 / W14 / W15 / W16
     from app.routers.collaborate import router as collaborate_router
     from app.routers.explore import router as explore_router

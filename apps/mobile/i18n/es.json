@@ -1,0 +1,87 @@
+{
+  "nav": { "explore": "Explorar", "myTrips": "Mis viajes", "newTrip": "Nuevo viaje" },
+  "trip": {
+    "stops": "paradas",
+    "stop": "parada",
+    "visited": "visitado",
+    "unvisited": "no visitado",
+    "markVisited": "Marcar como visitado",
+    "markUnvisited": "Marcar como no visitado",
+    "addNote": "Añadir nota…",
+    "saveNote": "Guardar nota",
+    "optimiseRoute": "Optimizar ruta",
+    "planMyTrip": "Planificar viaje",
+    "exportToGoogleMaps": "Abrir en Google Maps",
+    "duplicateTrip": "Duplicar viaje",
+    "shareTrip": "Compartir viaje",
+    "deleteTrip": "Eliminar viaje",
+    "noTripsYet": "Aún sin viajes",
+    "importVideo": "Importar desde video",
+    "travelTime": "{{time}} de viaje",
+    "distance": "{{km}} km"
+  },
+  "pin": {
+    "watchInVideo": "▶ Ver en video",
+    "openNow": "Abierto ahora",
+    "closedNow": "Cerrado",
+    "rating": "{{rating}} · {{count}} reseñas",
+    "directions": "Direcciones",
+    "website": "Sitio web",
+    "phone": "Llamar"
+  },
+  "explore": {
+    "title": "Explorar Viajes",
+    "subtitle": "Descubre rutas creadas desde videos de viaje",
+    "searchPlaceholder": "Buscar destino…",
+    "trending": "🔥 Tendencias",
+    "noResults": "No hay viajes públicos aún.",
+    "beFirst": "¡Sé el primero — haz un viaje público desde su configuración!"
+  },
+  "chat": {
+    "placeholder": "Pregúntame sobre este viaje…",
+    "reconnect": "Reconéctate para usar IA"
+  },
+  "budget": {
+    "addExpense": "Añadir gasto",
+    "totalBudget": "Presupuesto total",
+    "spent": "Gastado",
+    "remaining": "Restante",
+    "settleUp": "Saldar cuentas"
+  },
+  "reservation": {
+    "import": "Importar desde email",
+    "paste": "Pega tu email de confirmación aquí…",
+    "parsing": "Procesando…",
+    "importBtn": "Importar reserva",
+    "noReservations": "Sin reservas aún."
+  },
+  "undo": {
+    "undo": "↩ Deshacer",
+    "undoing": "↩ Deshaciendo…",
+    "nothingToUndo": "Nada que deshacer",
+    "restoredAt": "✓ Restaurado a {{time}}"
+  },
+  "directions": {
+    "title": "Indicaciones",
+    "driving": "En coche",
+    "transit": "Transporte público",
+    "walking": "A pie",
+    "totalTime": "Tiempo total de viaje",
+    "loadingDirections": "Cargando indicaciones…"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "loading": "Cargando…",
+    "error": "Algo salió mal",
+    "retry": "Intentar de nuevo",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "next": "Siguiente →",
+    "prev": "← Anterior",
+    "page": "Página {{n}}"
+  }
+}

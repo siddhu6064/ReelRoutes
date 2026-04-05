@@ -1,0 +1,87 @@
+{
+  "nav": { "explore": "탐색", "myTrips": "내 여행", "newTrip": "새 여행" },
+  "trip": {
+    "stops": "개 장소",
+    "stop": "개 장소",
+    "visited": "방문함",
+    "unvisited": "미방문",
+    "markVisited": "방문 완료로 표시",
+    "markUnvisited": "미방문으로 표시",
+    "addNote": "메모 추가…",
+    "saveNote": "메모 저장",
+    "optimiseRoute": "경로 최적화",
+    "planMyTrip": "여행 계획 세우기",
+    "exportToGoogleMaps": "Google 지도에서 열기",
+    "duplicateTrip": "여행 복제",
+    "shareTrip": "여행 공유",
+    "deleteTrip": "여행 삭제",
+    "noTripsYet": "아직 여행이 없습니다",
+    "importVideo": "동영상에서 가져오기",
+    "travelTime": "이동 {{time}}",
+    "distance": "{{km}} km"
+  },
+  "pin": {
+    "watchInVideo": "▶ 동영상에서 보기",
+    "openNow": "영업 중",
+    "closedNow": "영업 종료",
+    "rating": "{{rating}} · {{count}} 리뷰",
+    "directions": "길찾기",
+    "website": "웹사이트",
+    "phone": "전화"
+  },
+  "explore": {
+    "title": "여행 탐색",
+    "subtitle": "실제 여행 동영상으로 만든 루트 발견",
+    "searchPlaceholder": "목적지 검색…",
+    "trending": "🔥 트렌딩",
+    "noResults": "아직 공개된 여행이 없습니다.",
+    "beFirst": "첫 번째가 되세요 — 설정에서 여행을 공개하세요!"
+  },
+  "chat": {
+    "placeholder": "이 여행에 대해 질문하세요…",
+    "reconnect": "AI를 사용하려면 다시 연결하세요"
+  },
+  "budget": {
+    "addExpense": "지출 추가",
+    "totalBudget": "총 예산",
+    "spent": "사용",
+    "remaining": "남은 금액",
+    "settleUp": "정산하기"
+  },
+  "reservation": {
+    "import": "이메일에서 가져오기",
+    "paste": "예약 확인 이메일을 붙여넣으세요…",
+    "parsing": "분석 중…",
+    "importBtn": "예약 가져오기",
+    "noReservations": "아직 예약이 없습니다."
+  },
+  "undo": {
+    "undo": "↩ 실행 취소",
+    "undoing": "↩ 취소 중…",
+    "nothingToUndo": "취소할 항목 없음",
+    "restoredAt": "✓ {{time}}으로 복원됨"
+  },
+  "directions": {
+    "title": "길찾기",
+    "driving": "자동차",
+    "transit": "대중교통",
+    "walking": "도보",
+    "totalTime": "총 이동 시간",
+    "loadingDirections": "경로 불러오는 중…"
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "close": "닫기",
+    "loading": "로딩 중…",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "copy": "복사",
+    "copied": "복사됨!",
+    "next": "다음 →",
+    "prev": "← 이전",
+    "page": "{{n}} 페이지"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "nav": {
+    "explore": "Explore",
+    "myTrips": "My Trips",
+    "newTrip": "New Trip"
+  },
+  "trip": {
+    "stops": "stops",
+    "stop": "stop",
+    "visited": "visited",
+    "unvisited": "unvisited",
+    "markVisited": "Mark as visited",
+    "markUnvisited": "Mark as not visited",
+    "addNote": "Add a note…",
+    "saveNote": "Save note",
+    "optimiseRoute": "Optimise route",
+    "planMyTrip": "Plan my trip",
+    "exportToGoogleMaps": "Open in Google Maps",
+    "duplicateTrip": "Duplicate this trip",
+    "shareTrip": "Share trip",
+    "deleteTrip": "Delete trip",
+    "noTripsYet": "No trips yet",
+    "importVideo": "Import from video",
+    "travelTime": "{{time}} travel",
+    "distance": "{{km}} km"
+  },
+  "pin": {
+    "watchInVideo": "▶ Watch in video",
+    "openNow": "Open now",
+    "closedNow": "Closed",
+    "rating": "{{rating}} · {{count}} reviews",
+    "directions": "Directions",
+    "website": "Website",
+    "phone": "Call"
+  },
+  "explore": {
+    "title": "Explore Trips",
+    "subtitle": "Discover routes built from real travel videos",
+    "searchPlaceholder": "Search destination…",
+    "trending": "🔥 Trending",
+    "noResults": "No public trips found yet.",
+    "beFirst": "Be the first — make a trip public from its settings!"
+  },
+  "chat": {
+    "placeholder": "Ask me anything about this trip…",
+    "reconnect": "Reconnect to use AI"
+  },
+  "budget": {
+    "addExpense": "Add expense",
+    "totalBudget": "Total budget",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "settleUp": "Settle up"
+  },
+  "reservation": {
+    "import": "Import from email",
+    "paste": "Paste your confirmation email here…",
+    "parsing": "Parsing…",
+    "importBtn": "Import reservation",
+    "noReservations": "No reservations yet."
+  },
+  "undo": {
+    "undo": "↩ Undo",
+    "undoing": "↩ Undoing…",
+    "nothingToUndo": "Nothing to undo",
+    "restoredAt": "✓ Restored to {{time}}"
+  },
+  "directions": {
+    "title": "Directions",
+    "driving": "Driving",
+    "transit": "Transit",
+    "walking": "Walking",
+    "totalTime": "Total travel time",
+    "loadingDirections": "Loading directions…"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "next": "Next →",
+    "prev": "← Prev",
+    "page": "Page {{n}}"
+  }
+}
