@@ -48,22 +48,16 @@ function LimitBar({
         <span className={over ? styles.spentOver : styles.spent}>
           {money(spent, currency)} spent
         </span>
-        <span className={styles.limitLabel}>
-          limit {money(budget, currency)}
-        </span>
+        <span className={styles.limitLabel}>limit {money(budget, currency)}</span>
       </div>
       <div className={styles.track}>
         <div
-          className={[styles.fill, over ? styles.fillOver : ""]
-            .filter(Boolean)
-            .join(" ")}
+          className={[styles.fill, over ? styles.fillOver : ""].filter(Boolean).join(" ")}
           style={{ width: `${pct}%` }}
         />
       </div>
       {over && (
-        <p className={styles.overWarning}>
-          ⚠️ {money(spent - budget, currency)} over budget
-        </p>
+        <p className={styles.overWarning}>⚠️ {money(spent - budget, currency)} over budget</p>
       )}
     </div>
   );
@@ -91,18 +85,14 @@ function CategoryBreakdown({
     <div className={styles.cats}>
       <p className={styles.sectionLabel}>By category</p>
       {entries.map(([cat, amount]) => {
-        const icon =
-          EXPENSE_CATEGORY_ICONS[cat as ExpenseCategory] ?? "📎";
+        const icon = EXPENSE_CATEGORY_ICONS[cat as ExpenseCategory] ?? "📎";
         const pct = total > 0 ? Math.round((amount / total) * 100) : 0;
         return (
           <div key={cat} className={styles.catRow}>
             <span>{icon}</span>
             <span className={styles.catName}>{cat}</span>
             <div className={styles.catTrack}>
-              <div
-                className={styles.catFill}
-                style={{ width: `${(amount / max) * 100}%` }}
-              />
+              <div className={styles.catFill} style={{ width: `${(amount / max) * 100}%` }} />
             </div>
             <span className={styles.catPct}>{pct}%</span>
             <span className={styles.catAmt}>{money(amount, currency)}</span>
@@ -132,13 +122,9 @@ function ExpenseRow({
       <span className={styles.expenseIcon}>{icon}</span>
       <div className={styles.expenseBody}>
         <p className={styles.expenseTitle}>{expense.title}</p>
-        {expense.notes && (
-          <p className={styles.expenseNotes}>{expense.notes}</p>
-        )}
+        {expense.notes && <p className={styles.expenseNotes}>{expense.notes}</p>}
       </div>
-      <span className={styles.expenseAmount}>
-        {money(expense.amount, currency)}
-      </span>
+      <span className={styles.expenseAmount}>{money(expense.amount, currency)}</span>
       <button
         type="button"
         className={styles.deleteBtn}
@@ -173,8 +159,14 @@ function AddExpenseForm({
 
   function handleSubmit() {
     const parsed = parseFloat(amount);
-    if (!title.trim()) { setErr("Enter a description"); return; }
-    if (isNaN(parsed) || parsed <= 0) { setErr("Enter a valid amount"); return; }
+    if (!title.trim()) {
+      setErr("Enter a description");
+      return;
+    }
+    if (isNaN(parsed) || parsed <= 0) {
+      setErr("Enter a valid amount");
+      return;
+    }
     setErr("");
     addMutation.mutate(
       {
@@ -225,10 +217,7 @@ function AddExpenseForm({
           <button
             key={c}
             type="button"
-            className={[
-              styles.catChip,
-              category === c ? styles.catChipActive : "",
-            ]
+            className={[styles.catChip, category === c ? styles.catChipActive : ""]
               .filter(Boolean)
               .join(" ")}
             onClick={() => setCategory(c)}
@@ -289,14 +278,8 @@ function SetBudgetRow({
 
   if (!editing) {
     return (
-      <button
-        type="button"
-        className={styles.setBudgetBtn}
-        onClick={() => setEditing(true)}
-      >
-        {current !== null
-          ? `✏️ Edit limit (${money(current, currency)})`
-          : "＋ Set a budget limit"}
+      <button type="button" className={styles.setBudgetBtn} onClick={() => setEditing(true)}>
+        {current !== null ? `✏️ Edit limit (${money(current, currency)})` : "＋ Set a budget limit"}
       </button>
     );
   }
@@ -321,11 +304,7 @@ function SetBudgetRow({
       >
         {setBudgetMutation.isPending ? "…" : "Save"}
       </button>
-      <button
-        type="button"
-        className={styles.cancelBtn}
-        onClick={() => setEditing(false)}
-      >
+      <button type="button" className={styles.cancelBtn} onClick={() => setEditing(false)}>
         Cancel
       </button>
     </div>
@@ -381,16 +360,10 @@ export default function BudgetPanel({ tripId, userId }: BudgetPanelProps) {
       {/* total */}
       <div className={styles.totalRow}>
         <span className={styles.totalLabel}>Total spent</span>
-        <span className={styles.totalValue}>
-          {money(summary.totalSpent, currency)}
-        </span>
+        <span className={styles.totalValue}>{money(summary.totalSpent, currency)}</span>
       </div>
 
-      <LimitBar
-        spent={summary.totalSpent}
-        budget={budget}
-        currency={currency}
-      />
+      <LimitBar spent={summary.totalSpent} budget={budget} currency={currency} />
 
       <SetBudgetRow
         tripId={tripId}
@@ -422,8 +395,7 @@ export default function BudgetPanel({ tripId, userId }: BudgetPanelProps) {
                 })
               }
               isDeleting={
-                deleteMutation.isPending &&
-                deleteMutation.variables?.expenseId === exp.id
+                deleteMutation.isPending && deleteMutation.variables?.expenseId === exp.id
               }
             />
           ))}

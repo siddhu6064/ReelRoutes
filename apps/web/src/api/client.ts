@@ -351,29 +351,19 @@ export function useVisitPin() {
           ...(diaryEntry !== undefined ? { diary_entry: diaryEntry } : {}),
         }),
       }),
-    onSuccess: (_data, vars) =>
-      qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }
 
 export function useUnvisitPin() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      tripId,
-      pinId,
-      userId,
-    }: {
-      tripId: string;
-      pinId: string;
-      userId?: string;
-    }) =>
+    mutationFn: ({ tripId, pinId, userId }: { tripId: string; pinId: string; userId?: string }) =>
       apiFetch<{ pinId: string; unvisited: boolean }>(
         `/api/trips/${tripId}/pins/${pinId}/visit${userId ? `?user_id=${userId}` : ""}`,
         { method: "DELETE" },
       ),
-    onSuccess: (_data, vars) =>
-      qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }
 
@@ -403,9 +393,7 @@ export function useWrapped(tripId: string | null, userId?: string) {
   return useQuery({
     queryKey: ["wrapped", tripId],
     queryFn: () =>
-      apiFetch<WrappedStats>(
-        `/api/trips/${tripId}/wrapped${userId ? `?user_id=${userId}` : ""}`,
-      ),
+      apiFetch<WrappedStats>(`/api/trips/${tripId}/wrapped${userId ? `?user_id=${userId}` : ""}`),
     enabled: !!tripId,
     staleTime: 60_000,
   });
@@ -430,19 +418,12 @@ export interface SuggestSpotsData {
 export function useSuggestSpots() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      tripId,
-      userId,
-    }: {
-      tripId: string;
-      userId?: string;
-    }) =>
+    mutationFn: ({ tripId, userId }: { tripId: string; userId?: string }) =>
       apiFetch<SuggestSpotsData>(
         `/api/trips/${tripId}/suggest-spots${userId ? `?user_id=${userId}` : ""}`,
         { method: "POST" },
       ),
-    onSuccess: (_data, vars) =>
-      qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }
 
@@ -624,17 +605,14 @@ export function useSetBudget() {
       budget: number;
       currency?: string;
     }) =>
-      apiFetch<{ budget: number; currency: string }>(
-        `/api/trips/${tripId}/budget`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            user_id: userId ?? null,
-            budget,
-            currency: currency ?? "USD",
-          }),
-        },
-      ),
+      apiFetch<{ budget: number; currency: string }>(`/api/trips/${tripId}/budget`, {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: userId ?? null,
+          budget,
+          currency: currency ?? "USD",
+        }),
+      }),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
       qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });

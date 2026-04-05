@@ -74,10 +74,7 @@ export default function PinListItem({ pin, onVisit, onUnvisit, onPress }: Props)
       >
         <Text style={s.check}>{isVisited ? "✅" : "⬜"}</Text>
         <View style={s.info}>
-          <Text
-            style={[s.name, isVisited && s.nameVisited]}
-            numberOfLines={1}
-          >
+          <Text style={[s.name, isVisited && s.nameVisited]} numberOfLines={1}>
             {pin.placeName}
           </Text>
           {pin.address ? (

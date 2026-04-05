@@ -75,20 +75,12 @@ export default function VisitToggle({
           onClick={handleClick}
           disabled={isPending}
           aria-pressed={isVisited}
-          aria-label={
-            isVisited
-              ? `Unmark ${placeName} as visited`
-              : `Mark ${placeName} as visited`
-          }
+          aria-label={isVisited ? `Unmark ${placeName} as visited` : `Mark ${placeName} as visited`}
         >
-          <span aria-hidden="true">
-            {isPending ? "⏳" : isVisited ? "✅" : "⬜"}
-          </span>
+          <span aria-hidden="true">{isPending ? "⏳" : isVisited ? "✅" : "⬜"}</span>
           <span>{isVisited ? "Visited" : "Visit"}</span>
         </button>
-        {visitedDate && (
-          <span className={styles.date}>{visitedDate}</span>
-        )}
+        {visitedDate && <span className={styles.date}>{visitedDate}</span>}
       </div>
 
       {showModal && (

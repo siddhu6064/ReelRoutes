@@ -1,10 +1,6 @@
 import { useState } from "react";
 
-import {
-  useAddSuggestedPin,
-  useSuggestSpots,
-  type SpotSuggestion,
-} from "../api/client";
+import { useAddSuggestedPin, useSuggestSpots, type SpotSuggestion } from "../api/client";
 
 import styles from "./SpotSuggestions.module.css";
 
@@ -25,10 +21,7 @@ interface SpotSuggestionsProps {
   userId?: string;
 }
 
-export default function SpotSuggestions({
-  tripId,
-  userId,
-}: SpotSuggestionsProps) {
+export default function SpotSuggestions({ tripId, userId }: SpotSuggestionsProps) {
   const suggestMutation = useSuggestSpots();
   const addPinMutation = useAddSuggestedPin();
   const [addedNames, setAddedNames] = useState<Set<string>>(new Set());
@@ -97,18 +90,13 @@ export default function SpotSuggestions({
           {suggestions.map((spot) => {
             const added = addedNames.has(spot.name);
             const adding =
-              addPinMutation.isPending &&
-              addPinMutation.variables?.spot.name === spot.name;
+              addPinMutation.isPending && addPinMutation.variables?.spot.name === spot.name;
             return (
               <li key={spot.name} role="listitem">
                 <div
-                  className={[styles.card, added ? styles.cardAdded : ""]
-                    .filter(Boolean)
-                    .join(" ")}
+                  className={[styles.card, added ? styles.cardAdded : ""].filter(Boolean).join(" ")}
                 >
-                  <span className={styles.cardIcon}>
-                    {CAT_ICONS[spot.category] ?? "📍"}
-                  </span>
+                  <span className={styles.cardIcon}>{CAT_ICONS[spot.category] ?? "📍"}</span>
                   <div className={styles.cardBody}>
                     <p className={styles.cardName}>{spot.name}</p>
                     <p className={styles.cardAddress}>{spot.address}</p>
@@ -116,17 +104,12 @@ export default function SpotSuggestions({
                   </div>
                   <button
                     type="button"
-                    className={[
-                      styles.addBtn,
-                      added ? styles.addBtnAdded : "",
-                    ]
+                    className={[styles.addBtn, added ? styles.addBtnAdded : ""]
                       .filter(Boolean)
                       .join(" ")}
                     onClick={() => handleAdd(spot)}
                     disabled={adding || added}
-                    aria-label={
-                      added ? `${spot.name} added` : `Add ${spot.name} to trip`
-                    }
+                    aria-label={added ? `${spot.name} added` : `Add ${spot.name} to trip`}
                   >
                     {added ? "✓" : adding ? "…" : "+"}
                   </button>

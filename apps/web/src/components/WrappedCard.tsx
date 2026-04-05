@@ -27,12 +27,7 @@ function ProgressRing({ rate, size = 96 }: { rate: number; size?: number }) {
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - rate);
   return (
-    <svg
-      width={size}
-      height={size}
-      className={styles.ring}
-      aria-hidden="true"
-    >
+    <svg width={size} height={size} className={styles.ring} aria-hidden="true">
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -118,9 +113,7 @@ export default function WrappedCard({ tripId, userId }: WrappedCardProps) {
             value: String(data.daysActive),
             label: data.daysActive === 1 ? "day active" : "days active",
           },
-          ...(topCat
-            ? [{ icon: "🏆", value: topCat.category, label: "top category" }]
-            : []),
+          ...(topCat ? [{ icon: "🏆", value: topCat.category, label: "top category" }] : []),
         ].map((c) => (
           <div key={c.label} className={styles.chip}>
             <span aria-hidden="true">{c.icon}</span>
@@ -134,16 +127,12 @@ export default function WrappedCard({ tripId, userId }: WrappedCardProps) {
         <div className={styles.cats}>
           <p className={styles.catsLabel}>Top spot types</p>
           {data.topCategories.map((c) => {
-            const pct =
-              (c.count / (data.topCategories[0]?.count ?? 1)) * 100;
+            const pct = (c.count / (data.topCategories[0]?.count ?? 1)) * 100;
             return (
               <div key={c.category} className={styles.catRow}>
                 <span className={styles.catName}>{c.category}</span>
                 <div className={styles.catBarWrap}>
-                  <div
-                    className={styles.catBar}
-                    style={{ width: `${pct}%` }}
-                  />
+                  <div className={styles.catBar} style={{ width: `${pct}%` }} />
                 </div>
                 <span className={styles.catCount}>{c.count}</span>
               </div>
@@ -152,11 +141,7 @@ export default function WrappedCard({ tripId, userId }: WrappedCardProps) {
         </div>
       )}
 
-      <button
-        type="button"
-        className={styles.shareBtn}
-        onClick={() => shareStats(data)}
-      >
+      <button type="button" className={styles.shareBtn} onClick={() => shareStats(data)}>
         Share my stats 🔗
       </button>
     </section>

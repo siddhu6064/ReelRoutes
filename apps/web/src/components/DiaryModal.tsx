@@ -52,12 +52,7 @@ export default function DiaryModal({
           <h2 id="diary-title" className={styles.title}>
             You visited {placeName}! 🎉
           </h2>
-          <button
-            type="button"
-            className={styles.close}
-            aria-label="Close"
-            onClick={onClose}
-          >
+          <button type="button" className={styles.close} aria-label="Close" onClick={onClose}>
             ✕
           </button>
         </div>
@@ -79,24 +74,16 @@ export default function DiaryModal({
         />
 
         <p
-          className={[styles.counter, isOver ? styles.counterError : ""]
-            .filter(Boolean)
-            .join(" ")}
+          className={[styles.counter, isOver ? styles.counterError : ""].filter(Boolean).join(" ")}
         >
-          {remaining < 200
-            ? `${remaining} characters remaining`
-            : `${entry.length} / ${MAX}`}
+          {remaining < 200 ? `${remaining} characters remaining` : `${entry.length} / ${MAX}`}
         </p>
 
         <div className={styles.actions}>
           <button type="button" className={styles.btnGhost} onClick={onClose}>
             Cancel
           </button>
-          <button
-            type="button"
-            className={styles.btnSecondary}
-            onClick={onSkip}
-          >
+          <button type="button" className={styles.btnSecondary} onClick={onSkip}>
             Skip note
           </button>
           <button
