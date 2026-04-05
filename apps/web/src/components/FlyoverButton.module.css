@@ -1,0 +1,75 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #111827;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.btn:hover:not(:disabled) {
+  background: #374151;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.preview {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}
+.downloadBtn,
+.copyBtn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.12s;
+}
+.downloadBtn {
+  background: #d85a30;
+  color: #fff;
+  border: none;
+}
+.downloadBtn:hover {
+  background: #b84820;
+}
+.copyBtn {
+  background: #fff;
+  color: #374151;
+  border: 1.5px solid #e5e7eb;
+}
+.copyBtn:hover {
+  background: #f3f4f6;
+}
+.meta {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+}
+.msg {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
