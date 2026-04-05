@@ -1,0 +1,172 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.close:hover {
+  background: #f3f4f6;
+}
+
+.desc {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.roleGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.role,
+.roleActive {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  transition: all 0.12s;
+  background: #f9fafb;
+}
+
+.role:hover {
+  border-color: #d85a30;
+}
+
+.roleActive {
+  background: #fef3ee;
+  border-color: #d85a30;
+}
+
+.roleName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.roleDesc {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.generateBtn {
+  padding: 11px;
+  border-radius: 10px;
+  border: none;
+  background: #d85a30;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.generateBtn:hover:not(:disabled) {
+  background: #b84820;
+}
+
+.generateBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.linkBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.link {
+  flex: 1;
+  font-size: 11px;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: monospace;
+}
+
+.copyBtn {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1.5px solid #d85a30;
+  background: #fff;
+  color: #d85a30;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.copyBtn:hover {
+  background: #d85a30;
+  color: #fff;
+}
+
+.note {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.anotherBtn {
+  background: none;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.anotherBtn:hover {
+  background: #f3f4f6;
+}

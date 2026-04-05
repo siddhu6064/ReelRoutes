@@ -155,6 +155,43 @@ class TripCollaborator(BaseModel):
     joined_at: datetime | None = None
 
 
+# ── Edit history (W15) ────────────────────────────────────────
+
+
+class EditSnapshot(BaseModel):
+    """Snapshot of pins[] state before a mutation — used by POST /undo.
+    Stored as a JSON string to avoid Beanie issues with deeply-nested lists."""
+
+    snapshot_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    pins_json: str  # json.dumps([pin.model_dump(mode="json") for pin in trip.pins])
+
+
+# ── Reservations (W16) ────────────────────────────────────────
+
+
+class ReservationType(Enum):
+    FLIGHT = "flight"
+    HOTEL = "hotel"
+    ACTIVITY = "activity"
+    CAR_RENTAL = "car_rental"
+    OTHER = "other"
+
+
+class ReservationDocument(BaseModel):
+    """A parsed travel reservation embedded in a trip."""
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    reservation_type: ReservationType = ReservationType.OTHER
+    title: str
+    confirmation_number: str | None = None
+    flight_number: str | None = None
+    check_in: datetime | None = None
+    check_out: datetime | None = None
+    notes: str | None = None
+    raw_email_snippet: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
 # ── Embedded: Pin ─────────────────────────────────────────────
 
 
@@ -284,6 +321,17 @@ class TripDocument(Document):
     share_token: str | None = None
     is_shared: bool = False
 
+    # Community feed (W13)
+    is_public: bool = False
+    view_count: int = 0
+    share_count: int = 0
+
+    # Undo history (W15) — last 20 pin-state snapshots
+    trip_edit_history: list[EditSnapshot] = Field(default_factory=list)
+
+    # Reservations (W16) — parsed from confirmation emails
+    reservations: list[ReservationDocument] = Field(default_factory=list)
+
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -304,6 +352,21 @@ class TripDocument(Document):
             ),
             # Guest-mode cleanup: find old anonymous trips by age
             IndexModel([("created_at", DESCENDING)], name="idx_trips_created_at"),
+            # Community feed (W13)
+            IndexModel(
+                [("is_public", ASCENDING), ("view_count", DESCENDING)],
+                name="idx_trips_public_views",
+            ),
+            IndexModel(
+                [("is_public", ASCENDING), ("share_count", DESCENDING)],
+                name="idx_trips_public_shares",
+            ),
+            # Invite token lookup (W14)
+            IndexModel(
+                [("collaborators.invite_token", ASCENDING)],
+                sparse=True,
+                name="idx_trips_invite_token",
+            ),
         ]
 
 

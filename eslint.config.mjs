@@ -18,6 +18,10 @@ const browserGlobals = {
   crypto: "readonly", performance: "readonly",
   EventTarget: "readonly", Event: "readonly", CustomEvent: "readonly",
   AbortController: "readonly", AbortSignal: "readonly",
+  // Fetch API types (DOM lib) — used in type annotations
+  RequestInit: "readonly", RequestInfo: "readonly", ResponseInit: "readonly",
+  // Node.js / Expo globals
+  process: "readonly", Buffer: "readonly", global: "readonly",
   // JSX transform — React is not imported explicitly
   React: "readonly",
   // Google Maps loaded via @googlemaps/js-api-loader at runtime

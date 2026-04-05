@@ -1,0 +1,155 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.group {
+  display: flex;
+  align-items: stretch;
+}
+
+.btn,
+.btnDisabled {
+  padding: 7px 13px;
+  border-radius: 8px 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s;
+  border: 1.5px solid transparent;
+}
+
+.btn {
+  background: #fef3ee;
+  color: #d85a30;
+  border-color: #d85a30;
+}
+
+.btn:hover {
+  background: #d85a30;
+  color: #fff;
+}
+
+.btnDisabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+}
+
+.historyToggle {
+  padding: 7px 9px;
+  border-radius: 0 8px 8px 0;
+  border: 1.5px solid #d85a30;
+  border-left: none;
+  background: #fef3ee;
+  color: #d85a30;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.historyToggle:hover:not(:disabled) {
+  background: #d85a30;
+  color: #fff;
+}
+
+.historyToggle:disabled {
+  border-color: #e5e7eb;
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.toast {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #111827;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  z-index: 50;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  min-width: 220px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popoverTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin: 0;
+}
+
+.snapshots {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.snap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+
+.snapTime {
+  font-size: 12px;
+  color: #374151;
+  font-family: monospace;
+}
+
+.restoreBtn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 5px;
+  border: 1px solid #d85a30;
+  background: transparent;
+  color: #d85a30;
+  cursor: pointer;
+}
+
+.restoreBtn:hover {
+  background: #d85a30;
+  color: #fff;
+}
+
+.shortcutHint {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 0;
+}
