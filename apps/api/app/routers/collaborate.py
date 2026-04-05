@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Body, Query
 from pydantic import BaseModel
 
-from app.core.errors import NotFoundError
+from app.middleware.error_handler import NotFoundError
 from app.models.documents import CollaboratorRole, TripCollaborator, TripDocument
 from app.services.trip_service import TripService
 
