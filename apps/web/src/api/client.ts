@@ -42,6 +42,9 @@ export interface Pin {
   openingHoursText?: string[];
   website?: string;
   phoneNumber?: string;
+  // Phase 3 W9 — Visit tracking
+  visitedAt?: string;
+  diaryEntry?: string;
 }
 
 export interface ItineraryDay {
@@ -316,5 +319,156 @@ export function useGenerateItinerary() {
         body: JSON.stringify({ user_id, trip_length_days }),
       }),
     onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+  });
+}
+
+// ── Phase 3 W9 — Pin Visit ────────────────────────────────────
+
+export interface VisitPinData {
+  pinId: string;
+  visitedAt: string;
+  diaryEntry: string | null;
+}
+
+export function useVisitPin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      pinId,
+      userId,
+      diaryEntry,
+    }: {
+      tripId: string;
+      pinId: string;
+      userId?: string;
+      diaryEntry?: string;
+    }) =>
+      apiFetch<VisitPinData>(`/api/trips/${tripId}/pins/${pinId}/visit`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          user_id: userId ?? null,
+          ...(diaryEntry !== undefined ? { diary_entry: diaryEntry } : {}),
+        }),
+      }),
+    onSuccess: (_data, vars) =>
+      qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+  });
+}
+
+export function useUnvisitPin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      pinId,
+      userId,
+    }: {
+      tripId: string;
+      pinId: string;
+      userId?: string;
+    }) =>
+      apiFetch<{ pinId: string; unvisited: boolean }>(
+        `/api/trips/${tripId}/pins/${pinId}/visit${userId ? `?user_id=${userId}` : ""}`,
+        { method: "DELETE" },
+      ),
+    onSuccess: (_data, vars) =>
+      qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+  });
+}
+
+// ── Phase 3 W10 — Trip Wrapped ────────────────────────────────
+
+export interface CategoryCount {
+  category: string;
+  count: number;
+}
+
+export interface WrappedStats {
+  tripId: string;
+  title: string;
+  totalPins: number;
+  visitedPins: number;
+  visitRate: number;
+  diaryCount: number;
+  distanceKm: number;
+  daysActive: number;
+  topCategories: CategoryCount[];
+  firstVisit: string | null;
+  lastVisit: string | null;
+  createdAt: string | null;
+}
+
+export function useWrapped(tripId: string | null, userId?: string) {
+  return useQuery({
+    queryKey: ["wrapped", tripId],
+    queryFn: () =>
+      apiFetch<WrappedStats>(
+        `/api/trips/${tripId}/wrapped${userId ? `?user_id=${userId}` : ""}`,
+      ),
+    enabled: !!tripId,
+    staleTime: 60_000,
+  });
+}
+
+// ── Phase 3 W11 — AI Spot Suggestions ────────────────────────
+
+export interface SpotSuggestion {
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  category: string;
+  reason: string;
+}
+
+export interface SuggestSpotsData {
+  tripId: string;
+  suggestions: SpotSuggestion[];
+}
+
+export function useSuggestSpots() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      userId,
+    }: {
+      tripId: string;
+      userId?: string;
+    }) =>
+      apiFetch<SuggestSpotsData>(
+        `/api/trips/${tripId}/suggest-spots${userId ? `?user_id=${userId}` : ""}`,
+        { method: "POST" },
+      ),
+    onSuccess: (_data, vars) =>
+      qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+  });
+}
+
+export function useAddSuggestedPin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      spot,
+      userId,
+    }: {
+      tripId: string;
+      spot: SpotSuggestion;
+      userId?: string;
+    }) =>
+      apiFetch<Trip>(`/api/trips/${tripId}/pins`, {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: userId ?? null,
+          place_name: spot.name,
+          address: spot.address,
+          lat: spot.lat,
+          lng: spot.lng,
+          notes: spot.reason,
+        }),
+      }),
+    onSuccess: (data) => qc.setQueryData(["trip", data.id], data),
   });
 }

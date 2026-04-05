@@ -210,6 +210,10 @@ class PinDocument(BaseModel):
     notes: str | None = None
     tags: list[str] = Field(default_factory=list)
 
+    # Visit tracking (W9)
+    visited_at: datetime | None = None
+    diary_entry: str | None = None
+
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 

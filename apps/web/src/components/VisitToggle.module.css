@@ -1,0 +1,54 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 6px;
+  border: 1.5px solid transparent;
+  border-radius: 20px;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 140ms, border-color 140ms, opacity 140ms;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.unvisited {
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+.unvisited:hover:not(:disabled) {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.visited {
+  color: #15803d;
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+.visited:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.pending {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.date {
+  font-size: 11px;
+  color: #6b7280;
+  padding-left: 6px;
+}

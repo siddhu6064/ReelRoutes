@@ -121,6 +121,15 @@ def create_app() -> FastAPI:
     app.include_router(clerk_router)
     app.include_router(trip_extras_router)
 
+    # Phase 3 — W9 / W10 / W11
+    from app.routers.pin_visit import router as pin_visit_router
+    from app.routers.suggestions import router as suggestions_router
+    from app.routers.wrapped import router as wrapped_router
+
+    app.include_router(pin_visit_router)
+    app.include_router(wrapped_router)
+    app.include_router(suggestions_router)
+
     return app
 
 
