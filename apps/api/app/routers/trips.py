@@ -74,6 +74,15 @@ def _trip_response(trip: TripDocument) -> dict:
                 "manuallyAdded": p.manually_added,
                 "notes": p.notes,
                 "tags": p.tags,
+                # Week 2 — Places enrichment
+                "rating": p.rating,
+                "userRatingsTotal": p.user_ratings_total,
+                "openNow": p.open_now,
+                "openingHoursText": p.opening_hours_text,
+                "website": p.website,
+                "phoneNumber": p.phone_number,
+                # Week 3 — city grouping
+                "cityGroup": p.city_group,
             }
             for p in sorted(trip.pins, key=lambda p: p.order)
         ],

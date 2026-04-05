@@ -214,3 +214,89 @@
   padding: 6px 12px; border-radius: var(--r-sm);
   background: var(--surface-3); color: var(--text); font-size: 12px; font-weight: 600;
 }
+
+/* ── Week 1+2 additions ── */
+.enrichRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px 4px;
+  flex-wrap: wrap;
+}
+.stars {
+  color: var(--amber, #f59e0b);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.starsNum { color: var(--text); letter-spacing: 0; }
+.starsCount { color: var(--text-muted); font-size: 11px; font-weight: 400; letter-spacing: 0; }
+.openBadge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+.openBadge[data-open="true"]  { background: #d1fae5; color: #065f46; }
+.openBadge[data-open="false"] { background: #fee2e2; color: #991b1b; }
+
+.hoursBlock { padding: 0 16px 4px; }
+.hoursToggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 0;
+  font-family: inherit;
+}
+.hoursToggle:hover { color: var(--text); }
+.hoursList {
+  list-style: none;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hoursList li {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 2px 0;
+  border-bottom: 1px solid var(--border-faint, #2a2a28);
+}
+
+.linkRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 16px 8px;
+}
+.videoLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--coral);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: opacity .12s;
+}
+.videoLink:hover { opacity: .85; }
+.extLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface2, #232320);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  border: 1px solid var(--border, #2a2a28);
+  transition: color .12s;
+}
+.extLink:hover { color: var(--text); }

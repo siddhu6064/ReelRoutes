@@ -139,9 +139,15 @@ class TestGeocodeLocations:
             return _mock_http(_places_response([_place_result(name, f"id_{name}", lat, lng)]))
 
         responses = [_make_resp("Shibuya", 35.66, 139.70), _make_resp("Senso-ji", 35.71, 139.80)]
+        # Empty details response — _enrich_with_details makes a second call per pin
+        empty_details = _mock_http({"status": "OK", "result": {}})
         call_idx = [0]
 
         async def mock_get(*a, **kw):
+            url = a[0] if a else kw.get("url", "")
+            # Details API calls return empty so coords stay from text search
+            if "details" in str(url):
+                return empty_details
             r = responses[call_idx[0] % len(responses)]
             call_idx[0] += 1
             return r

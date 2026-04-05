@@ -10,6 +10,29 @@ interface Props {
   onClose: () => void;
 }
 
+function StarRating({ rating, total }: { rating: number; total?: number }) {
+  const full = Math.floor(rating);
+  const half = rating - full >= 0.5;
+  return (
+    <span className={styles.stars}>
+      {"★".repeat(full)}
+      {half ? "½" : ""}
+      {"☆".repeat(5 - full - (half ? 1 : 0))}
+      <span className={styles.starsNum}> {rating.toFixed(1)}</span>
+      {total ? <span className={styles.starsCount}> · {total.toLocaleString()} reviews</span> : null}
+    </span>
+  );
+}
+
+function OpenBadge({ openNow }: { openNow: boolean | undefined }) {
+  if (openNow === undefined) return null;
+  return (
+    <span className={styles.openBadge} data-open={openNow}>
+      {openNow ? "● Open now" : "● Closed"}
+    </span>
+  );
+}
+
 export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
   const { userId } = useAppStore();
   const [notes, setNotes] = useState(pin.notes ?? "");
@@ -17,6 +40,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
   const [tags, setTags] = useState<string[]>(pin.tags);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [hoursOpen, setHoursOpen] = useState(false);
 
   const { mutateAsync: updatePin } = useUpdatePin();
   const { mutateAsync: deletePin } = useDeletePin();
@@ -34,9 +58,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
   function addTag(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
-      if (!tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
-      }
+      if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
       setTagInput("");
     }
   }
@@ -61,6 +83,50 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
         <button className={styles.close} onClick={onClose} aria-label="Close panel">✕</button>
       </div>
 
+      {/* ── Rating + Open status ── */}
+      {(pin.rating !== undefined || pin.openNow !== undefined) && (
+        <div className={styles.enrichRow}>
+          {pin.rating !== undefined && (
+            <StarRating rating={pin.rating} total={pin.userRatingsTotal} />
+          )}
+          <OpenBadge openNow={pin.openNow} />
+        </div>
+      )}
+
+      {/* ── Opening hours ── */}
+      {pin.openingHoursText && pin.openingHoursText.length > 0 && (
+        <div className={styles.hoursBlock}>
+          <button className={styles.hoursToggle} onClick={() => setHoursOpen(o => !o)}>
+            🕐 Hours {hoursOpen ? "▲" : "▼"}
+          </button>
+          {hoursOpen && (
+            <ul className={styles.hoursList}>
+              {pin.openingHoursText.map((line, i) => <li key={i}>{line}</li>)}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* ── External links ── */}
+      <div className={styles.linkRow}>
+        {pin.videoDeepLink && (
+          <a className={styles.videoLink} href={pin.videoDeepLink} target="_blank" rel="noreferrer">
+            ▶ Watch in video
+          </a>
+        )}
+        {pin.website && (
+          <a className={styles.extLink} href={pin.website} target="_blank" rel="noreferrer">
+            🌐 Website
+          </a>
+        )}
+        {pin.phoneNumber && (
+          <a className={styles.extLink} href={`tel:${pin.phoneNumber}`}>
+            📞 {pin.phoneNumber}
+          </a>
+        )}
+      </div>
+
+      {/* ── Context quote ── */}
       {pin.contextQuote && (
         <blockquote className={styles.quote}>
           <span className={styles.quoteIcon}>"</span>
@@ -79,9 +145,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
             AI {Math.round(conf * 100)}% confident
           </span>
         )}
-        {pin.manuallyAdded && (
-          <span className={styles.metaChip}>Added manually</span>
-        )}
+        {pin.manuallyAdded && <span className={styles.metaChip}>Added manually</span>}
         {pin.city && <span className={styles.metaChip}>📍 {pin.city}</span>}
       </div>
 
@@ -102,10 +166,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
           {tags.map((t) => (
             <span key={t} className={styles.tag}>
               {t}
-              <button
-                className={styles.tagRemove}
-                onClick={() => setTags(tags.filter((x) => x !== t))}
-              >✕</button>
+              <button className={styles.tagRemove} onClick={() => setTags(tags.filter((x) => x !== t))}>✕</button>
             </span>
           ))}
           <input
@@ -131,20 +192,12 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
 
       <div className={styles.actions}>
         {userId && (
-          <button
-            className={styles.saveBtn}
-            onClick={handleSave}
-            disabled={saving}
-          >
+          <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save changes"}
           </button>
         )}
-
         {!confirmDelete ? (
-          <button
-            className={styles.deleteBtn}
-            onClick={() => setConfirmDelete(true)}
-          >
+          <button className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>
             Remove stop
           </button>
         ) : (

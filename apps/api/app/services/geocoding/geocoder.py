@@ -69,6 +69,14 @@ class GeocodedLocation:
     # Candidates stored when ambiguous (Task 4)
     candidates: list[dict] = field(default_factory=list)
 
+    # Google Places enrichment (Week 2)
+    rating: float | None = None
+    user_ratings_total: int | None = None
+    open_now: bool | None = None
+    opening_hours_text: list[str] = field(default_factory=list)
+    website: str | None = None
+    phone_number: str | None = None
+
 
 @dataclass
 class GeocodingResult:
@@ -157,7 +165,7 @@ async def _resolve_place(
                 params={
                     "query": query,
                     "key": api_key,
-                    "fields": "place_id,name,geometry,formatted_address,address_components",
+                    "fields": "place_id,name,geometry,formatted_address,address_components,rating,user_ratings_total,opening_hours",
                 },
             )
             resp.raise_for_status()
@@ -199,6 +207,10 @@ async def _resolve_place(
                 candidates=len(base.candidates),
             )
 
+        # Week 2 — fetch website + phone via Place Details (non-blocking)
+        if base.place_id:
+            await _enrich_with_details(base, base.place_id, api_key, client)
+
     except httpx.TimeoutException:
         base.unresolved = True
         logger.warning("geocoding_timeout", place_name=loc.place_name)
@@ -225,8 +237,54 @@ def _populate_from_result(loc: GeocodedLocation, result: dict) -> None:
             if not loc.city:
                 loc.city = component.get("long_name")
 
+    # Week 2 — enrichment from text search response
+    if "rating" in result:
+        loc.rating = float(result["rating"])
+    if "user_ratings_total" in result:
+        loc.user_ratings_total = int(result["user_ratings_total"])
+    oh = result.get("opening_hours")
+    if oh is not None:
+        loc.open_now = oh.get("open_now")
+        loc.opening_hours_text = oh.get("weekday_text", [])
+
     if loc.lat is not None and loc.lng is not None:
         loc.geocoded = True
+
+
+async def _enrich_with_details(
+    loc: GeocodedLocation,
+    place_id: str,
+    api_key: str,
+    client: "httpx.AsyncClient",
+) -> None:
+    """Fetch website + phone from Place Details API (Week 2). Fails silently."""
+    try:
+        resp = await client.get(
+            PLACES_DETAILS_URL,
+            params={
+                "place_id": place_id,
+                "key": api_key,
+                "fields": "website,formatted_phone_number,opening_hours",
+            },
+            timeout=5.0,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        result = data.get("result", {})
+        if result.get("website"):
+            loc.website = result["website"]
+        if result.get("formatted_phone_number"):
+            loc.phone_number = result["formatted_phone_number"]
+        # Prefer full hours from Details over partial hours from Text Search
+        oh = result.get("opening_hours")
+        if oh:
+            if loc.open_now is None:
+                loc.open_now = oh.get("open_now")
+            full_text = oh.get("weekday_text", [])
+            if full_text:
+                loc.opening_hours_text = full_text
+    except Exception as exc:
+        logger.debug("place_details_fetch_failed", place_id=place_id, error=str(exc))
 
 
 # ── Task 5 — Distance-based deduplication ─────────────────────
@@ -329,6 +387,8 @@ def _mock_geocoding(extracted: list[ExtractedLocation]) -> GeocodingResult:
             (v for k, v in KNOWN_COORDS.items() if k in name_lower),
             None,
         )
+        city_name = coords[3] if coords else loc.place_name
+        cc = coords[2] if coords else "XX"
         geo = GeocodedLocation(
             place_name=loc.place_name,
             raw_name=loc.place_name,
@@ -339,10 +399,25 @@ def _mock_geocoding(extracted: list[ExtractedLocation]) -> GeocodingResult:
             place_id=f"mock_place_{loc.order}",
             lat=coords[0] if coords else 35.0 + loc.order * 0.1,
             lng=coords[1] if coords else 135.0 + loc.order * 0.1,
-            address=f"{loc.place_name}, {coords[2] if coords else 'Unknown'}",
-            country_code=coords[2] if coords else "XX",
-            city=coords[3] if coords else loc.place_name,
+            address=f"{loc.place_name}, {cc}",
+            country_code=cc,
+            city=city_name,
             geocoded=True,
+            # Week 2 — mock enrichment
+            rating=4.5,
+            user_ratings_total=1234,
+            open_now=True,
+            opening_hours_text=[
+                "Monday: 9:00 AM – 10:00 PM",
+                "Tuesday: 9:00 AM – 10:00 PM",
+                "Wednesday: 9:00 AM – 10:00 PM",
+                "Thursday: 9:00 AM – 10:00 PM",
+                "Friday: 9:00 AM – 11:00 PM",
+                "Saturday: 10:00 AM – 11:00 PM",
+                "Sunday: 10:00 AM – 9:00 PM",
+            ],
+            website=f"https://example.com/{loc.place_name.lower().replace(' ', '-')}",
+            phone_number="+1 555-000-0000",
         )
         locations.append(geo)
 

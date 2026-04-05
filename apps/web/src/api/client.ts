@@ -26,12 +26,21 @@ export interface Pin {
   address?: string;
   countryCode?: string;
   city?: string;
+  cityGroup?: string;
   contextQuote?: string;
   timestampHint?: number;
+  videoDeepLink?: string;
   confidence: number;
   manuallyAdded: boolean;
   notes?: string;
   tags: string[];
+  // Week 2 — Places enrichment
+  rating?: number;
+  userRatingsTotal?: number;
+  openNow?: boolean;
+  openingHoursText?: string[];
+  website?: string;
+  phoneNumber?: string;
 }
 
 export interface Trip {
@@ -42,6 +51,8 @@ export interface Trip {
   platform: string;
   thumbnailUrl?: string;
   videoDuration?: number;
+  videoCreator?: string;
+  videoChannel?: string;
   pinCount: number;
   pins: Pin[];
   shareToken?: string;

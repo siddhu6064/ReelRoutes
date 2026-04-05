@@ -171,6 +171,17 @@ class PinDocument(BaseModel):
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     manually_added: bool = False
 
+    # Google Places enrichment (Week 2) — stored from Places API response
+    rating: float | None = None
+    user_ratings_total: int | None = None
+    open_now: bool | None = None                           # current open/closed status
+    opening_hours_text: list[str] = Field(default_factory=list)  # ["Monday: 9 AM – 10 PM", …]
+    website: str | None = None
+    phone_number: str | None = None
+
+    # City grouping (Week 3) — e.g. "Tokyo, JP"
+    city_group: str | None = None
+
     # User-editable
     notes: str | None = None
     tags: list[str] = Field(default_factory=list)

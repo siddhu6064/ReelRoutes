@@ -113,6 +113,13 @@ def geocoded_locations_to_pins(locations: list[GeocodedLocation]) -> list[PinDoc
         if loc.lat is None or loc.lng is None:
             continue
 
+        # Week 3 — city_group: canonical "City, CC" string for grouping
+        city_group: str | None = None
+        if loc.city and loc.country_code:
+            city_group = f"{loc.city}, {loc.country_code}"
+        elif loc.city:
+            city_group = loc.city
+
         pin = PinDocument(
             id=str(uuid.uuid4()),
             order=len(pins),           # sequential order among geocoded pins only
@@ -123,11 +130,19 @@ def geocoded_locations_to_pins(locations: list[GeocodedLocation]) -> list[PinDoc
             address=loc.address,
             country_code=loc.country_code,
             city=loc.city,
+            city_group=city_group,
             context_quote=loc.context_quote,
             timestamp_hint=loc.timestamp_hint,
             confidence=loc.confidence,
             manually_added=False,
             tags=[],
+            # Week 2 — Places enrichment
+            rating=loc.rating,
+            user_ratings_total=loc.user_ratings_total,
+            open_now=loc.open_now,
+            opening_hours_text=loc.opening_hours_text,
+            website=loc.website,
+            phone_number=loc.phone_number,
         )
         pins.append(pin)
 
