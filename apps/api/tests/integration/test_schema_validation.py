@@ -8,6 +8,7 @@ Schema validation tests:
   - Cross-document consistency (trip.user_id matches user.clerk_id)
   - Seed factory: full_scenario produces coherent data graph
 """
+
 from __future__ import annotations
 
 import pytest
@@ -17,14 +18,13 @@ from app.models.documents import (
     JobDocument,
     JobStatus,
     PinDocument,
-    Platform,
     TripDocument,
     UserDocument,
 )
 from app.utils.seed import SeedFactory, make_pin
 
-
 # ── Required field enforcement ─────────────────────────────────
+
 
 @pytest.mark.asyncio
 class TestRequiredFields:
@@ -67,6 +67,7 @@ class TestRequiredFields:
 
 # ── Field value validation ─────────────────────────────────────
 
+
 @pytest.mark.asyncio
 class TestFieldValueValidation:
     async def test_pin_confidence_must_be_0_to_1(self) -> None:
@@ -96,38 +97,43 @@ class TestFieldValueValidation:
 
     async def test_platform_enum_rejects_invalid_value(self) -> None:
         with pytest.raises(ValidationError):
-            TripDocument.model_validate({
-                "title": "T",
-                "source_url": "https://x.com",
-                "platform": "snapchat",  # not in Platform enum
-            })
+            TripDocument.model_validate(
+                {
+                    "title": "T",
+                    "source_url": "https://x.com",
+                    "platform": "snapchat",  # not in Platform enum
+                }
+            )
 
     async def test_job_status_enum_rejects_invalid_value(self) -> None:
         with pytest.raises(ValidationError):
-            JobDocument.model_validate({
-                "url": "https://x.com",
-                "status": "pending",  # not in JobStatus enum
-            })
+            JobDocument.model_validate(
+                {
+                    "url": "https://x.com",
+                    "status": "pending",  # not in JobStatus enum
+                }
+            )
 
 
 # ── Index enforcement ──────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 class TestIndexEnforcement:
     async def test_unique_clerk_id_prevents_duplicate_users(self) -> None:
         await SeedFactory.user(clerk_id="clerk_unique_test")
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017 — mongomock raises generic DuplicateKeyError
             await SeedFactory.user(clerk_id="clerk_unique_test")
 
     async def test_same_clerk_id_different_emails_rejected(self) -> None:
         await SeedFactory.user(clerk_id="clerk_same", email="first@test.com")
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017 — mongomock raises generic DuplicateKeyError
             await SeedFactory.user(clerk_id="clerk_same", email="second@test.com")
 
     async def test_share_token_unique_across_trips(self) -> None:
         token = "unique_share_token_abc"
         await SeedFactory.shared_trip(share_token=token)
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017 — mongomock raises generic DuplicateKeyError
             await SeedFactory.shared_trip(share_token=token)
 
     async def test_multiple_trips_without_share_token_allowed(self) -> None:
@@ -143,6 +149,7 @@ class TestIndexEnforcement:
 
 # ── Reference integrity ────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 class TestReferenceIntegrity:
     async def test_trip_user_id_matches_user_clerk_id(self) -> None:
@@ -151,9 +158,7 @@ class TestReferenceIntegrity:
         trip = await SeedFactory.trip(user_id=user.clerk_id)
 
         reloaded_trip = await TripDocument.get(trip.id)
-        reloaded_user = await UserDocument.find_one(
-            UserDocument.clerk_id == reloaded_trip.user_id
-        )
+        reloaded_user = await UserDocument.find_one(UserDocument.clerk_id == reloaded_trip.user_id)
         assert reloaded_user is not None
         assert reloaded_user.clerk_id == user.clerk_id
 
@@ -162,9 +167,7 @@ class TestReferenceIntegrity:
         job = await SeedFactory.job(user_id=user.clerk_id)
 
         reloaded_job = await JobDocument.get(job.id)
-        reloaded_user = await UserDocument.find_one(
-            UserDocument.clerk_id == reloaded_job.user_id
-        )
+        reloaded_user = await UserDocument.find_one(UserDocument.clerk_id == reloaded_job.user_id)
         assert reloaded_user is not None
 
     async def test_null_user_id_is_valid_for_guest_documents(self) -> None:
@@ -196,6 +199,7 @@ class TestReferenceIntegrity:
 
 
 # ── Seed factory integrity ─────────────────────────────────────
+
 
 @pytest.mark.asyncio
 class TestSeedFactoryIntegrity:

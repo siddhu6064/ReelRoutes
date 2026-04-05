@@ -4,6 +4,7 @@ tests/adapters/test_base_adapter.py
 Tests for the shared AdapterOutput contract and utility methods.
 Every adapter must produce output that passes these shape tests.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -16,8 +17,8 @@ from app.adapters.base import (
 )
 from app.models.documents import Platform
 
-
 # ── TranscriptSegment ──────────────────────────────────────────
+
 
 class TestTranscriptSegment:
     def test_duration_property(self) -> None:
@@ -31,14 +32,15 @@ class TestTranscriptSegment:
 
 # ── AdapterOutput ──────────────────────────────────────────────
 
+
 def make_output(**kwargs) -> AdapterOutput:
-    defaults = dict(
-        platform=Platform.YOUTUBE,
-        url="https://youtube.com/watch?v=test",
-        video_id="test",
-        canonical_url="https://youtube.com/watch?v=test",
-        title="Test Video",
-    )
+    defaults = {
+        "platform": Platform.YOUTUBE,
+        "url": "https://youtube.com/watch?v=test",
+        "video_id": "test",
+        "canonical_url": "https://youtube.com/watch?v=test",
+        "title": "Test Video",
+    }
     return AdapterOutput(**{**defaults, **kwargs})
 
 
@@ -107,6 +109,7 @@ class TestAdapterOutputWarnings:
 
 # ── BaseAdapter utility methods ────────────────────────────────
 
+
 class TestBaseAdapterUtils:
     def test_clean_description_strips_whitespace(self) -> None:
         result = BaseAdapter._clean_description("  hello   world  ")
@@ -148,21 +151,26 @@ class TestBaseAdapterUtils:
 
 # ── Registry ───────────────────────────────────────────────────
 
+
 class TestAdapterRegistry:
     def test_all_known_platforms_have_adapters(self) -> None:
         from app.adapters.registry import _REGISTRY
         from app.models.documents import Platform
+
         expected = {
-            Platform.YOUTUBE, Platform.INSTAGRAM, Platform.TIKTOK,
-            Platform.FACEBOOK, Platform.TWITTER,
+            Platform.YOUTUBE,
+            Platform.INSTAGRAM,
+            Platform.TIKTOK,
+            Platform.FACEBOOK,
+            Platform.TWITTER,
         }
         assert expected.issubset(set(_REGISTRY.keys()))
 
     def test_get_adapter_returns_correct_type(self) -> None:
-        from app.adapters.registry import get_adapter
-        from app.adapters.youtube import YouTubeAdapter
         from app.adapters.instagram import InstagramAdapter
+        from app.adapters.registry import get_adapter
         from app.adapters.tiktok import TikTokAdapter
+        from app.adapters.youtube import YouTubeAdapter
 
         assert isinstance(get_adapter(Platform.YOUTUBE), YouTubeAdapter)
         assert isinstance(get_adapter(Platform.INSTAGRAM), InstagramAdapter)
@@ -170,6 +178,7 @@ class TestAdapterRegistry:
 
     def test_unknown_platform_falls_back_gracefully(self) -> None:
         from app.adapters.registry import get_adapter
+
         # UNKNOWN platform should not raise
         adapter = get_adapter(Platform.UNKNOWN)
         assert adapter is not None

@@ -16,6 +16,7 @@ Strategy:
 This keeps the heavy spatial logic in Python (cheap, deterministic)
 and uses GPT-4o only for the human-readable grouping labels and notes.
 """
+
 from __future__ import annotations
 
 import json
@@ -107,11 +108,11 @@ async def _gpt_group_into_days(
         return _fallback_split(sorted_pins, trip_length_days)
 
     from openai import AsyncOpenAI
+
     client = AsyncOpenAI(api_key=settings.openai_api_key)
 
     pin_list = "\n".join(
-        f"{i+1}. {p.place_name} ({p.city or ''}) — id:{p.id}"
-        for i, p in enumerate(sorted_pins)
+        f"{i+1}. {p.place_name} ({p.city or ''}) — id:{p.id}" for i, p in enumerate(sorted_pins)
     )
 
     prompt = f"""You are a travel itinerary planner.
@@ -147,17 +148,23 @@ Format:
             max_tokens=1500,
         )
         raw = response.choices[0].message.content or ""
-        raw = raw.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+        # Strip markdown code fences that GPT sometimes wraps JSON in
+        import re
+
+        raw = re.sub(r"^```(?:json)?\s*", "", raw.strip())
+        raw = re.sub(r"\s*```$", "", raw).strip()
         data = json.loads(raw)
 
         days = []
         for d in data.get("days", []):
-            days.append(TripDay(
-                day_number=d["day_number"],
-                label=d.get("label"),
-                pin_ids=d.get("pin_ids", []),
-                notes=d.get("notes"),
-            ))
+            days.append(
+                TripDay(
+                    day_number=d["day_number"],
+                    label=d.get("label"),
+                    pin_ids=d.get("pin_ids", []),
+                    notes=d.get("notes"),
+                )
+            )
         return days
 
     except Exception as exc:
@@ -179,9 +186,11 @@ def _fallback_split(sorted_pins, trip_length_days: int) -> list[TripDay]:
         day_pins = sorted_pins[start:end]
         if not day_pins:
             break
-        days.append(TripDay(
-            day_number=day_num,
-            label=f"Day {day_num}",
-            pin_ids=[p.id for p in day_pins],
-        ))
+        days.append(
+            TripDay(
+                day_number=day_num,
+                label=f"Day {day_num}",
+                pin_ids=[p.id for p in day_pins],
+            )
+        )
     return days

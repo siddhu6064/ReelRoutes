@@ -1,35 +1,43 @@
 """
 app/routers/trips.py — with input validation (schemas.py) and auth guards (Task 4+6)
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter
+from pydantic import BaseModel, Field
 
 from app.middleware.error_handler import AppError, ForbiddenError
 from app.models.documents import Platform, TripDocument
-from app.services.expense_service import check_can_edit
 from app.routers.schemas import (
-    AddPinRequest, ChatRequest, CreateTripRequest, ReorderPinsRequest,
-    UpdatePinRequest, UpdateTripRequest,
+    AddPinRequest,
+    ChatRequest,
+    CreateTripRequest,
+    ReorderPinsRequest,
+    UpdatePinRequest,
+    UpdateTripRequest,
 )
 from app.services.chat_service import SUGGESTION_CHIPS, chat
+from app.services.expense_service import check_can_edit
 from app.services.trip_service import TripService
 
-from pydantic import BaseModel, Field
 
 class GenerateItineraryRequest(BaseModel):
     user_id: str | None = None
     trip_length_days: int = Field(..., ge=1, le=30)
+
 
 class OptimiseRouteRequest(BaseModel):
     user_id: str | None = None
     start_lat: float | None = Field(None, ge=-90.0, le=90.0)
     start_lng: float | None = Field(None, ge=-180.0, le=180.0)
 
+
 router = APIRouter(prefix="/api/trips", tags=["trips"])
 
 
 # ── Task 4 — explicit user_id validation guard ─────────────────
+
 
 def _require_user_id(user_id: str | None, action: str = "modify") -> str:
     """Raise 401 with a clear message if user_id is missing or blank."""
@@ -43,6 +51,7 @@ def _require_user_id(user_id: str | None, action: str = "modify") -> str:
 
 
 # ── Serialisation ──────────────────────────────────────────────
+
 
 def _trip_response(trip: TripDocument) -> dict:
     return {
@@ -130,6 +139,7 @@ def _video_deep_link(source_url: str, platform: str, timestamp: float | None) ->
 
 # ── Trip CRUD ──────────────────────────────────────────────────
 
+
 @router.post("", summary="Create trip", status_code=201)
 async def create_trip(body: CreateTripRequest) -> dict:
     trip = await TripService.create(
@@ -170,11 +180,13 @@ async def delete_trip(trip_id: str, user_id: str) -> None:
 
 # ── Sharing ────────────────────────────────────────────────────
 
+
 @router.post("/{trip_id}/share", summary="Generate share link")
 async def share_trip(trip_id: str, user_id: str) -> dict:
     uid = _require_user_id(user_id, "share")
     trip = await TripService.share(trip_id=trip_id, user_id=uid)
     from app.config.analytics import track_trip_shared
+
     track_trip_shared(uid, trip_id)
     return {"ok": True, "data": {"shareToken": trip.share_token, "isShared": trip.is_shared}}
 
@@ -188,7 +200,8 @@ async def unshare_trip(trip_id: str, user_id: str) -> dict:
 
 # ── Pin operations ─────────────────────────────────────────────
 
-async def _pin_edit_guard(trip_id: str, user_id: str | None) -> tuple[str, "TripDocument"]:
+
+async def _pin_edit_guard(trip_id: str, user_id: str | None) -> tuple[str, TripDocument]:
     """Require auth + editor/owner rights. Returns (uid, trip)."""
     uid = _require_user_id(user_id, "edit pins in")
     trip = await TripService.get(trip_id)
@@ -201,9 +214,14 @@ async def _pin_edit_guard(trip_id: str, user_id: str | None) -> tuple[str, "Trip
 async def add_pin(trip_id: str, body: AddPinRequest) -> dict:
     uid, _ = await _pin_edit_guard(trip_id, body.user_id)
     trip = await TripService.add_pin(
-        trip_id=trip_id, user_id=uid,
-        place_name=body.place_name, lat=body.lat, lng=body.lng,
-        address=body.address, notes=body.notes, tags=body.tags,
+        trip_id=trip_id,
+        user_id=uid,
+        place_name=body.place_name,
+        lat=body.lat,
+        lng=body.lng,
+        address=body.address,
+        notes=body.notes,
+        tags=body.tags,
     )
     return {"ok": True, "data": _trip_response(trip)}
 
@@ -212,8 +230,12 @@ async def add_pin(trip_id: str, body: AddPinRequest) -> dict:
 async def update_pin(trip_id: str, pin_id: str, body: UpdatePinRequest) -> dict:
     uid, _ = await _pin_edit_guard(trip_id, body.user_id)
     trip = await TripService.update_pin(
-        trip_id=trip_id, pin_id=pin_id, user_id=uid,
-        place_name=body.place_name, notes=body.notes, tags=body.tags,
+        trip_id=trip_id,
+        pin_id=pin_id,
+        user_id=uid,
+        place_name=body.place_name,
+        notes=body.notes,
+        tags=body.tags,
     )
     return {"ok": True, "data": _trip_response(trip)}
 
@@ -229,7 +251,9 @@ async def delete_pin(trip_id: str, pin_id: str, user_id: str) -> dict:
 async def reorder_pins(trip_id: str, body: ReorderPinsRequest) -> dict:
     uid, _ = await _pin_edit_guard(trip_id, body.user_id)
     trip = await TripService.reorder_pins(
-        trip_id=trip_id, user_id=uid, pin_ids=body.pin_ids,
+        trip_id=trip_id,
+        user_id=uid,
+        pin_ids=body.pin_ids,
     )
     return {"ok": True, "data": _trip_response(trip)}
 
@@ -238,7 +262,9 @@ async def reorder_pins(trip_id: str, body: ReorderPinsRequest) -> dict:
 async def merge_trips(trip_id: str, source_trip_id: str, user_id: str) -> dict:
     uid, _ = await _pin_edit_guard(trip_id, user_id)
     trip = await TripService.merge_pins(
-        target_trip_id=trip_id, source_trip_id=source_trip_id, user_id=uid,
+        target_trip_id=trip_id,
+        source_trip_id=source_trip_id,
+        user_id=uid,
     )
     return {"ok": True, "data": _trip_response(trip)}
 
@@ -250,10 +276,12 @@ async def generate_itinerary(trip_id: str, body: GenerateItineraryRequest) -> di
     Saves the itinerary on the trip and returns it.
     """
     from app.services.itinerary_service import generate_itinerary as _generate
+
     trip = await TripService.get(trip_id, user_id=body.user_id)
     days = await _generate(trip, body.trip_length_days)
     trip.itinerary = days
     from datetime import UTC, datetime
+
     trip.updated_at = datetime.now(UTC)
     await trip.save()
     return {
@@ -281,6 +309,7 @@ async def optimise_route(trip_id: str, body: OptimiseRouteRequest) -> dict:
     Returns before/after distance comparison and the updated pin order.
     """
     from app.services.route_service import optimise_route as _optimise
+
     trip = await TripService.get(trip_id, user_id=body.user_id)
     trip, original_km, optimised_km = await _optimise(
         trip,
@@ -301,10 +330,12 @@ async def optimise_route(trip_id: str, body: OptimiseRouteRequest) -> dict:
 
 # ── AI Chat ────────────────────────────────────────────────────
 
+
 @router.post("/{trip_id}/chat", summary="AI travel assistant chat")
 async def chat_with_trip(trip_id: str, body: ChatRequest) -> dict:
     trip = await TripService.get(trip_id, user_id=body.user_id)
     from app.config.analytics import track_chat_message_sent
+
     track_chat_message_sent(body.user_id, trip_id)
     reply = await chat(
         trip=trip,

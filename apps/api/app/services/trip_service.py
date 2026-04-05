@@ -4,6 +4,7 @@ app/services/trip_service.py
 Service layer for Trip and Pin operations.
 All trip and pin business logic lives here — never call Beanie ODM from routers.
 """
+
 from __future__ import annotations
 
 import secrets
@@ -13,12 +14,12 @@ from datetime import UTC, datetime
 from app.config.logging import get_logger
 from app.middleware.error_handler import ForbiddenError, NotFoundError
 from app.models.documents import PinDocument, Platform, TripDocument
-from app.utils.seed import make_pin
 
 logger = get_logger(__name__)
 
 
 # ── Trip CRUD ──────────────────────────────────────────────────
+
 
 class TripService:
     @staticmethod

@@ -5,10 +5,11 @@ FastAPI application factory.
 All middleware, routers, and exception handlers are registered here.
 The app is created once and imported by uvicorn.
 """
+
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -28,11 +29,14 @@ from app.middleware import (
 )
 from app.routers import health_router
 
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
+
 logger = get_logger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
     """
     FastAPI lifespan context manager.
     Code before yield runs on startup; code after yield runs on shutdown.
@@ -42,6 +46,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Task 7 — Sentry initialisation
     from app.config.sentry import init_sentry
+
     init_sentry()
 
     logger.info("app_starting", version=settings.version, env=settings.env)
@@ -92,11 +97,21 @@ def create_app() -> FastAPI:
 
     # ── Routers ───────────────────────────────────────────────
     app.include_router(health_router)
-    from app.routers.jobs import router as jobs_router, ws_router
+    from app.routers.jobs import router as jobs_router
+    from app.routers.jobs import ws_router
     from app.routers.process import router as process_router
-    from app.routers.trips import router as trips_router
-    from app.routers.users import router as users_router, trips_router as user_trips_router, clerk_router
     from app.routers.trip_extras import router as trip_extras_router
+    from app.routers.trips import router as trips_router
+    from app.routers.users import (
+        clerk_router,
+    )
+    from app.routers.users import (
+        router as users_router,
+    )
+    from app.routers.users import (
+        trips_router as user_trips_router,
+    )
+
     app.include_router(jobs_router)
     app.include_router(ws_router)
     app.include_router(process_router)

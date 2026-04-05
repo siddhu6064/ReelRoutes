@@ -10,6 +10,7 @@ Rules:
   - Shared trips: readable by anyone with the share_token (no auth required)
   - Cross-user access always returns 403 — never 404 (avoids enumeration)
 """
+
 from __future__ import annotations
 
 from app.middleware.error_handler import ForbiddenError, NotFoundError
@@ -50,6 +51,7 @@ async def claim_guest_trip(trip_id: str, clerk_id: str) -> TripDocument:
     Only succeeds if the trip is unclaimed (user_id = None).
     """
     from datetime import UTC, datetime
+
     trip = await TripDocument.get(trip_id)
     if not trip:
         raise NotFoundError("Trip", trip_id)

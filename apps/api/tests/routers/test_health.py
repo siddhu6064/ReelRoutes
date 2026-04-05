@@ -10,10 +10,15 @@ Covers:
   - X-Request-Id header is present on all responses
   - /version always returns 200 regardless of DB state
 """
+
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
-from httpx import AsyncClient
+
+if TYPE_CHECKING:
+    from httpx import AsyncClient
 
 
 @pytest.mark.asyncio

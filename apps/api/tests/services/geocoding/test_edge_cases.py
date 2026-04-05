@@ -4,44 +4,51 @@ tests/services/geocoding/test_edge_cases.py
 Task 7 — Edge case tests for emoji-heavy captions, multi-country hashtag posts,
 ambiguous location tags, and other real-world extraction/geocoding challenges.
 """
+
 from __future__ import annotations
 
 import json
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from app.adapters.base import AdapterOutput, CaptionsSource
 from app.models.documents import Platform
-from app.services.extraction.parser import parse_extraction_response
-from app.services.extraction.service import ExtractionService
-from app.services.extraction.signals import build_signals, SignalType
+from app.services.extraction.parser import ExtractedLocation, parse_extraction_response
+from app.services.extraction.signals import SignalType, build_signals
 from app.services.geocoding.geocoder import (
     GeocodedLocation,
-    haversine_metres,
     _deduplicate_locations,
     _normalise_name,
+    haversine_metres,
 )
-from app.services.extraction.parser import ExtractedLocation
-
 
 # ── Shared helper ──────────────────────────────────────────────
 
+
 def _make_loc(name: str, conf: float = 0.85, order: int = 0) -> ExtractedLocation:
     return ExtractedLocation(
-        place_name=name, context_quote=f"{name} context",
-        confidence=conf, order=order,
+        place_name=name,
+        context_quote=f"{name} context",
+        confidence=conf,
+        order=order,
     )
 
 
 def _make_geo(name: str, lat: float, lng: float, conf: float = 0.85) -> GeocodedLocation:
     return GeocodedLocation(
-        place_name=name, raw_name=name, context_quote=f"{name} context",
-        confidence=conf, order=0, lat=lat, lng=lng, geocoded=True,
+        place_name=name,
+        raw_name=name,
+        context_quote=f"{name} context",
+        confidence=conf,
+        order=0,
+        lat=lat,
+        lng=lng,
+        geocoded=True,
     )
 
 
 # ── Task 7a: Emoji-heavy captions ─────────────────────────────
+
 
 class TestEmojiHeavyCaptions:
     """Instagram/TikTok captions are often emoji-saturated."""
@@ -56,6 +63,7 @@ class TestEmojiHeavyCaptions:
             "#japan #tokyo #kyoto #travel #sakura #cherryblossom 🌸"
         )
         from app.adapters.base import BaseAdapter
+
         hashtags = BaseAdapter._extract_hashtags(emoji_caption)
         assert "japan" in hashtags
         assert "tokyo" in hashtags
@@ -101,10 +109,20 @@ class TestEmojiHeavyCaptions:
 
     def test_parser_handles_emoji_in_place_names(self) -> None:
         # Some GPT-4o outputs include emoji in place names
-        raw = json.dumps([
-            {"place_name": "Senso-ji Temple ⛩️", "context_quote": "visited Senso-ji", "confidence": 0.9},
-            {"place_name": "Fushimi Inari 🦊", "context_quote": "hiked Fushimi Inari", "confidence": 0.88},
-        ])
+        raw = json.dumps(
+            [
+                {
+                    "place_name": "Senso-ji Temple ⛩️",
+                    "context_quote": "visited Senso-ji",
+                    "confidence": 0.9,
+                },
+                {
+                    "place_name": "Fushimi Inari 🦊",
+                    "context_quote": "hiked Fushimi Inari",
+                    "confidence": 0.88,
+                },
+            ]
+        )
         result = parse_extraction_response(raw)
         assert len(result.locations) == 2
         assert result.locations[0].confidence == pytest.approx(0.9)
@@ -113,12 +131,14 @@ class TestEmojiHeavyCaptions:
         """📍 emoji is a strong location signal inline."""
         text = "📍 Shibuya Crossing\n📍 Harajuku\n📍 Shinjuku Gyoen"
         from app.adapters.instagram import _extract_inline_location
+
         loc = _extract_inline_location(text)
         assert loc is not None
         assert "Shibuya" in loc
 
 
 # ── Task 7b: Multi-country hashtag posts ──────────────────────
+
 
 class TestMultiCountryHashtags:
     """Posts spanning multiple countries create ambiguity in geocoding."""
@@ -130,6 +150,7 @@ class TestMultiCountryHashtags:
             "#japan #korea #thailand #vietnam #bali #asia #backpacking"
         )
         from app.adapters.base import BaseAdapter
+
         hashtags = BaseAdapter._extract_hashtags(caption)
         assert "japan" in hashtags
         assert "korea" in hashtags
@@ -138,13 +159,35 @@ class TestMultiCountryHashtags:
         assert "bali" in hashtags
 
     def test_parser_handles_multi_country_place_list(self) -> None:
-        multi_country_json = json.dumps([
-            {"place_name": "Shibuya Crossing", "context_quote": "Tokyo, Japan", "confidence": 0.95},
-            {"place_name": "Gyeongbokgung Palace", "context_quote": "Seoul, South Korea", "confidence": 0.92},
-            {"place_name": "Wat Phra Kaew", "context_quote": "Bangkok, Thailand", "confidence": 0.90},
-            {"place_name": "Hoi An Ancient Town", "context_quote": "Hoi An, Vietnam", "confidence": 0.88},
-            {"place_name": "Ubud Monkey Forest", "context_quote": "Bali, Indonesia", "confidence": 0.91},
-        ])
+        multi_country_json = json.dumps(
+            [
+                {
+                    "place_name": "Shibuya Crossing",
+                    "context_quote": "Tokyo, Japan",
+                    "confidence": 0.95,
+                },
+                {
+                    "place_name": "Gyeongbokgung Palace",
+                    "context_quote": "Seoul, South Korea",
+                    "confidence": 0.92,
+                },
+                {
+                    "place_name": "Wat Phra Kaew",
+                    "context_quote": "Bangkok, Thailand",
+                    "confidence": 0.90,
+                },
+                {
+                    "place_name": "Hoi An Ancient Town",
+                    "context_quote": "Hoi An, Vietnam",
+                    "confidence": 0.88,
+                },
+                {
+                    "place_name": "Ubud Monkey Forest",
+                    "context_quote": "Bali, Indonesia",
+                    "confidence": 0.91,
+                },
+            ]
+        )
         result = parse_extraction_response(multi_country_json)
         assert len(result.locations) == 5
         countries_mentioned = {loc.place_name for loc in result.locations}
@@ -154,7 +197,7 @@ class TestMultiCountryHashtags:
     def test_dedup_does_not_merge_same_name_different_countries(self) -> None:
         """Springfield (USA) ≠ Springfield (UK) — different coords → keep both."""
         loc_a = _make_geo("Springfield", 39.7817, -89.6501)  # Illinois, USA
-        loc_b = _make_geo("Springfield", 52.0794, -1.6625)   # UK
+        loc_b = _make_geo("Springfield", 52.0794, -1.6625)  # UK
 
         deduped, removed = _deduplicate_locations([loc_a, loc_b])
         # Far apart — should NOT be deduped by distance
@@ -165,7 +208,9 @@ class TestMultiCountryHashtags:
         assert removed <= 1  # at most one removed
 
     def test_multi_country_signals_produce_description_signal_type(self) -> None:
-        caption = "From Tokyo to Seoul to Bangkok — the ultimate Asia trip!\n#japan #korea #thailand"
+        caption = (
+            "From Tokyo to Seoul to Bangkok — the ultimate Asia trip!\n#japan #korea #thailand"
+        )
         out = AdapterOutput(
             platform=Platform.TIKTOK,
             url="https://tiktok.com/@user/video/123",
@@ -181,14 +226,25 @@ class TestMultiCountryHashtags:
 
 # ── Task 7c: Ambiguous location tags ──────────────────────────
 
+
 class TestAmbiguousLocationTags:
     """Tagged locations can be vague, misspelled, or refer to regions not points."""
 
     def test_parser_keeps_low_confidence_above_threshold(self) -> None:
-        raw = json.dumps([
-            {"place_name": "Somewhere in Asia", "context_quote": "somewhere in Asia", "confidence": 0.42},
-            {"place_name": "The Beach", "context_quote": "at the beach", "confidence": 0.38},  # below threshold
-        ])
+        raw = json.dumps(
+            [
+                {
+                    "place_name": "Somewhere in Asia",
+                    "context_quote": "somewhere in Asia",
+                    "confidence": 0.42,
+                },
+                {
+                    "place_name": "The Beach",
+                    "context_quote": "at the beach",
+                    "confidence": 0.38,
+                },  # below threshold
+            ]
+        )
         result = parse_extraction_response(raw)
         assert len(result.locations) == 1
         assert result.locations[0].place_name == "Somewhere in Asia"
@@ -200,8 +256,11 @@ class TestAmbiguousLocationTags:
         rather than appearing at (0,0) off the coast of Africa.
         They surface in the 'Did we miss anything?' panel instead.
         """
-        from app.services.geocoding.storage import geocoded_locations_to_pins, get_unresolved_locations
         from app.services.geocoding.geocoder import GeocodedLocation
+        from app.services.geocoding.storage import (
+            geocoded_locations_to_pins,
+            get_unresolved_locations,
+        )
 
         unresolved = GeocodedLocation(
             place_name="Secret Beach",
@@ -225,6 +284,7 @@ class TestAmbiguousLocationTags:
     def test_ambiguous_geocoding_stores_candidates(self) -> None:
         """When multiple Places results exist, candidates are stored for manual pick."""
         from app.services.geocoding.geocoder import GeocodedLocation
+
         ambig = GeocodedLocation(
             place_name="Springfield",
             raw_name="Springfield",
@@ -244,16 +304,19 @@ class TestAmbiguousLocationTags:
         assert len(ambig.candidates) == 2
 
     def test_vague_hashtag_only_below_min_confidence_filtered(self) -> None:
-        raw = json.dumps([
-            {"place_name": "Asia", "context_quote": "#asia", "confidence": 0.3},
-            {"place_name": "Somewhere", "context_quote": "#travel", "confidence": 0.25},
-        ])
+        raw = json.dumps(
+            [
+                {"place_name": "Asia", "context_quote": "#asia", "confidence": 0.3},
+                {"place_name": "Somewhere", "context_quote": "#travel", "confidence": 0.25},
+            ]
+        )
         result = parse_extraction_response(raw)
         assert len(result.locations) == 0
         assert result.filtered_count == 2
 
     def test_inline_location_emoji_extraction(self) -> None:
         from app.adapters.instagram import _extract_inline_location
+
         texts = [
             ("📍 Ubud, Bali", "Ubud"),
             ("📍Tokyo, Japan", "Tokyo"),
@@ -267,6 +330,7 @@ class TestAmbiguousLocationTags:
 
 
 # ── Task 7d: Distance deduplication edge cases ────────────────
+
 
 class TestDeduplicationEdgeCases:
     def test_200m_boundary_exactly(self) -> None:

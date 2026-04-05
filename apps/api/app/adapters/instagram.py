@@ -18,11 +18,12 @@ Instagram rate-limits unauthenticated yt-dlp requests. We handle
 this gracefully: if extraction fails, we return whatever partial
 metadata was recoverable and flag the job for retry.
 """
+
 from __future__ import annotations
 
 import re
 
-from app.adapters._ytdlp_mixin import extract_hashtags_from_ytdlp, ytdlp_extract
+from app.adapters._ytdlp_mixin import extract_hashtags_from_ytdlp
 from app.adapters.base import AdapterOutput, BaseAdapter, CaptionsSource
 from app.config.logging import get_logger
 from app.models.documents import Platform
@@ -57,7 +58,10 @@ class InstagramAdapter(BaseAdapter):
 
         try:
             from app.adapters._ytdlp_health import ytdlp_extract_with_retry
-            info, extra_warnings = await ytdlp_extract_with_retry(url, max_retries=2, base_delay=3.0)
+
+            info, extra_warnings = await ytdlp_extract_with_retry(
+                url, max_retries=2, base_delay=3.0
+            )
             for w in extra_warnings:
                 output.add_warning(w)
             if info:
@@ -100,11 +104,7 @@ class InstagramAdapter(BaseAdapter):
 
         hashtags = extract_hashtags_from_ytdlp(info)
 
-        creator = (
-            info.get("uploader_id")
-            or info.get("uploader")
-            or info.get("channel")
-        )
+        creator = info.get("uploader_id") or info.get("uploader") or info.get("channel")
         creator_handle = f"@{creator.lstrip('@')}" if creator else None
 
         output.title = cleaned_desc[:80] if cleaned_desc else "Instagram Reel"
@@ -130,6 +130,7 @@ class InstagramAdapter(BaseAdapter):
 
 
 # ── Helpers ────────────────────────────────────────────────────
+
 
 def _extract_inline_location(text: str) -> str | None:
     """
@@ -157,4 +158,5 @@ def _parse_timestamp(ts: int | float | None) -> str | None:
     if ts is None:
         return None
     from datetime import UTC, datetime
+
     return datetime.fromtimestamp(float(ts), tz=UTC).isoformat()

@@ -4,9 +4,8 @@ tests/test_startup.py
 Tests that the app and settings initialise correctly.
 These are the first tests to run — if they fail, nothing else will work.
 """
-from __future__ import annotations
 
-import pytest
+from __future__ import annotations
 
 from app.config.settings import Settings, get_settings
 from app.main import create_app
@@ -57,6 +56,7 @@ class TestSettings:
 class TestAppFactory:
     def test_create_app_returns_fastapi_instance(self) -> None:
         from fastapi import FastAPI
+
         app = create_app()
         assert isinstance(app, FastAPI)
 
@@ -73,6 +73,7 @@ class TestAppFactory:
     def test_docs_disabled_in_production(self) -> None:
         """OpenAPI docs must not be exposed in production."""
         from unittest.mock import patch
+
         with patch.dict("os.environ", {"ENV": "production"}):
             get_settings.cache_clear()
             app = create_app()
@@ -83,6 +84,7 @@ class TestAppFactory:
 
     def test_docs_enabled_in_local(self) -> None:
         from unittest.mock import patch
+
         with patch.dict("os.environ", {"ENV": "local"}):
             get_settings.cache_clear()
             app = create_app()

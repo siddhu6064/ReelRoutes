@@ -13,6 +13,7 @@ grant notification permissions in the mobile app.
 
 Token format: ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxxxx]
 """
+
 from __future__ import annotations
 
 import httpx
@@ -53,7 +54,7 @@ async def send_trip_ready(
 
 async def send_import_failed(
     user_id: str | None,
-    job_id: str,
+    job_id: str,  # noqa: ARG001 — kept for API symmetry with send_import_complete
     reason: str,
 ) -> bool:
     """
@@ -88,6 +89,7 @@ async def register_push_token(user_id: str, token: str) -> None:
 
 
 # ── Private helpers ────────────────────────────────────────────
+
 
 async def _get_push_token(user_id: str) -> str | None:
     user = await UserDocument.find_one(UserDocument.clerk_id == user_id)

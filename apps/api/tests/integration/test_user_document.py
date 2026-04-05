@@ -4,10 +4,10 @@ tests/integration/test_user_document.py
 Integration tests for UserDocument against mongomock-motor.
 Tests insert, read, unique index enforcement, and field integrity.
 """
+
 from __future__ import annotations
 
 import pytest
-from beanie.exceptions import RevisionIdWasChanged
 
 from app.models.documents import UserDocument
 from app.utils.seed import SeedFactory
@@ -20,7 +20,7 @@ class TestUserDocumentInsertAndRead:
         assert user.id is not None
 
     async def test_find_by_clerk_id(self) -> None:
-        user = await SeedFactory.user(clerk_id="clerk_findme")
+        await SeedFactory.user(clerk_id="clerk_findme")
         found = await UserDocument.find_one(UserDocument.clerk_id == "clerk_findme")
         assert found is not None
         assert found.clerk_id == "clerk_findme"
@@ -81,7 +81,7 @@ class TestUserDocumentInsertAndRead:
 class TestUserDocumentUniqueIndex:
     async def test_duplicate_clerk_id_raises(self) -> None:
         await SeedFactory.user(clerk_id="clerk_dup")
-        with pytest.raises(Exception):  # mongomock raises on unique violation
+        with pytest.raises(Exception):  # noqa: B017 — mongomock raises generic DuplicateKeyError
             await SeedFactory.user(clerk_id="clerk_dup")
 
     async def test_different_clerk_ids_allowed(self) -> None:

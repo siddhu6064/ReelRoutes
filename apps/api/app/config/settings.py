@@ -4,6 +4,7 @@ app/config/settings.py
 All configuration is loaded from environment variables via pydantic-settings.
 Never hardcode secrets. See /.env.example for full documentation.
 """
+
 from __future__ import annotations
 
 from functools import lru_cache

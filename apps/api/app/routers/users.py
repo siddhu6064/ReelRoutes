@@ -8,22 +8,22 @@ User-facing authenticated routes:
 
 These complement the existing trips router with auth-gated operations.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Query, Request
 from pydantic import BaseModel
 
-from app.auth.clerk import RequiredUser, optional_auth
 from app.auth.authorization import claim_guest_trip
-from app.middleware.error_handler import NotFoundError
+from app.auth.clerk import RequiredUser
 from app.models.documents import UserDocument
 from app.services.trip_service import TripService
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 trips_router = APIRouter(prefix="/api/trips", tags=["trips"])
 
-
 # ── Current user ───────────────────────────────────────────────
+
 
 @router.get("/me", summary="Get current user profile")
 async def get_me(clerk_id: RequiredUser) -> dict:
@@ -55,6 +55,7 @@ async def get_me(clerk_id: RequiredUser) -> dict:
 
 # ── Task 3 — My trips with pagination ─────────────────────────
 
+
 @router.get("/me/trips", summary="List my saved trips")
 async def list_my_trips(
     clerk_id: RequiredUser,
@@ -84,6 +85,7 @@ async def list_my_trips(
 
 # ── Guest trip claim ───────────────────────────────────────────
 
+
 @trips_router.post("/{trip_id}/claim", summary="Claim a guest trip after sign-up")
 async def claim_trip(trip_id: str, clerk_id: RequiredUser) -> dict:
     trip = await claim_guest_trip(trip_id, clerk_id)
@@ -91,6 +93,7 @@ async def claim_trip(trip_id: str, clerk_id: RequiredUser) -> dict:
 
 
 # ── Push token registration (Fix 3) ────────────────────────────
+
 
 class PushTokenRequest(BaseModel):
     token: str
@@ -104,6 +107,7 @@ async def register_push_token(body: PushTokenRequest, clerk_id: RequiredUser) ->
     trip finishes processing.
     """
     from app.services.push_notifications import register_push_token as _register
+
     await _register(clerk_id, body.token)
     return {"ok": True, "data": {"registered": True}}
 
@@ -122,10 +126,7 @@ async def clerk_webhook(request: Request) -> dict:
     In production: verify the svix signature using CLERK_WEBHOOK_SECRET.
     """
     from datetime import UTC, datetime
-    import hmac
-    import hashlib
 
-    settings_obj = request.app.state  # avoid circular import
     body = await request.json()
     event_type = body.get("type")
     data = body.get("data", {})
@@ -135,19 +136,33 @@ async def clerk_webhook(request: Request) -> dict:
 
     clerk_id = data.get("id")
     email = next(
-        (e["email_address"] for e in data.get("email_addresses", [])
-         if e.get("id") == data.get("primary_email_address_id")),
+        (
+            e["email_address"]
+            for e in data.get("email_addresses", [])
+            if e.get("id") == data.get("primary_email_address_id")
+        ),
         None,
     )
-    name = " ".join(filter(None, [
-        data.get("first_name", ""),
-        data.get("last_name", ""),
-    ])).strip() or "ReelRoutes User"
+    name = (
+        " ".join(
+            filter(
+                None,
+                [
+                    data.get("first_name", ""),
+                    data.get("last_name", ""),
+                ],
+            )
+        ).strip()
+        or "ReelRoutes User"
+    )
 
     avatar_url = data.get("image_url") or data.get("profile_image_url")
     google_id = next(
-        (a["provider_user_id"] for a in data.get("external_accounts", [])
-         if a.get("provider") == "google"),
+        (
+            a["provider_user_id"]
+            for a in data.get("external_accounts", [])
+            if a.get("provider") == "google"
+        ),
         None,
     )
 
@@ -173,6 +188,7 @@ async def clerk_webhook(request: Request) -> dict:
 
 
 # ── Helper ─────────────────────────────────────────────────────
+
 
 def _trip_summary(trip) -> dict:
     return {

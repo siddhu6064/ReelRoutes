@@ -21,12 +21,12 @@ For a 10-minute TikTok: ~$0.06. Acceptable for the free tier.
 File size limit: Whisper API accepts up to 25 MB.
 For videos longer than ~30 min we chunk the audio (future enhancement).
 """
+
 from __future__ import annotations
 
 import asyncio
 import os
 import tempfile
-from functools import partial
 from pathlib import Path
 
 from app.adapters.base import CaptionsSource, TranscriptSegment
@@ -36,7 +36,7 @@ from app.config.settings import get_settings
 logger = get_logger(__name__)
 
 WHISPER_MODEL = "whisper-1"
-MAX_FILE_SIZE_MB = 24          # stay under the 25 MB hard limit
+MAX_FILE_SIZE_MB = 24  # stay under the 25 MB hard limit
 SUPPORTED_FORMATS = ("mp4", "m4a", "webm", "mp3", "wav", "ogg", "flac")
 
 

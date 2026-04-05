@@ -8,6 +8,7 @@ embedding in a TripDocument.
 Task 4: place_resolution_candidates stored for ambiguous matches
 Task 6: signal_type, platform, extracted_at tracked for analytics
 """
+
 from __future__ import annotations
 
 import uuid
@@ -15,8 +16,8 @@ from datetime import UTC, datetime
 
 from app.config.logging import get_logger
 from app.models.documents import JobDocument, PinDocument
-from app.services.geocoding.geocoder import GeocodedLocation, GeocodingResult
 from app.services.extraction.service import ExtractionResult
+from app.services.geocoding.geocoder import GeocodedLocation, GeocodingResult
 
 logger = get_logger(__name__)
 
@@ -39,25 +40,27 @@ async def persist_geocoding_to_job(
     candidates_map = {}
 
     for loc in geocoding_result.locations:
-        geocoded_places.append({
-            "place_name": loc.place_name,
-            "raw_name": loc.raw_name,
-            "place_id": loc.place_id,
-            "lat": loc.lat,
-            "lng": loc.lng,
-            "address": loc.address,
-            "country_code": loc.country_code,
-            "city": loc.city,
-            "context_quote": loc.context_quote,
-            "timestamp_hint": loc.timestamp_hint,
-            "confidence": loc.confidence,
-            "order": loc.order,
-            "geocoded": loc.geocoded,
-            "unresolved": loc.unresolved,
-            "ambiguous": loc.ambiguous,
-            # Task 6 — signal provenance
-            "signal_type": extraction_result.signal_type,
-        })
+        geocoded_places.append(
+            {
+                "place_name": loc.place_name,
+                "raw_name": loc.raw_name,
+                "place_id": loc.place_id,
+                "lat": loc.lat,
+                "lng": loc.lng,
+                "address": loc.address,
+                "country_code": loc.country_code,
+                "city": loc.city,
+                "context_quote": loc.context_quote,
+                "timestamp_hint": loc.timestamp_hint,
+                "confidence": loc.confidence,
+                "order": loc.order,
+                "geocoded": loc.geocoded,
+                "unresolved": loc.unresolved,
+                "ambiguous": loc.ambiguous,
+                # Task 6 — signal provenance
+                "signal_type": extraction_result.signal_type,
+            }
+        )
 
         # Task 4 — store candidates for ambiguous results
         if loc.ambiguous and loc.candidates:
@@ -70,6 +73,7 @@ async def persist_geocoding_to_job(
 
     # Store unresolved locations separately for the 'Did we miss anything?' UI
     from app.services.geocoding.storage import get_unresolved_locations
+
     job.unresolved_places = get_unresolved_locations(geocoding_result.locations)  # type: ignore[attr-defined]
 
     # Task 6 — analytics
@@ -122,7 +126,7 @@ def geocoded_locations_to_pins(locations: list[GeocodedLocation]) -> list[PinDoc
 
         pin = PinDocument(
             id=str(uuid.uuid4()),
-            order=len(pins),           # sequential order among geocoded pins only
+            order=len(pins),  # sequential order among geocoded pins only
             place_name=loc.place_name,
             place_id=loc.place_id,
             lat=loc.lat,

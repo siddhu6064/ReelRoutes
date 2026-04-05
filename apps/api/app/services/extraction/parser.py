@@ -11,6 +11,7 @@ Responsibilities:
   - Deduplicate by normalised place name
   - Re-index order field sequentially
 """
+
 from __future__ import annotations
 
 import json
@@ -21,7 +22,7 @@ from app.config.logging import get_logger
 
 logger = get_logger(__name__)
 
-MIN_CONFIDENCE: float = 0.4     # Task 6: filter below this threshold
+MIN_CONFIDENCE: float = 0.4  # Task 6: filter below this threshold
 MAX_CONTEXT_QUOTE_LEN: int = 200
 
 
@@ -31,6 +32,7 @@ class ExtractedLocation:
     One location extracted by GPT-4o.
     Mirrors the shared TypeScript ExtractedLocation type exactly.
     """
+
     place_name: str
     context_quote: str
     confidence: float
@@ -48,8 +50,8 @@ class ParseResult:
     locations: list[ExtractedLocation] = field(default_factory=list)
     raw_response: str = ""
     parse_error: str | None = None
-    filtered_count: int = 0       # locations dropped due to low confidence
-    duplicate_count: int = 0      # locations dropped as duplicates
+    filtered_count: int = 0  # locations dropped due to low confidence
+    duplicate_count: int = 0  # locations dropped as duplicates
 
     @property
     def ok(self) -> bool:
@@ -167,6 +169,7 @@ def merge_chunk_results(
 
 
 # ── Private helpers ────────────────────────────────────────────
+
 
 def _strip_fences(text: str) -> str:
     """Remove ```json ... ``` or ``` ... ``` markdown fences."""

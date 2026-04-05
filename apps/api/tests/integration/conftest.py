@@ -9,10 +9,11 @@ The `db` fixture re-initialises Beanie before every test so each
 test gets a clean, empty database. This is the correct approach:
 faster than spawning a real MongoDB, and avoids test-order coupling.
 """
+
 from __future__ import annotations
 
-import pytest_asyncio
 import mongomock_motor
+import pytest_asyncio
 from beanie import init_beanie
 
 from app.models.documents import ALL_DOCUMENTS

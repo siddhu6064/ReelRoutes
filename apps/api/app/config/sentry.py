@@ -17,6 +17,7 @@ Environment variables:
   SENTRY_ENVIRONMENT  — "development" | "staging" | "production"
   SENTRY_TRACES_RATE  — float 0.0–1.0, sample rate for performance traces
 """
+
 from __future__ import annotations
 
 from app.config.logging import get_logger
@@ -31,6 +32,7 @@ def init_sentry() -> None:
     No-ops silently if SENTRY_DSN is not set.
     """
     from app.config.settings import get_settings
+
     settings = get_settings()
 
     if not settings.sentry_dsn:
@@ -38,9 +40,9 @@ def init_sentry() -> None:
         return
 
     import sentry_sdk
+    from sentry_sdk.integrations.asyncio import AsyncioIntegration
     from sentry_sdk.integrations.fastapi import FastApiIntegration
     from sentry_sdk.integrations.starlette import StarletteIntegration
-    from sentry_sdk.integrations.asyncio import AsyncioIntegration
 
     sentry_sdk.init(
         dsn=settings.sentry_dsn,
@@ -76,7 +78,8 @@ def _before_send(event: dict, hint: dict) -> dict | None:
     if "exc_info" in hint:
         exc_type, exc_value, _ = hint["exc_info"]
         from app.middleware.error_handler import AppError
-        if isinstance(exc_value, AppError):
+
+        if isinstance(exc_value, AppError):  # noqa: SIM102
             if exc_value.status_code in (400, 401, 403, 404, 422, 429):
                 return None
 
@@ -87,6 +90,7 @@ def capture_exception(exc: Exception, context: dict | None = None) -> None:
     """Manually capture an exception with optional extra context."""
     try:
         import sentry_sdk
+
         with sentry_sdk.push_scope() as scope:
             if context:
                 for k, v in context.items():
@@ -100,6 +104,7 @@ def set_user_context(clerk_id: str | None) -> None:
     """Attach the current user's Clerk ID to Sentry events."""
     try:
         import sentry_sdk
+
         if clerk_id:
             sentry_sdk.set_user({"id": clerk_id})
     except Exception:

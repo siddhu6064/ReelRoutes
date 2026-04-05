@@ -5,6 +5,7 @@ Local fixtures for Google Places API responses.
 Used in geocoding tests to avoid live API calls and ensure deterministic results.
 All data is realistic but synthetic.
 """
+
 from __future__ import annotations
 
 # ── Single place responses ─────────────────────────────────────
@@ -66,7 +67,11 @@ FUSHIMI_INARI = {
     "address_components": [
         {"long_name": "Fushimi Ward", "short_name": "Fushimi Ward", "types": ["sublocality"]},
         {"long_name": "Kyoto", "short_name": "Kyoto", "types": ["locality"]},
-        {"long_name": "Kyoto Prefecture", "short_name": "Kyoto Prefecture", "types": ["administrative_area_level_1"]},
+        {
+            "long_name": "Kyoto Prefecture",
+            "short_name": "Kyoto Prefecture",
+            "types": ["administrative_area_level_1"],
+        },
         {"long_name": "Japan", "short_name": "JP", "types": ["country"]},
     ],
     "types": ["tourist_attraction", "place_of_worship", "point_of_interest"],
@@ -88,7 +93,11 @@ EIFFEL_TOWER = {
     "address_components": [
         {"long_name": "7th arrondissement", "short_name": "7th", "types": ["sublocality"]},
         {"long_name": "Paris", "short_name": "Paris", "types": ["locality"]},
-        {"long_name": "Île-de-France", "short_name": "IDF", "types": ["administrative_area_level_1"]},
+        {
+            "long_name": "Île-de-France",
+            "short_name": "IDF",
+            "types": ["administrative_area_level_1"],
+        },
         {"long_name": "France", "short_name": "FR", "types": ["country"]},
     ],
     "types": ["tourist_attraction", "point_of_interest"],
@@ -110,7 +119,11 @@ CENTRAL_PARK = {
     "address_components": [
         {"long_name": "Manhattan", "short_name": "Manhattan", "types": ["sublocality"]},
         {"long_name": "New York", "short_name": "New York", "types": ["locality"]},
-        {"long_name": "New York State", "short_name": "NY", "types": ["administrative_area_level_1"]},
+        {
+            "long_name": "New York State",
+            "short_name": "NY",
+            "types": ["administrative_area_level_1"],
+        },
         {"long_name": "United States", "short_name": "US", "types": ["country"]},
     ],
     "types": ["park", "tourist_attraction", "point_of_interest"],
@@ -150,6 +163,7 @@ NOT_FOUND_RESULT = {
 }
 
 # ── Helper ─────────────────────────────────────────────────────
+
 
 def fixture_for(place_name: str) -> dict:
     """Return a Places API-like fixture for a known place name."""

@@ -4,13 +4,12 @@ tests/adapters/conftest.py
 Shared fixtures for adapter tests.
 All tests mock yt-dlp and YouTube Data API — no live network calls.
 """
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
+from unittest.mock import AsyncMock
 
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures" / "adapter_fixtures"
 
@@ -32,6 +31,7 @@ def load_transcript_fixture(name: str) -> list[dict]:
 
 # ── Shared mock factories ──────────────────────────────────────
 
+
 def mock_ytdlp_extract(fixture_name: str):
     """
     Returns an async mock that returns the given fixture
@@ -44,8 +44,6 @@ def mock_ytdlp_extract(fixture_name: str):
 def mock_youtube_api(fixture_name: str):
     """Mock for YouTubeAdapter._fetch_metadata returning fixture data."""
     fixture = load_fixture(fixture_name)
-    snippet_keys = {"title", "description", "channelTitle", "publishedAt", "thumbnails"}
-    content_keys = {"duration"}
 
     metadata = {
         "title": fixture.get("title", ""),
@@ -62,6 +60,7 @@ def _ts_to_iso(ts: int | float | None) -> str | None:
     if ts is None:
         return None
     from datetime import UTC, datetime
+
     return datetime.fromtimestamp(float(ts), tz=UTC).isoformat()
 
 

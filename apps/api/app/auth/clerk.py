@@ -17,16 +17,15 @@ Guest mode:
   - After sign-in, the frontend sends PATCH /api/jobs/:id/claim
     to link the guest trip to the new user
 """
+
 from __future__ import annotations
 
 import time
-from functools import lru_cache
 from typing import Annotated
 
 import httpx
 from fastapi import Depends, Request
-from jose import JWTError, jwk, jwt
-from jose.utils import base64url_decode
+from jose import JWTError, jwt
 
 from app.config.logging import get_logger
 from app.config.settings import get_settings
@@ -61,6 +60,7 @@ async def _get_jwks() -> dict:
     # Format: pk_test_<base64_domain> or pk_live_<base64_domain>
     try:
         import base64
+
         parts = pub_key.split("_")
         if len(parts) >= 3:
             domain_b64 = parts[2].rstrip("$")
@@ -72,7 +72,7 @@ async def _get_jwks() -> dict:
             jwks_url = f"{domain}/.well-known/jwks.json"
         else:
             # Fallback to secret key issuer
-            jwks_url = f"https://api.clerk.com/v1/jwks"
+            jwks_url = "https://api.clerk.com/v1/jwks"
     except Exception:
         jwks_url = "https://api.clerk.com/v1/jwks"
 
@@ -114,7 +114,7 @@ def _verify_jwt(token: str, jwks: dict) -> dict:
         if not rsa_key:
             raise UnauthorizedError("Invalid token: key not found")
 
-        settings = get_settings()
+        get_settings()
         payload = jwt.decode(
             token,
             rsa_key,
@@ -136,6 +136,7 @@ def _extract_bearer(request: Request) -> str | None:
 
 
 # ── FastAPI dependency functions ───────────────────────────────
+
 
 async def optional_auth(request: Request) -> str | None:
     """

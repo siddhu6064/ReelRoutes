@@ -7,25 +7,27 @@ Tests for:
   3. Collaborator invite + accept flow
   4. Map export — Google Maps URL, GPX structure, KML structure, GeoJSON
 """
+
 from __future__ import annotations
 
 import json
+
 import pytest
 
 from app.services.expense_service import (
+    _compute_settlements,
+    accept_invite,
     add_expense,
+    check_can_edit,
     compute_summary,
     invite_collaborator,
-    accept_invite,
-    check_can_edit,
-    _compute_settlements,
 )
-from app.services.map_export_service import export_trip, _google_maps_url, _safe_filename
+from app.services.map_export_service import _google_maps_url, _safe_filename, export_trip
 from app.utils.seed import SeedFactory, make_pin
 from tests.fixtures.beanie_fixture import beanie_init  # noqa: F401
 
-
 # ── Expense: Solo mode ─────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 class TestSoloExpenses:
@@ -65,6 +67,7 @@ class TestSoloExpenses:
 
 
 # ── Expense: Split mode ────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 class TestSplitExpenses:
@@ -148,6 +151,7 @@ class TestSplitExpenses:
 
 # ── Settlement calculation ─────────────────────────────────────
 
+
 class TestSettlementAlgorithm:
     def test_simple_two_person_settlement(self) -> None:
         # Alice paid 100, Bob owes 50 → Bob pays Alice 50
@@ -202,6 +206,7 @@ class TestSettlementAlgorithm:
 
 # ── Collaborator flow ──────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 class TestCollaborators:
     async def test_invite_creates_pending_collaborator(self, beanie_init) -> None:
@@ -239,7 +244,7 @@ class TestCollaborators:
 
     async def test_invalid_token_raises(self, beanie_init) -> None:
         trip = await SeedFactory.trip(user_id="clerk_owner")
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017 — service raises generic AppError subclass
             await accept_invite(trip, "invalid-token", "clerk_intruder")
 
     async def test_pending_collab_cannot_edit(self, beanie_init) -> None:
@@ -251,6 +256,7 @@ class TestCollaborators:
 
 
 # ── Map export ─────────────────────────────────────────────────
+
 
 class TestGoogleMapsExport:
     def test_single_pin_url(self) -> None:
@@ -293,7 +299,7 @@ class TestMapExportFormats:
         assert result["format"] == "apple_maps"
         assert result["content"] is not None
         assert "<gpx" in result["content"]
-        assert "application/gpx+xml" == result["content_type"]
+        assert result["content_type"] == "application/gpx+xml"
 
     async def test_apple_maps_gpx_has_all_waypoints(self, beanie_init) -> None:
         pins = [make_pin(order=i) for i in range(4)]

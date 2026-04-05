@@ -10,6 +10,7 @@ Adding a new platform:
   2. Add an entry to _REGISTRY below
   3. Add a test in tests/adapters/test_myplatform.py
 """
+
 from __future__ import annotations
 
 from app.adapters.base import AdapterOutput, BaseAdapter

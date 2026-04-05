@@ -14,11 +14,12 @@ TikTok specifics:
 
 Creator handle extraction: TikTok URLs carry the @username in the path.
 """
+
 from __future__ import annotations
 
 import re
 
-from app.adapters._ytdlp_mixin import extract_hashtags_from_ytdlp, ytdlp_extract
+from app.adapters._ytdlp_mixin import extract_hashtags_from_ytdlp
 from app.adapters.base import AdapterOutput, BaseAdapter, CaptionsSource
 from app.adapters.instagram import _extract_mentions, _parse_timestamp
 from app.config.logging import get_logger
@@ -59,7 +60,10 @@ class TikTokAdapter(BaseAdapter):
 
         try:
             from app.adapters._ytdlp_health import ytdlp_extract_with_retry
-            info, extra_warnings = await ytdlp_extract_with_retry(url, max_retries=2, base_delay=3.0)
+
+            info, extra_warnings = await ytdlp_extract_with_retry(
+                url, max_retries=2, base_delay=3.0
+            )
             for w in extra_warnings:
                 output.add_warning(w)
             if info:
@@ -98,11 +102,7 @@ class TikTokAdapter(BaseAdapter):
 
         hashtags = extract_hashtags_from_ytdlp(info)
 
-        creator = (
-            output.creator_handle
-            or info.get("uploader_id")
-            or info.get("uploader")
-        )
+        creator = output.creator_handle or info.get("uploader_id") or info.get("uploader")
 
         output.title = cleaned_desc[:80] if cleaned_desc else "TikTok Video"
         output.description = cleaned_desc

@@ -9,6 +9,7 @@ Usage:
   - get_db() provides the raw Motor database for edge cases
   - All normal data access goes through Beanie document methods
 """
+
 from __future__ import annotations
 
 import motor.motor_asyncio
@@ -32,7 +33,9 @@ async def connect_db() -> None:
     global _client
     settings = get_settings()
 
-    logger.info("connecting_to_mongodb", url=_redact_url(settings.mongodb_url), db=settings.mongodb_db)
+    logger.info(
+        "connecting_to_mongodb", url=_redact_url(settings.mongodb_url), db=settings.mongodb_db
+    )
 
     _client = motor.motor_asyncio.AsyncIOMotorClient(
         settings.mongodb_url,

@@ -6,6 +6,7 @@ creates a Job, enqueues the ARQ task, returns job_id immediately.
 
 The client then connects to ws/jobs/:job_id or polls GET /api/jobs/:job_id.
 """
+
 from __future__ import annotations
 
 import re
@@ -71,13 +72,16 @@ async def process_video(body: ProcessRequest, request: Request) -> dict:
 
     # Track analytics event
     from app.config.analytics import track_import_started
+
     track_import_started(body.user_id, url, platform.value)
 
     # Enqueue ARQ task (falls back gracefully if Redis unavailable in local dev)
     try:
         from arq import create_pool
         from arq.connections import RedisSettings
+
         from app.config.settings import get_settings
+
         settings = get_settings()
         pool = await create_pool(RedisSettings.from_dsn(settings.redis_url))
         await pool.enqueue_job("process_video", str(job.id))

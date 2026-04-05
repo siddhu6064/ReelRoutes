@@ -27,12 +27,11 @@ Prerequisites:
     - Optionally add GOOGLE_PLACES_API_KEY for geocoding
     - YOUTUBE_API_KEY for YouTube metadata (optional — works without it)
 """
+
 from __future__ import annotations
 
 import argparse
 import asyncio
-import json
-import os
 import sys
 import time
 from pathlib import Path
@@ -43,16 +42,16 @@ sys.path.insert(0, str(Path(__file__).parent))
 # Load .env before importing app modules
 try:
     from dotenv import load_dotenv
+
     load_dotenv(Path(__file__).parent / ".env")
 except ImportError:
     pass  # python-dotenv optional — env vars may already be set
 
 
 async def run_demo(url: str, no_geocode: bool = False, verbose: bool = False) -> None:
+    from app.adapters.registry import fetch_from_url
     from app.config.settings import get_settings
-    from app.adapters.registry import detect_platform, fetch_from_url
     from app.routers.process import detect_platform as detect_platform_fn
-    from app.services.extraction.signals import build_signals
     from app.services.extraction.service import ExtractionService
     from app.services.geocoding.geocoder import geocode_locations
 
@@ -61,7 +60,9 @@ async def run_demo(url: str, no_geocode: bool = False, verbose: bool = False) ->
     _banner("ReelRoutes — End-to-End Demo")
     print(f"URL:     {url}")
     print(f"OpenAI:  {'✓ key set' if settings.openai_api_key else '✗ missing — mock extraction'}")
-    print(f"Places:  {'✓ key set' if settings.google_places_api_key else '✗ missing — mock geocoding'}")
+    print(
+        f"Places:  {'✓ key set' if settings.google_places_api_key else '✗ missing — mock geocoding'}"
+    )
     print()
 
     # ── Step 1: Detect platform ────────────────────────────────
@@ -69,7 +70,7 @@ async def run_demo(url: str, no_geocode: bool = False, verbose: bool = False) ->
     print(f"[1/4] Platform detected: {platform.upper()}")
 
     # ── Step 2: Fetch signals via adapter ──────────────────────
-    print(f"[2/4] Fetching video metadata and signals…")
+    print("[2/4] Fetching video metadata and signals…")
     t0 = time.perf_counter()
     adapter_output = await fetch_from_url(url, platform)
     elapsed = round(time.perf_counter() - t0, 2)
@@ -86,12 +87,12 @@ async def run_demo(url: str, no_geocode: bool = False, verbose: bool = False) ->
     print(f"      Done in {elapsed}s")
 
     if verbose:
-        print(f"\n--- Best signal text (first 500 chars) ---")
+        print("\n--- Best signal text (first 500 chars) ---")
         print(adapter_output.best_signal_text[:500])
         print("---\n")
 
     # ── Step 3: AI extraction ──────────────────────────────────
-    print(f"\n[3/4] Extracting locations with GPT-4o…")
+    print("\n[3/4] Extracting locations with GPT-4o…")
     t0 = time.perf_counter()
     extraction_result = await ExtractionService.extract(adapter_output)
     elapsed = round(time.perf_counter() - t0, 2)
@@ -107,13 +108,13 @@ async def run_demo(url: str, no_geocode: bool = False, verbose: bool = False) ->
         return
 
     if verbose:
-        print(f"\n--- Raw GPT-4o output (first 800 chars) ---")
+        print("\n--- Raw GPT-4o output (first 800 chars) ---")
         print(extraction_result.raw_response[:800])
         print("---\n")
 
     # ── Step 4: Geocoding ──────────────────────────────────────
     if no_geocode:
-        print(f"\n[4/4] Geocoding skipped (--no-geocode)")
+        print("\n[4/4] Geocoding skipped (--no-geocode)")
         _print_extracted(extraction_result.locations)
         return
 
@@ -136,18 +137,21 @@ async def run_demo(url: str, no_geocode: bool = False, verbose: bool = False) ->
         if loc.geocoded:
             print(f"          {loc.lat:.4f}, {loc.lng:.4f}  |  {loc.address}")
         if loc.unresolved:
-            print(f"          ⚠ Unresolved — will appear as editable pin")
+            print("          ⚠ Unresolved — will appear as editable pin")
         if verbose and loc.context_quote:
-            print(f"          \"{loc.context_quote[:80]}\"")
+            print(f'          "{loc.context_quote[:80]}"')
         if verbose and loc.ambiguous:
             print(f"          {len(loc.candidates)} candidates stored for manual selection")
 
     print()
-    print(f"✅ Pipeline complete: {geo_result.geocoded_count}/{len(geo_result.locations)} pins geocoded")
+    print(
+        f"✅ Pipeline complete: {geo_result.geocoded_count}/{len(geo_result.locations)} pins geocoded"
+    )
     print(f"   Ready to create Trip with {len(geo_result.locations)} stops.")
 
 
 # ── Helpers ────────────────────────────────────────────────────
+
 
 def _banner(title: str) -> None:
     width = 60
@@ -159,6 +163,7 @@ def _banner(title: str) -> None:
 def _count_tokens(text: str) -> int:
     try:
         import tiktoken
+
         return len(tiktoken.get_encoding("cl100k_base").encode(text))
     except Exception:
         return len(text.split())
@@ -170,7 +175,7 @@ def _print_extracted(locations) -> None:
         conf_bar = "█" * int(loc.confidence * 10)
         print(f"  {loc.order+1:2d}. [{conf_bar:<10}] {loc.confidence:.0%}  {loc.place_name}")
         if loc.context_quote:
-            print(f"       \"{loc.context_quote[:80]}\"")
+            print(f'       "{loc.context_quote[:80]}"')
 
 
 # ── CLI entry point ────────────────────────────────────────────
@@ -181,7 +186,9 @@ if __name__ == "__main__":
     )
     parser.add_argument("url", help="Social video URL (YouTube, Instagram, TikTok, Facebook, X)")
     parser.add_argument("--no-geocode", action="store_true", help="Skip geocoding step")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show full signals and raw output")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show full signals and raw output"
+    )
     args = parser.parse_args()
 
     asyncio.run(run_demo(args.url, no_geocode=args.no_geocode, verbose=args.verbose))

@@ -14,6 +14,7 @@ Every error response matches the ApiError contract from @reelroutes/shared:
     }
   }
 """
+
 from __future__ import annotations
 
 import traceback
@@ -27,11 +28,12 @@ from app.config.logging import get_logger
 
 logger = get_logger(__name__)
 
-
 # ── Custom application exceptions ─────────────────────────────
+
 
 class AppError(Exception):
     """Base class for all application-level errors."""
+
     def __init__(
         self,
         message: str,
@@ -81,6 +83,7 @@ class ValidationError(AppError):
 
 # ── Response builder ──────────────────────────────────────────
 
+
 def _error_response(
     request: Request,
     status_code: int,
@@ -103,6 +106,7 @@ def _error_response(
 
 
 # ── Exception handlers (registered in main.py) ────────────────
+
 
 async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
     logger.warning(
@@ -139,7 +143,9 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
     return _error_response(request, exc.status_code, code, message)
 
 
-async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
     """Converts Pydantic v2 validation errors to field-level error map."""
     fields: dict[str, list[str]] = {}
     for error in exc.errors():

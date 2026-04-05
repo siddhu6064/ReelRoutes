@@ -5,6 +5,7 @@ Service layer for Job documents. All business logic for the job
 lifecycle lives here. Routers and workers call these methods — they
 never touch the ODM directly.
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime

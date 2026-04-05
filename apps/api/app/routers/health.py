@@ -9,6 +9,7 @@ Used by:
   - CI smoke tests after deployment
   - Uptime monitoring
 """
+
 from __future__ import annotations
 
 import time
@@ -35,6 +36,7 @@ async def health() -> dict:
     t0 = time.perf_counter()
     try:
         from app.config.database import get_db  # local import keeps mock patchable
+
         db: AsyncIOMotorDatabase = get_db()  # type: ignore[type-arg]
         await db.command("ping")
         services["mongodb"] = {

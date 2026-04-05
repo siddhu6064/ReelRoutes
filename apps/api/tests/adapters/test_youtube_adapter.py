@@ -3,19 +3,23 @@ tests/adapters/test_youtube_adapter.py
 
 Tests for YouTubeAdapter using fixture data — no live API calls.
 """
+
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.adapters.base import CaptionsSource
+if TYPE_CHECKING:
+    from app.adapters.base import AdapterOutput
+
 from app.adapters.youtube import YouTubeAdapter, extract_video_id, parse_duration
 from app.models.documents import Platform
 from tests.adapters.conftest import load_fixture, load_transcript_fixture, mock_youtube_api
 
-
 # ── URL parsing ────────────────────────────────────────────────
+
 
 class TestExtractVideoId:
     def test_standard_watch_url(self) -> None:
@@ -31,7 +35,10 @@ class TestExtractVideoId:
         assert extract_video_id("https://www.youtube.com/embed/dQw4w9WgXcQ") == "dQw4w9WgXcQ"
 
     def test_url_with_extra_params(self) -> None:
-        assert extract_video_id("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=120s&list=PLabc") == "dQw4w9WgXcQ"
+        assert (
+            extract_video_id("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=120s&list=PLabc")
+            == "dQw4w9WgXcQ"
+        )
 
     def test_invalid_url_returns_none(self) -> None:
         assert extract_video_id("https://vimeo.com/123456") is None
@@ -57,14 +64,15 @@ class TestParseDuration:
 
 # ── YouTubeAdapter.fetch ───────────────────────────────────────
 
+
 @pytest.mark.asyncio
 class TestYouTubeAdapterFetch:
-    async def _run_fetch(self, with_transcript: bool = True) -> "AdapterOutput":
-        fixture = load_fixture("youtube_japan_travel")
+    async def _run_fetch(self, with_transcript: bool = True) -> AdapterOutput:
+        load_fixture("youtube_japan_travel")
         transcript_data = load_transcript_fixture("youtube_japan_transcript")
 
         # Build mock transcript objects matching youtube-transcript-api API
-        mock_segment = MagicMock()
+        MagicMock()
 
         class MockEntry:
             def __init__(self, d: dict):
@@ -79,10 +87,14 @@ class TestYouTubeAdapterFetch:
 
         mock_transcript_list = MagicMock()
         mock_transcript_list.find_manually_created_transcript = MagicMock(
-            side_effect=lambda langs: mock_transcript if with_transcript else (_ for _ in ()).throw(Exception("no cc"))
+            side_effect=lambda _langs: mock_transcript
+            if with_transcript
+            else (_ for _ in ()).throw(Exception("no cc"))
         )
         mock_transcript_list.find_generated_transcript = MagicMock(
-            return_value=mock_transcript if with_transcript else (_ for _ in ()).throw(Exception("no auto"))
+            return_value=mock_transcript
+            if with_transcript
+            else (_ for _ in ()).throw(Exception("no auto"))
         )
 
         adapter = YouTubeAdapter()
@@ -134,6 +146,7 @@ class TestYouTubeAdapterFetch:
 
     async def test_invalid_url_raises(self) -> None:
         from app.middleware.error_handler import AppError
+
         adapter = YouTubeAdapter()
         with pytest.raises(AppError):
             await adapter.fetch("https://not-youtube.com/video")
@@ -141,9 +154,11 @@ class TestYouTubeAdapterFetch:
 
 # ── Helper: makes _run_in_thread behave synchronously for tests ──
 
+
 async def _sync_mock(fn, *args, **kwargs):
     """Run the sync function directly in tests (no thread pool needed)."""
     from functools import partial
+
     if isinstance(fn, partial):
         return fn()
     return fn(*args, **kwargs)

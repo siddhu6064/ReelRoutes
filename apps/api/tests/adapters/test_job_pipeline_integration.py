@@ -5,6 +5,7 @@ Tests the adapter layer wired into the job worker pipeline.
 Verifies that platform detection → fetch → job progress updates flow correctly.
 No live API calls — all adapters are mocked.
 """
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
@@ -14,16 +15,17 @@ import pytest
 from app.adapters.base import AdapterOutput, CaptionsSource
 from app.models.documents import JobStatus, Platform
 from app.services.job_service import JobService
-from tests.adapters.conftest import load_fixture
 from tests.fixtures.beanie_fixture import beanie_init  # noqa: F401
 
 
-def _make_adapter_output(platform: Platform, description: str, transcript: str | None = None) -> AdapterOutput:
+def _make_adapter_output(
+    platform: Platform, description: str, transcript: str | None = None
+) -> AdapterOutput:
     return AdapterOutput(
         platform=platform,
-        url=f"https://example.com/video",
+        url="https://example.com/video",
         video_id="test123",
-        canonical_url=f"https://example.com/video",
+        canonical_url="https://example.com/video",
         title="Test Travel Video",
         description=description,
         transcript=transcript or description,
@@ -47,6 +49,7 @@ class TestAdapterInPipeline:
 
         with patch("app.adapters.registry.fetch_from_url", AsyncMock(return_value=youtube_output)):
             from app.adapters.registry import fetch_from_url
+
             output = await fetch_from_url(job.url, job.platform)
             await JobService.complete(job, transcript=output.transcript)
 
@@ -66,6 +69,7 @@ class TestAdapterInPipeline:
 
         with patch("app.adapters.registry.fetch_from_url", AsyncMock(return_value=ig_output)):
             from app.adapters.registry import fetch_from_url
+
             output = await fetch_from_url(job.url, job.platform)
             transcript = output.transcript or output.description or ""
             await JobService.complete(job, transcript=transcript)
@@ -91,6 +95,7 @@ class TestAdapterInPipeline:
 
         with patch("app.adapters.registry.fetch_from_url", AsyncMock(return_value=empty_output)):
             from app.adapters.registry import fetch_from_url
+
             output = await fetch_from_url(job.url, job.platform)
 
             # No usable signals → fail the job
@@ -116,9 +121,12 @@ class TestAdapterInPipeline:
         )
 
         from app.models.documents import JobStep
+
         await JobService.update_progress(
-            job, JobStep.FETCHING_VIDEO, 18,
-            f"Video metadata fetched · {rich_output.signal_quality} signal"
+            job,
+            JobStep.FETCHING_VIDEO,
+            18,
+            f"Video metadata fetched · {rich_output.signal_quality} signal",
         )
 
         reloaded = await JobService.get(str(job.id))

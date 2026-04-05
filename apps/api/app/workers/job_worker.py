@@ -9,13 +9,12 @@ runs the full pipeline, and saves progress to MongoDB at each step.
 The WebSocket endpoint and polling endpoint both read from MongoDB,
 so client updates are decoupled from worker execution.
 """
+
 from __future__ import annotations
 
-import asyncio
-from typing import Any
+from typing import Any, ClassVar
 
 import motor.motor_asyncio
-from arq import Retry
 from beanie import init_beanie
 
 from app.config.logging import configure_logging, get_logger
@@ -34,7 +33,7 @@ STEP_PROGRESS = {
 }
 
 
-async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
+async def process_video(ctx: dict[str, Any], job_id: str) -> dict:  # noqa: ARG001 — ctx required by ARQ
     """
     Main ARQ task — called by the worker when a job is dequeued.
     Runs the full pipeline and updates MongoDB at each step.
@@ -50,17 +49,18 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
             job, JobStep.FETCHING_VIDEO, 10, "Fetching video metadata…"
         )
         from app.adapters.registry import fetch_from_url
+
         adapter_output = await fetch_from_url(job.url, job.platform)
 
         await JobService.update_progress(
-            job, JobStep.FETCHING_VIDEO, 18,
-            f"Video metadata fetched · {adapter_output.signal_quality} signal"
+            job,
+            JobStep.FETCHING_VIDEO,
+            18,
+            f"Video metadata fetched · {adapter_output.signal_quality} signal",
         )
 
         # ── Step 2: Transcription ──────────────────────────────
-        await JobService.update_progress(
-            job, JobStep.TRANSCRIBING, 22, "Transcribing audio…"
-        )
+        await JobService.update_progress(job, JobStep.TRANSCRIBING, 22, "Transcribing audio…")
 
         transcript = adapter_output.transcript or ""
 
@@ -81,8 +81,10 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
                 return {"job_id": job_id, "status": "failed"}
 
         await JobService.update_progress(
-            job, JobStep.TRANSCRIBING, 42,
-            f"Transcript ready · {len(transcript)} chars · source: {adapter_output.captions_source}"
+            job,
+            JobStep.TRANSCRIBING,
+            42,
+            f"Transcript ready · {len(transcript)} chars · source: {adapter_output.captions_source}",
         )
 
         # ── Step 3: AI location extraction ─────────────────────
@@ -90,6 +92,7 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
             job, JobStep.EXTRACTING_LOCATIONS, 48, "Identifying locations with AI…"
         )
         from app.services.extraction.service import ExtractionService
+
         extraction_result = await ExtractionService.extract(adapter_output, job)
 
         raw_locations = [loc.place_name for loc in extraction_result.locations]
@@ -103,32 +106,35 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
             return {"job_id": job_id, "status": "failed"}
 
         await JobService.update_progress(
-            job, JobStep.EXTRACTING_LOCATIONS, 65,
-            f"{len(raw_locations)} locations found"
+            job, JobStep.EXTRACTING_LOCATIONS, 65, f"{len(raw_locations)} locations found"
         )
 
         # ── Step 4: Geocoding ──────────────────────────────────
-        await JobService.update_progress(
-            job, JobStep.GEOCODING, 68, "Geocoding place names…"
+        await JobService.update_progress(job, JobStep.GEOCODING, 68, "Geocoding place names…")
+        from app.services.geocoding import (
+            geocode_locations,
+            geocoded_locations_to_pins,
+            persist_geocoding_to_job,
         )
-        from app.services.geocoding import geocode_locations, persist_geocoding_to_job, geocoded_locations_to_pins
-        from app.services.extraction.parser import ExtractedLocation
 
         geo_result = await geocode_locations(extraction_result.locations)
         await persist_geocoding_to_job(job, geo_result, extraction_result)
 
         await JobService.update_progress(
-            job, JobStep.GEOCODING, 82,
+            job,
+            JobStep.GEOCODING,
+            82,
             f"{geo_result.geocoded_count} places geocoded"
-            + (f" · {geo_result.unresolved_count} unresolved" if geo_result.unresolved_count else "")
+            + (
+                f" · {geo_result.unresolved_count} unresolved"
+                if geo_result.unresolved_count
+                else ""
+            ),
         )
 
         # ── Step 5: Finalize — create Trip ────────────────────
-        await JobService.update_progress(
-            job, JobStep.FINALIZING, 88, "Building your trip…"
-        )
+        await JobService.update_progress(job, JobStep.FINALIZING, 88, "Building your trip…")
         from app.services.trip_service import TripService
-        from app.models.documents import Platform as PlatformEnum
 
         pins = geocoded_locations_to_pins(geo_result.locations)
         trip = await TripService.create(
@@ -152,6 +158,7 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
 
         # Fix 3 — push notification: let the user know their trip is ready
         from app.services.push_notifications import send_trip_ready
+
         await send_trip_ready(
             user_id=job.user_id,
             trip_id=str(trip.id),
@@ -180,6 +187,7 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
             )
             # Fix 3 — push notification on failure
             from app.services.push_notifications import send_import_failed
+
             await send_import_failed(
                 user_id=job.user_id,
                 job_id=job_id,
@@ -191,6 +199,7 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:
 
 
 # ── ARQ worker settings ────────────────────────────────────────
+
 
 async def startup(ctx: dict) -> None:
     """Called once when the worker process starts."""
@@ -212,7 +221,8 @@ async def shutdown(ctx: dict) -> None:
 
 class WorkerSettings:
     """ARQ worker configuration."""
-    functions = [process_video]
+
+    functions: ClassVar[list] = [process_video]
     on_startup = startup
     on_shutdown = shutdown
     max_jobs = 10
@@ -222,5 +232,6 @@ class WorkerSettings:
     @classmethod
     def redis_settings(cls):  # type: ignore[override]
         from arq.connections import RedisSettings
+
         settings = get_settings()
         return RedisSettings.from_dsn(settings.redis_url)

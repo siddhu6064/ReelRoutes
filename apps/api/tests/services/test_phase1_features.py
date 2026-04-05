@@ -7,19 +7,20 @@ Phase 1 — Quick Wins tests:
   Week 3: Route polyline data + city_group computation
   Week 4: Google Maps export URL
 """
+
 from __future__ import annotations
 
 import pytest
-from app.routers.trips import _video_deep_link, _trip_response
-from app.services.geocoding.storage import geocoded_locations_to_pins
+
+from app.routers.trips import _trip_response, _video_deep_link
 from app.services.geocoding.geocoder import GeocodedLocation
-from app.services.map_export_service import export_trip, _google_maps_url
-from app.models.documents import PinDocument, TripDocument, Platform
+from app.services.geocoding.storage import geocoded_locations_to_pins
+from app.services.map_export_service import _google_maps_url, export_trip
 from app.utils.seed import SeedFactory, make_pin
 from tests.fixtures.beanie_fixture import beanie_init  # noqa: F401
 
-
 # ── Week 1: Video deep links ──────────────────────────────────
+
 
 class TestVideoDeepLink:
     def test_youtube_with_timestamp(self):
@@ -55,6 +56,7 @@ class TestVideoDeepLink:
 
 
 # ── Week 2: Pin enrichment fields ────────────────────────────
+
 
 class TestPinEnrichment:
     def test_pin_document_has_rating_field(self):
@@ -124,20 +126,33 @@ class TestPinEnrichment:
 
 # ── Week 3: city_group + route data ──────────────────────────
 
+
 class TestCityGroup:
     def test_city_group_computed_from_city_and_cc(self):
         locs = [
             GeocodedLocation(
-                place_name="Senso-ji", raw_name="Senso-ji",
-                context_quote="", confidence=0.9, order=0,
-                lat=35.71, lng=139.79, geocoded=True,
-                city="Tokyo", country_code="JP",
+                place_name="Senso-ji",
+                raw_name="Senso-ji",
+                context_quote="",
+                confidence=0.9,
+                order=0,
+                lat=35.71,
+                lng=139.79,
+                geocoded=True,
+                city="Tokyo",
+                country_code="JP",
             ),
             GeocodedLocation(
-                place_name="Fushimi Inari", raw_name="Fushimi Inari",
-                context_quote="", confidence=0.9, order=1,
-                lat=34.96, lng=135.77, geocoded=True,
-                city="Kyoto", country_code="JP",
+                place_name="Fushimi Inari",
+                raw_name="Fushimi Inari",
+                context_quote="",
+                confidence=0.9,
+                order=1,
+                lat=34.96,
+                lng=135.77,
+                geocoded=True,
+                city="Kyoto",
+                country_code="JP",
             ),
         ]
         pins = geocoded_locations_to_pins(locs)
@@ -147,10 +162,16 @@ class TestCityGroup:
     def test_city_group_city_only_when_no_cc(self):
         locs = [
             GeocodedLocation(
-                place_name="Some Place", raw_name="Some Place",
-                context_quote="", confidence=0.8, order=0,
-                lat=10.0, lng=20.0, geocoded=True,
-                city="Bangkok", country_code=None,
+                place_name="Some Place",
+                raw_name="Some Place",
+                context_quote="",
+                confidence=0.8,
+                order=0,
+                lat=10.0,
+                lng=20.0,
+                geocoded=True,
+                city="Bangkok",
+                country_code=None,
             )
         ]
         pins = geocoded_locations_to_pins(locs)
@@ -159,10 +180,16 @@ class TestCityGroup:
     def test_city_group_none_when_no_city(self):
         locs = [
             GeocodedLocation(
-                place_name="Unknown", raw_name="Unknown",
-                context_quote="", confidence=0.5, order=0,
-                lat=0.1, lng=0.1, geocoded=True,
-                city=None, country_code=None,
+                place_name="Unknown",
+                raw_name="Unknown",
+                context_quote="",
+                confidence=0.5,
+                order=0,
+                lat=0.1,
+                lng=0.1,
+                geocoded=True,
+                city=None,
+                country_code=None,
             )
         ]
         pins = geocoded_locations_to_pins(locs)
@@ -171,10 +198,16 @@ class TestCityGroup:
     def test_multiple_pins_same_city_group(self):
         locs = [
             GeocodedLocation(
-                place_name=f"Place {i}", raw_name=f"Place {i}",
-                context_quote="", confidence=0.9, order=i,
-                lat=35.0 + i * 0.01, lng=139.0 + i * 0.01,
-                geocoded=True, city="Tokyo", country_code="JP",
+                place_name=f"Place {i}",
+                raw_name=f"Place {i}",
+                context_quote="",
+                confidence=0.9,
+                order=i,
+                lat=35.0 + i * 0.01,
+                lng=139.0 + i * 0.01,
+                geocoded=True,
+                city="Tokyo",
+                country_code="JP",
             )
             for i in range(3)
         ]
@@ -195,6 +228,7 @@ class TestCityGroup:
 
 
 # ── Week 4: Google Maps export ────────────────────────────────
+
 
 @pytest.mark.asyncio
 class TestGoogleMapsExport:
@@ -240,6 +274,7 @@ class TestGoogleMapsExport:
         trip = await SeedFactory.trip()
         result = export_trip(trip, "geojson")
         import json
+
         data = json.loads(result["content"])
         assert data["type"] == "FeatureCollection"
         assert len(data["features"]) == len(trip.pins)
@@ -247,25 +282,30 @@ class TestGoogleMapsExport:
 
 # ── Gap fixes ─────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 class TestItineraryInTripResponse:
     async def test_trip_response_includes_empty_itinerary_by_default(self, beanie_init) -> None:
         trip = await SeedFactory.trip()
-        from app.routers.trips import _trip_response
+
         data = _trip_response(trip)
         assert "itinerary" in data
         assert data["itinerary"] == []
 
     async def test_trip_response_includes_generated_itinerary(self, beanie_init) -> None:
         from app.models.documents import TripDay
+
         trip = await SeedFactory.trip(pin_count=4)
         trip.itinerary = [
-            TripDay(day_number=1, label="Day 1 — Tokyo", pin_ids=[trip.pins[0].id, trip.pins[1].id]),
-            TripDay(day_number=2, label="Day 2 — Kyoto", pin_ids=[trip.pins[2].id, trip.pins[3].id]),
+            TripDay(
+                day_number=1, label="Day 1 — Tokyo", pin_ids=[trip.pins[0].id, trip.pins[1].id]
+            ),
+            TripDay(
+                day_number=2, label="Day 2 — Kyoto", pin_ids=[trip.pins[2].id, trip.pins[3].id]
+            ),
         ]
         await trip.save()
 
-        from app.routers.trips import _trip_response
         data = _trip_response(trip)
         assert len(data["itinerary"]) == 2
         assert data["itinerary"][0]["dayNumber"] == 1
@@ -274,7 +314,8 @@ class TestItineraryInTripResponse:
         assert data["itinerary"][1]["dayNumber"] == 2
 
     async def test_trip_response_includes_collaborators(self, beanie_init) -> None:
-        from app.models.documents import TripCollaborator, CollaboratorRole
+        from app.models.documents import CollaboratorRole, TripCollaborator
+
         trip = await SeedFactory.trip()
         trip.collaborators = [
             TripCollaborator(name="Alice", role=CollaboratorRole.EDITOR, status="active"),
@@ -282,7 +323,6 @@ class TestItineraryInTripResponse:
         ]
         await trip.save()
 
-        from app.routers.trips import _trip_response
         data = _trip_response(trip)
         assert len(data["collaborators"]) == 2
         assert data["collaborators"][0]["name"] == "Alice"
@@ -295,11 +335,13 @@ class TestPinEditPermissions:
     async def test_owner_can_edit_pin(self, beanie_init) -> None:
         trip = await SeedFactory.trip()
         from app.services.expense_service import check_can_edit
+
         assert check_can_edit(trip, trip.user_id) is True
 
     async def test_stranger_cannot_edit_pin(self, beanie_init) -> None:
         trip = await SeedFactory.trip()
         from app.services.expense_service import check_can_edit
+
         assert check_can_edit(trip, "stranger-clerk-id") is False
 
     async def test_none_user_cannot_edit_owned_trip(self, beanie_init) -> None:
@@ -308,27 +350,34 @@ class TestPinEditPermissions:
         trip.user_id = "owner-clerk-id"  # make it an owned trip
         await trip.save()
         from app.services.expense_service import check_can_edit
+
         assert check_can_edit(trip, None) is False
 
     async def test_active_editor_collaborator_can_edit(self, beanie_init) -> None:
-        from app.models.documents import TripCollaborator, CollaboratorRole
+        from app.models.documents import CollaboratorRole, TripCollaborator
         from app.services.expense_service import check_can_edit
+
         trip = await SeedFactory.trip()
         collab = TripCollaborator(
-            name="Alice", clerk_id="alice-clerk-id",
-            role=CollaboratorRole.EDITOR, status="active",
+            name="Alice",
+            clerk_id="alice-clerk-id",
+            role=CollaboratorRole.EDITOR,
+            status="active",
         )
         trip.collaborators = [collab]
         await trip.save()
         assert check_can_edit(trip, "alice-clerk-id") is True
 
     async def test_viewer_collaborator_cannot_edit(self, beanie_init) -> None:
-        from app.models.documents import TripCollaborator, CollaboratorRole
+        from app.models.documents import CollaboratorRole, TripCollaborator
         from app.services.expense_service import check_can_edit
+
         trip = await SeedFactory.trip()
         collab = TripCollaborator(
-            name="Bob", clerk_id="bob-clerk-id",
-            role=CollaboratorRole.VIEWER, status="active",
+            name="Bob",
+            clerk_id="bob-clerk-id",
+            role=CollaboratorRole.VIEWER,
+            status="active",
         )
         trip.collaborators = [collab]
         await trip.save()
@@ -336,12 +385,15 @@ class TestPinEditPermissions:
 
     async def test_pending_editor_cannot_edit(self, beanie_init) -> None:
         """Pending = invite sent but not yet accepted — no edit rights yet."""
-        from app.models.documents import TripCollaborator, CollaboratorRole
+        from app.models.documents import CollaboratorRole, TripCollaborator
         from app.services.expense_service import check_can_edit
+
         trip = await SeedFactory.trip()
         collab = TripCollaborator(
-            name="Charlie", clerk_id="charlie-clerk-id",
-            role=CollaboratorRole.EDITOR, status="pending",  # not accepted yet
+            name="Charlie",
+            clerk_id="charlie-clerk-id",
+            role=CollaboratorRole.EDITOR,
+            status="pending",  # not accepted yet
         )
         trip.collaborators = [collab]
         await trip.save()

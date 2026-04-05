@@ -12,6 +12,7 @@ Additional trip feature endpoints:
   Collab    — DELETE /api/trips/:id/collaborators/:cid
   Export    — GET  /api/trips/:id/export/:format
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Query
@@ -37,8 +38,8 @@ from app.services.trip_service import TripService
 
 router = APIRouter(prefix="/api/trips", tags=["trip-extras"])
 
-
 # ── Request schemas ────────────────────────────────────────────
+
 
 class AddExpenseRequest(BaseModel):
     user_id: str | None = None
@@ -77,6 +78,7 @@ class InviteRequest(BaseModel):
 
 
 # ── Expense endpoints ──────────────────────────────────────────
+
 
 @router.post("/{trip_id}/expenses", summary="Add an expense", status_code=201)
 async def create_expense(trip_id: str, body: AddExpenseRequest) -> dict:
@@ -177,7 +179,9 @@ async def expense_summary(
             "currency": summary.currency,
             "budget": trip.expense_budget,
             "remaining": remaining,
-            "budgetUsedPercent": round(summary.total_spent / trip.expense_budget * 100, 1) if trip.expense_budget else None,
+            "budgetUsedPercent": round(summary.total_spent / trip.expense_budget * 100, 1)
+            if trip.expense_budget
+            else None,
             "expenseCount": summary.expense_count,
             "byCategory": summary.by_category,
             "perPersonPaid": summary.per_person,
@@ -205,6 +209,7 @@ async def set_trip_budget(trip_id: str, body: SetBudgetRequest) -> dict:
 
 
 # ── Collaborator endpoints ─────────────────────────────────────
+
 
 @router.post("/{trip_id}/invite", summary="Invite a collaborator to the trip")
 async def invite_to_trip(trip_id: str, body: InviteRequest) -> dict:
@@ -260,7 +265,7 @@ async def join_trip(
         "data": {
             "tripId": trip_id,
             "role": collaborator.role,
-            "message": f"You now have {collaborator.role} access to \"{trip.title}\"",
+            "message": f'You now have {collaborator.role} access to "{trip.title}"',
         },
     }
 
@@ -289,6 +294,7 @@ async def remove_collab(
 
 
 # ── Map export endpoints ───────────────────────────────────────
+
 
 @router.get("/{trip_id}/export/google-maps", summary="Export to Google Maps")
 async def export_google_maps(
@@ -372,6 +378,7 @@ async def export_geojson(
 
 
 # ── Serialisation helpers ──────────────────────────────────────
+
 
 def _expense_dict(e) -> dict:
     return {

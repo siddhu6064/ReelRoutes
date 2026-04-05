@@ -15,6 +15,7 @@ Events tracked:
 All events are anonymised — we send distinct_id (clerk_id or guest UUID),
 never PII like email or name.
 """
+
 from __future__ import annotations
 
 from app.config.logging import get_logger
@@ -30,12 +31,14 @@ def _get_client():
         return _posthog
 
     from app.config.settings import get_settings
+
     settings = get_settings()
 
     if not settings.posthog_api_key or settings.is_test:
         return None
 
     import posthog
+
     posthog.api_key = settings.posthog_api_key
     posthog.host = settings.posthog_host
     posthog.debug = settings.is_development
@@ -67,6 +70,7 @@ def track(
 
 
 # ── Typed event helpers ────────────────────────────────────────
+
 
 def track_import_started(user_id: str | None, url: str, platform: str) -> None:
     track(

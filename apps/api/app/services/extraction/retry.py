@@ -6,6 +6,7 @@ Per-platform retry configuration and failure reason classification.
 Task 1: Capped retry strategy with platform-specific failure codes
 Task 2: Instagram/TikTok rate limit and access error handling
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -30,6 +31,7 @@ class FailureReason(StrEnum):
 @dataclass
 class PlatformRetryConfig:
     """Per-platform retry tuning."""
+
     max_retries: int
     base_delay_seconds: float
     # Whether to attempt Whisper when no captions found
@@ -46,7 +48,7 @@ PLATFORM_RETRY_CONFIG: dict[Platform, PlatformRetryConfig] = {
         retry_on_rate_limit=True,
     ),
     Platform.INSTAGRAM: PlatformRetryConfig(
-        max_retries=2,           # Instagram rate limits recover slowly
+        max_retries=2,  # Instagram rate limits recover slowly
         base_delay_seconds=3.0,
         whisper_fallback=True,
         retry_on_rate_limit=False,  # Don't hammer IG on 429

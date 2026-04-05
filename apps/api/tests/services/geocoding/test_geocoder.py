@@ -3,35 +3,41 @@ tests/services/geocoding/test_geocoder.py
 
 Tests for the geocoding service — mocked Google Places API responses.
 """
+
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from app.services.extraction.parser import ExtractedLocation
 from app.services.geocoding.geocoder import (
-    GeocodedLocation,
     GeocodingResult,
     geocode_locations,
     haversine_metres,
-    _deduplicate_locations,
-    DEDUP_DISTANCE_METRES,
 )
 
 # ── Fixture helpers ────────────────────────────────────────────
 
+
 def _ext(name: str, conf: float = 0.9, order: int = 0) -> ExtractedLocation:
     return ExtractedLocation(
-        place_name=name, context_quote=f"{name} context",
-        confidence=conf, order=order,
+        place_name=name,
+        context_quote=f"{name} context",
+        confidence=conf,
+        order=order,
     )
+
 
 def _places_response(results: list[dict]) -> dict:
     return {"status": "OK", "results": results}
 
+
 def _place_result(
-    name: str, place_id: str,
-    lat: float, lng: float,
+    name: str,
+    place_id: str,
+    lat: float,
+    lng: float,
     address: str = "Tokyo, Japan",
     country_code: str = "JP",
     city: str = "Tokyo",
@@ -58,15 +64,17 @@ def _mock_http(response_data: dict):
 
 # ── geocode_locations ──────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 class TestGeocodeLocations:
-
     async def test_returns_geocoding_result(self) -> None:
         extracted = [_ext("Shibuya Crossing")]
         resp = _places_response([_place_result("Shibuya Crossing", "ChIJabc", 35.6595, 139.7004)])
 
-        with patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc, \
-             patch("app.services.geocoding.geocoder.get_settings") as ms:
+        with (
+            patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc,
+            patch("app.services.geocoding.geocoder.get_settings") as ms,
+        ):
             ms.return_value.google_places_api_key = "fake-key"
             mc.return_value.__aenter__.return_value.get = AsyncMock(return_value=_mock_http(resp))
             result = await geocode_locations(extracted)
@@ -80,8 +88,10 @@ class TestGeocodeLocations:
         extracted = [_ext("Shibuya Crossing")]
         resp = _places_response([_place_result("Shibuya Crossing", "ChIJabc", 35.6595, 139.7004)])
 
-        with patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc, \
-             patch("app.services.geocoding.geocoder.get_settings") as ms:
+        with (
+            patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc,
+            patch("app.services.geocoding.geocoder.get_settings") as ms,
+        ):
             ms.return_value.google_places_api_key = "fake-key"
             mc.return_value.__aenter__.return_value.get = AsyncMock(return_value=_mock_http(resp))
             result = await geocode_locations(extracted)
@@ -98,8 +108,10 @@ class TestGeocodeLocations:
         extracted = [_ext("Nonexistent Place")]
         resp = {"status": "ZERO_RESULTS", "results": []}
 
-        with patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc, \
-             patch("app.services.geocoding.geocoder.get_settings") as ms:
+        with (
+            patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc,
+            patch("app.services.geocoding.geocoder.get_settings") as ms,
+        ):
             ms.return_value.google_places_api_key = "fake-key"
             mc.return_value.__aenter__.return_value.get = AsyncMock(return_value=_mock_http(resp))
             result = await geocode_locations(extracted)
@@ -111,13 +123,31 @@ class TestGeocodeLocations:
     async def test_multiple_results_marks_ambiguous_and_stores_candidates(self) -> None:
         """Task 4 — ambiguous results store up to 5 candidates."""
         extracted = [_ext("Springfield")]
-        resp = _places_response([
-            _place_result("Springfield, IL", "p1", 39.7817, -89.6501, country_code="US", city="Springfield"),
-            _place_result("Springfield, MO", "p2", 37.2090, -93.2923, country_code="US", city="Springfield"),
-        ])
+        resp = _places_response(
+            [
+                _place_result(
+                    "Springfield, IL",
+                    "p1",
+                    39.7817,
+                    -89.6501,
+                    country_code="US",
+                    city="Springfield",
+                ),
+                _place_result(
+                    "Springfield, MO",
+                    "p2",
+                    37.2090,
+                    -93.2923,
+                    country_code="US",
+                    city="Springfield",
+                ),
+            ]
+        )
 
-        with patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc, \
-             patch("app.services.geocoding.geocoder.get_settings") as ms:
+        with (
+            patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc,
+            patch("app.services.geocoding.geocoder.get_settings") as ms,
+        ):
             ms.return_value.google_places_api_key = "fake-key"
             mc.return_value.__aenter__.return_value.get = AsyncMock(return_value=_mock_http(resp))
             result = await geocode_locations(extracted)
@@ -152,8 +182,10 @@ class TestGeocodeLocations:
             call_idx[0] += 1
             return r
 
-        with patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc, \
-             patch("app.services.geocoding.geocoder.get_settings") as ms:
+        with (
+            patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc,
+            patch("app.services.geocoding.geocoder.get_settings") as ms,
+        ):
             ms.return_value.google_places_api_key = "fake-key"
             mc.return_value.__aenter__.return_value.get = mock_get
             result = await geocode_locations(extracted)
@@ -162,10 +194,13 @@ class TestGeocodeLocations:
 
     async def test_timeout_marks_unresolved(self) -> None:
         import httpx
+
         extracted = [_ext("Slow Place")]
 
-        with patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc, \
-             patch("app.services.geocoding.geocoder.get_settings") as ms:
+        with (
+            patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc,
+            patch("app.services.geocoding.geocoder.get_settings") as ms,
+        ):
             ms.return_value.google_places_api_key = "fake-key"
             mc.return_value.__aenter__.return_value.get = AsyncMock(
                 side_effect=httpx.TimeoutException("timeout")
@@ -201,8 +236,10 @@ class TestGeocodeLocations:
             call_idx[0] += 1
             return r
 
-        with patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc, \
-             patch("app.services.geocoding.geocoder.get_settings") as ms:
+        with (
+            patch("app.services.geocoding.geocoder.httpx.AsyncClient") as mc,
+            patch("app.services.geocoding.geocoder.get_settings") as ms,
+        ):
             ms.return_value.google_places_api_key = "fake-key"
             mc.return_value.__aenter__.return_value.get = mock_get
             result = await geocode_locations(extracted)
@@ -213,6 +250,7 @@ class TestGeocodeLocations:
 
 
 # ── Haversine ──────────────────────────────────────────────────
+
 
 class TestHaversineMetres:
     def test_same_point_is_zero(self) -> None:

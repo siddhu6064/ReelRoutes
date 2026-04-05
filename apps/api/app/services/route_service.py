@@ -14,13 +14,14 @@ Optional start_location: if the user provides a lat/lng starting point
 (e.g. their hotel or the airport), the route begins from the pin closest
 to that location rather than pin[0].
 """
+
 from __future__ import annotations
 
 import math
 from datetime import UTC, datetime
 
 from app.config.logging import get_logger
-from app.middleware.error_handler import AppError, NotFoundError
+from app.middleware.error_handler import AppError
 from app.models.documents import TripDocument
 
 logger = get_logger(__name__)

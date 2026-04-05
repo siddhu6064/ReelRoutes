@@ -4,15 +4,16 @@ tests/services/test_job_service.py
 Unit tests for JobService covering the full lifecycle:
 queued → processing → completed / failed.
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
 import pytest
 
+from app.middleware.error_handler import NotFoundError
 from app.models.documents import JobErrorCode, JobStatus, JobStep, Platform
 from app.services.job_service import JobService
-from app.middleware.error_handler import NotFoundError
 from tests.fixtures.beanie_fixture import beanie_init  # noqa: F401
 
 
@@ -51,6 +52,7 @@ class TestJobServiceGet:
 
     async def test_get_nonexistent_raises(self, beanie_init) -> None:
         from bson import ObjectId
+
         fake_id = str(ObjectId())
         with pytest.raises(NotFoundError):
             await JobService.get(fake_id)
@@ -154,12 +156,12 @@ class TestJobServiceListForUser:
     async def test_list_sorted_newest_first(self, beanie_init) -> None:
         uid = "clerk_sorttest"
         from datetime import timedelta
-        from datetime import UTC, datetime
+
         # Insert two jobs with explicitly different created_at timestamps
         j1 = await JobService.create("https://youtube.com/watch?v=1", Platform.YOUTUBE, uid)
         j1.created_at = datetime.now(UTC) - timedelta(seconds=10)
         await j1.save()
-        j2 = await JobService.create("https://youtube.com/watch?v=2", Platform.YOUTUBE, uid)
+        await JobService.create("https://youtube.com/watch?v=2", Platform.YOUTUBE, uid)
         # j2 is newer by default
         jobs = await JobService.list_for_user(uid)
         assert len(jobs) == 2

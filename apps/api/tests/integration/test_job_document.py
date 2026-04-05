@@ -4,6 +4,7 @@ tests/integration/test_job_document.py
 Integration tests for JobDocument.
 Covers the full job lifecycle: queued → processing → completed/failed.
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -141,9 +142,7 @@ class TestJobQueryPatterns:
         await SeedFactory.job(status=JobStatus.QUEUED)
         await SeedFactory.completed_job()
 
-        queued = await JobDocument.find(
-            JobDocument.status == JobStatus.QUEUED
-        ).to_list()
+        queued = await JobDocument.find(JobDocument.status == JobStatus.QUEUED).to_list()
         assert len(queued) == 2
 
     async def test_find_jobs_by_user(self) -> None:
@@ -152,18 +151,14 @@ class TestJobQueryPatterns:
         await SeedFactory.job(user_id=uid)
         await SeedFactory.job(user_id="clerk_other")
 
-        user_jobs = await JobDocument.find(
-            JobDocument.user_id == uid
-        ).to_list()
+        user_jobs = await JobDocument.find(JobDocument.user_id == uid).to_list()
         assert len(user_jobs) == 2
 
     async def test_find_processing_jobs(self) -> None:
         await SeedFactory.job(status=JobStatus.PROCESSING, progress=40)
         await SeedFactory.job(status=JobStatus.QUEUED)
 
-        processing = await JobDocument.find(
-            JobDocument.status == JobStatus.PROCESSING
-        ).to_list()
+        processing = await JobDocument.find(JobDocument.status == JobStatus.PROCESSING).to_list()
         assert len(processing) == 1
         assert processing[0].progress == 40
 
@@ -195,9 +190,7 @@ class TestJobQueryPatterns:
         await SeedFactory.failed_job()
         await SeedFactory.completed_job()
 
-        count = await JobDocument.find(
-            JobDocument.status == JobStatus.FAILED
-        ).count()
+        count = await JobDocument.find(JobDocument.status == JobStatus.FAILED).count()
         assert count == 2
 
 

@@ -5,6 +5,7 @@ Configures structlog for structured JSON logging in production
 and pretty console logging in local/test environments.
 All log lines include request_id, env, and version automatically.
 """
+
 from __future__ import annotations
 
 import logging
@@ -40,7 +41,9 @@ def configure_logging() -> None:
             *shared_processors,
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
-        wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG if settings.debug else logging.INFO),
+        wrapper_class=structlog.make_filtering_bound_logger(
+            logging.DEBUG if settings.debug else logging.INFO
+        ),
         context_class=dict,
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
@@ -67,8 +70,8 @@ def configure_logging() -> None:
 
 
 def _add_app_context(
-    logger: logging.Logger,
-    method_name: str,
+    logger: logging.Logger,  # noqa: ARG001 — required by structlog processor signature
+    method_name: str,  # noqa: ARG001 — required by structlog processor signature
     event_dict: structlog.types.EventDict,
 ) -> structlog.types.EventDict:
     settings = get_settings()

@@ -6,9 +6,9 @@ Tests for the three high-priority competitor gap features:
   2. Day-by-day itinerary generation (geo sort + day splitting)
   3. Route optimisation (nearest-neighbour TSP)
 """
+
 from __future__ import annotations
 
-import math
 import pytest
 
 from app.routers.trips import _video_deep_link
@@ -26,8 +26,8 @@ from app.services.route_service import (
 from app.utils.seed import SeedFactory, make_pin
 from tests.fixtures.beanie_fixture import beanie_init  # noqa: F401
 
-
 # ── Feature 1: Video deep links ───────────────────────────────
+
 
 class TestVideoDeepLink:
     def test_youtube_adds_timestamp(self):
@@ -72,6 +72,7 @@ class TestVideoDeepLink:
 
 # ── Feature 2: Itinerary generation ───────────────────────────
 
+
 class TestHaversine:
     def test_same_point_zero(self):
         assert _haversine(51.5, -0.1, 51.5, -0.1) == pytest.approx(0.0)
@@ -90,14 +91,15 @@ class TestGeoSort:
     def test_sorts_to_shorter_path(self):
         """Geo-sorted path should be shorter than original random order."""
         pins = [
-            make_pin(order=0, lat=48.8566, lng=2.3522),   # Paris
+            make_pin(order=0, lat=48.8566, lng=2.3522),  # Paris
             make_pin(order=1, lat=35.6762, lng=139.6503),  # Tokyo
-            make_pin(order=2, lat=48.1351, lng=11.5820),   # Munich
-            make_pin(order=3, lat=51.5074, lng=-0.1278),   # London
+            make_pin(order=2, lat=48.1351, lng=11.5820),  # Munich
+            make_pin(order=3, lat=51.5074, lng=-0.1278),  # London
         ]
 
         class FakeTrip:
-            def __init__(self): self.pins = pins
+            def __init__(self):
+                self.pins = pins
 
         sorted_pins = _geo_sort_pins(FakeTrip())
         original_dist = _total_distance(pins)
@@ -109,7 +111,8 @@ class TestGeoSort:
         pins = [make_pin(order=0, lat=51.5, lng=-0.1)]
 
         class FakeTrip:
-            def __init__(self): self.pins = pins
+            def __init__(self):
+                self.pins = pins
 
         result = _geo_sort_pins(FakeTrip())
         assert len(result) == 1
@@ -158,7 +161,7 @@ class TestGenerateItinerary:
 
     async def test_raises_on_invalid_days(self, beanie_init):
         trip = await SeedFactory.trip(pins=[make_pin(order=0)])
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017 — AppError subclass, validated by message check
             await generate_itinerary(trip, 0)
 
     async def test_all_pins_assigned(self, beanie_init):
@@ -172,11 +175,12 @@ class TestGenerateItinerary:
 
 # ── Feature 3: Route optimisation ─────────────────────────────
 
+
 class TestTotalDistance:
     def test_single_pair(self):
         pins = [
             make_pin(order=0, lat=51.5074, lng=-0.1278),  # London
-            make_pin(order=1, lat=48.8566, lng=2.3522),   # Paris
+            make_pin(order=1, lat=48.8566, lng=2.3522),  # Paris
         ]
         dist = _total_distance(pins)
         assert 340 < dist < 345
@@ -184,7 +188,7 @@ class TestTotalDistance:
     def test_two_pairs_sum(self):
         pins = [
             make_pin(order=0, lat=51.5074, lng=-0.1278),  # London
-            make_pin(order=1, lat=48.8566, lng=2.3522),   # Paris
+            make_pin(order=1, lat=48.8566, lng=2.3522),  # Paris
             make_pin(order=2, lat=48.1351, lng=11.5820),  # Munich
         ]
         d_total = _total_distance(pins)
@@ -200,10 +204,10 @@ class TestNearestNeighbour:
         Optimised: should cluster European cities together.
         """
         pins = [
-            make_pin(order=0, lat=51.5074, lng=-0.1278),   # London
+            make_pin(order=0, lat=51.5074, lng=-0.1278),  # London
             make_pin(order=1, lat=35.6762, lng=139.6503),  # Tokyo
-            make_pin(order=2, lat=48.8566, lng=2.3522),    # Paris
-            make_pin(order=3, lat=48.1351, lng=11.5820),   # Munich
+            make_pin(order=2, lat=48.8566, lng=2.3522),  # Paris
+            make_pin(order=3, lat=48.1351, lng=11.5820),  # Munich
         ]
         original_dist = _total_distance(pins)
         optimised = _nearest_neighbour(pins, start_idx=0)
@@ -212,10 +216,7 @@ class TestNearestNeighbour:
 
     def test_already_optimal_unchanged_distance(self):
         """Sequential close pins: nearest-neighbour should find same/similar distance."""
-        pins = [
-            make_pin(order=i, lat=48.0 + i * 0.1, lng=2.3)
-            for i in range(5)
-        ]
+        pins = [make_pin(order=i, lat=48.0 + i * 0.1, lng=2.3) for i in range(5)]
         original_dist = _total_distance(pins)
         optimised = _nearest_neighbour(pins, start_idx=0)
         optimised_dist = _total_distance(optimised)
@@ -234,10 +235,10 @@ class TestOptimiseRoute:
     async def test_reduces_distance(self, beanie_init):
         """Zig-zag order should be improved by optimisation."""
         pins = [
-            make_pin(order=0, lat=51.5074, lng=-0.1278),   # London
+            make_pin(order=0, lat=51.5074, lng=-0.1278),  # London
             make_pin(order=1, lat=35.6762, lng=139.6503),  # Tokyo
-            make_pin(order=2, lat=48.8566, lng=2.3522),    # Paris
-            make_pin(order=3, lat=48.1351, lng=11.5820),   # Munich
+            make_pin(order=2, lat=48.8566, lng=2.3522),  # Paris
+            make_pin(order=3, lat=48.1351, lng=11.5820),  # Munich
         ]
         trip = await SeedFactory.trip(pins=pins)
         _, original_km, optimised_km = await optimise_route(trip)
@@ -265,15 +266,13 @@ class TestOptimiseRoute:
     async def test_start_location_affects_first_pin(self, beanie_init):
         """Starting near Munich (lat=48, lng=11.5) should make the Munich-coordinate pin first."""
         pins = [
-            make_pin(order=0, lat=51.5074, lng=-0.1278),   # London coords
-            make_pin(order=1, lat=48.1351, lng=11.5820),   # Munich coords
-            make_pin(order=2, lat=48.8566, lng=2.3522),    # Paris coords
+            make_pin(order=0, lat=51.5074, lng=-0.1278),  # London coords
+            make_pin(order=1, lat=48.1351, lng=11.5820),  # Munich coords
+            make_pin(order=2, lat=48.8566, lng=2.3522),  # Paris coords
         ]
         trip = await SeedFactory.trip(pins=pins)
         # Start very close to Munich coordinates
-        updated_trip, _, _ = await optimise_route(
-            trip, start_lat=48.0, start_lng=11.5
-        )
+        updated_trip, _, _ = await optimise_route(trip, start_lat=48.0, start_lng=11.5)
         first_pin = min(updated_trip.pins, key=lambda p: p.order)
         # The first pin should be the one with Munich coordinates (48.1351, 11.582)
         assert abs(first_pin.lat - 48.1351) < 0.01 and abs(first_pin.lng - 11.582) < 0.01

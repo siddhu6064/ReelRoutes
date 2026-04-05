@@ -5,6 +5,7 @@ Task 8 — extraction.service.test with mocked multi-platform inputs.
 Covers rich (YouTube CC), medium (Instagram description), sparse (hashtags only),
 Whisper fallback, chunked extraction, and Job document persistence.
 """
+
 from __future__ import annotations
 
 import json
@@ -14,7 +15,6 @@ import pytest
 
 from app.adapters.base import AdapterOutput, CaptionsSource
 from app.models.documents import Platform
-from app.services.extraction.parser import ExtractedLocation
 from app.services.extraction.service import (
     ExtractionResult,
     ExtractionService,
@@ -23,22 +23,65 @@ from app.services.extraction.service import (
 from app.services.extraction.signals import SignalType
 from tests.fixtures.beanie_fixture import beanie_init  # noqa: F401
 
-
 # ── Shared fixtures ────────────────────────────────────────────
 
-JAPAN_LOCATIONS_JSON = json.dumps([
-    {"place_name": "Shibuya Crossing", "context_quote": "We started at Shibuya", "confidence": 0.97, "timestamp_hint": 135.0},
-    {"place_name": "Senso-ji Temple", "context_quote": "Oldest temple in Tokyo", "confidence": 0.94, "timestamp_hint": 810.0},
-    {"place_name": "Fushimi Inari Taisha", "context_quote": "Ten thousand torii gates", "confidence": 0.96, "timestamp_hint": 3120.0},
-    {"place_name": "Arashiyama Bamboo Grove", "context_quote": "The bamboo grove is surreal", "confidence": 0.93, "timestamp_hint": 3136.7},
-    {"place_name": "Dotonbori", "context_quote": "Osaka food scene at Dotonbori", "confidence": 0.91, "timestamp_hint": 4920.0},
-])
+JAPAN_LOCATIONS_JSON = json.dumps(
+    [
+        {
+            "place_name": "Shibuya Crossing",
+            "context_quote": "We started at Shibuya",
+            "confidence": 0.97,
+            "timestamp_hint": 135.0,
+        },
+        {
+            "place_name": "Senso-ji Temple",
+            "context_quote": "Oldest temple in Tokyo",
+            "confidence": 0.94,
+            "timestamp_hint": 810.0,
+        },
+        {
+            "place_name": "Fushimi Inari Taisha",
+            "context_quote": "Ten thousand torii gates",
+            "confidence": 0.96,
+            "timestamp_hint": 3120.0,
+        },
+        {
+            "place_name": "Arashiyama Bamboo Grove",
+            "context_quote": "The bamboo grove is surreal",
+            "confidence": 0.93,
+            "timestamp_hint": 3136.7,
+        },
+        {
+            "place_name": "Dotonbori",
+            "context_quote": "Osaka food scene at Dotonbori",
+            "confidence": 0.91,
+            "timestamp_hint": 4920.0,
+        },
+    ]
+)
 
-BALI_LOCATIONS_JSON = json.dumps([
-    {"place_name": "Ubud Monkey Forest", "context_quote": "Feed the monkeys carefully", "confidence": 0.92, "timestamp_hint": None},
-    {"place_name": "Tegallalang Rice Terraces", "context_quote": "Tegallalang at sunrise", "confidence": 0.90, "timestamp_hint": None},
-    {"place_name": "Mount Batur", "context_quote": "Woke up at 2am for this hike", "confidence": 0.88, "timestamp_hint": None},
-])
+BALI_LOCATIONS_JSON = json.dumps(
+    [
+        {
+            "place_name": "Ubud Monkey Forest",
+            "context_quote": "Feed the monkeys carefully",
+            "confidence": 0.92,
+            "timestamp_hint": None,
+        },
+        {
+            "place_name": "Tegallalang Rice Terraces",
+            "context_quote": "Tegallalang at sunrise",
+            "confidence": 0.90,
+            "timestamp_hint": None,
+        },
+        {
+            "place_name": "Mount Batur",
+            "context_quote": "Woke up at 2am for this hike",
+            "confidence": 0.88,
+            "timestamp_hint": None,
+        },
+    ]
+)
 
 
 def _make_output(
@@ -68,6 +111,7 @@ def _make_output(
 
 # ── ExtractionService.extract tests ───────────────────────────
 
+
 @pytest.mark.asyncio
 class TestExtractionServiceRichSignal:
     """YouTube with full CC transcript — richest case."""
@@ -79,7 +123,10 @@ class TestExtractionServiceRichSignal:
             captions_source=CaptionsSource.YOUTUBE_CC,
             has_captions=True,
         )
-        with patch("app.services.extraction.service._call_gpt4o", AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 312))):
+        with patch(
+            "app.services.extraction.service._call_gpt4o",
+            AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 312)),
+        ):
             result = await ExtractionService.extract(out)
 
         assert result.ok
@@ -94,7 +141,10 @@ class TestExtractionServiceRichSignal:
             captions_source=CaptionsSource.YOUTUBE_CC,
             has_captions=True,
         )
-        with patch("app.services.extraction.service._call_gpt4o", AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 200))):
+        with patch(
+            "app.services.extraction.service._call_gpt4o",
+            AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 200)),
+        ):
             result = await ExtractionService.extract(out)
 
         assert all(loc.confidence >= 0.4 for loc in result.locations)
@@ -106,7 +156,10 @@ class TestExtractionServiceRichSignal:
             captions_source=CaptionsSource.YOUTUBE_CC,
             has_captions=True,
         )
-        with patch("app.services.extraction.service._call_gpt4o", AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 200))):
+        with patch(
+            "app.services.extraction.service._call_gpt4o",
+            AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 200)),
+        ):
             result = await ExtractionService.extract(out)
 
         orders = [loc.order for loc in result.locations]
@@ -119,7 +172,10 @@ class TestExtractionServiceRichSignal:
             captions_source=CaptionsSource.YOUTUBE_CC,
             has_captions=True,
         )
-        with patch("app.services.extraction.service._call_gpt4o", AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 200))):
+        with patch(
+            "app.services.extraction.service._call_gpt4o",
+            AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 200)),
+        ):
             result = await ExtractionService.extract(out)
 
         # First location should have a timestamp_hint from the fixture
@@ -138,7 +194,10 @@ class TestExtractionServiceMediumSignal:
             hashtags=["bali", "indonesia", "travel"],
             location_tag="Ubud, Bali, Indonesia",
         )
-        with patch("app.services.extraction.service._call_gpt4o", AsyncMock(return_value=(BALI_LOCATIONS_JSON, 180))):
+        with patch(
+            "app.services.extraction.service._call_gpt4o",
+            AsyncMock(return_value=(BALI_LOCATIONS_JSON, 180)),
+        ):
             result = await ExtractionService.extract(out)
 
         assert result.ok
@@ -169,15 +228,19 @@ class TestExtractionServiceSparseSignal:
     """Hashtags-only signal — sparsest case."""
 
     async def test_extracts_from_hashtags_only(self) -> None:
-        sparse_json = json.dumps([
-            {"place_name": "Morocco", "context_quote": "#morocco", "confidence": 0.55},
-            {"place_name": "Marrakech", "context_quote": "#marrakech", "confidence": 0.58},
-        ])
+        sparse_json = json.dumps(
+            [
+                {"place_name": "Morocco", "context_quote": "#morocco", "confidence": 0.55},
+                {"place_name": "Marrakech", "context_quote": "#marrakech", "confidence": 0.58},
+            ]
+        )
         out = _make_output(
             Platform.TIKTOK,
             hashtags=["morocco", "marrakech", "travel"],
         )
-        with patch("app.services.extraction.service._call_gpt4o", AsyncMock(return_value=(sparse_json, 80))):
+        with patch(
+            "app.services.extraction.service._call_gpt4o", AsyncMock(return_value=(sparse_json, 80))
+        ):
             result = await ExtractionService.extract(out)
 
         assert result.ok
@@ -204,9 +267,20 @@ class TestExtractionServiceWhisperFallback:
         )
         mock_whisper_transcript = "We started in Marrakech then drove to Chefchaouen."
         whisper_mock = AsyncMock(return_value=(mock_whisper_transcript, [], CaptionsSource.WHISPER))
-        gpt_mock = AsyncMock(return_value=(json.dumps([
-            {"place_name": "Marrakech", "context_quote": "Started in Marrakech", "confidence": 0.9},
-        ]), 100))
+        gpt_mock = AsyncMock(
+            return_value=(
+                json.dumps(
+                    [
+                        {
+                            "place_name": "Marrakech",
+                            "context_quote": "Started in Marrakech",
+                            "confidence": 0.9,
+                        },
+                    ]
+                ),
+                100,
+            )
+        )
 
         with (
             patch("app.services.extraction.service.transcribe_url", whisper_mock),
@@ -228,7 +302,10 @@ class TestExtractionServiceWhisperFallback:
         whisper_mock = AsyncMock()
         with (
             patch("app.services.extraction.service.transcribe_url", whisper_mock),
-            patch("app.services.extraction.service._call_gpt4o", AsyncMock(return_value=(BALI_LOCATIONS_JSON, 100))),
+            patch(
+                "app.services.extraction.service._call_gpt4o",
+                AsyncMock(return_value=(BALI_LOCATIONS_JSON, 100)),
+            ),
         ):
             await ExtractionService.extract(out)
 
@@ -270,8 +347,10 @@ class TestExtractionServiceChunking:
             has_captions=True,
         )
         # Each chunk returns the same locations (extreme overlap scenario)
-        with patch("app.services.extraction.service._call_gpt4o",
-                   AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 200))):
+        with patch(
+            "app.services.extraction.service._call_gpt4o",
+            AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 200)),
+        ):
             result = await ExtractionService.extract(out)
 
         place_names = [loc.place_name for loc in result.locations]
@@ -308,6 +387,7 @@ class TestExtractionServiceJobPersistence:
 
     async def test_extraction_persisted_to_job(self, beanie_init) -> None:
         from app.utils.seed import SeedFactory
+
         job = await SeedFactory.job()
 
         out = _make_output(
@@ -316,12 +396,14 @@ class TestExtractionServiceJobPersistence:
             captions_source=CaptionsSource.YOUTUBE_CC,
             has_captions=True,
         )
-        with patch("app.services.extraction.service._call_gpt4o",
-                   AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 312))):
+        with patch(
+            "app.services.extraction.service._call_gpt4o",
+            AsyncMock(return_value=(JAPAN_LOCATIONS_JSON, 312)),
+        ):
             await ExtractionService.extract(out, job=job)
 
         from app.services.job_service import JobService
-        from bson import ObjectId
+
         reloaded = await JobService.get(str(job.id))
 
         assert len(reloaded.extracted_places) == 5
@@ -334,6 +416,7 @@ class TestExtractionServiceJobPersistence:
 
     async def test_extraction_persisted_signal_type(self, beanie_init) -> None:
         from app.utils.seed import SeedFactory
+
         job = await SeedFactory.job()
 
         out = _make_output(
@@ -341,11 +424,14 @@ class TestExtractionServiceJobPersistence:
             description="📍 Ubud Monkey Forest\n📍 Tegallalang",
             hashtags=["bali"],
         )
-        with patch("app.services.extraction.service._call_gpt4o",
-                   AsyncMock(return_value=(BALI_LOCATIONS_JSON, 150))):
+        with patch(
+            "app.services.extraction.service._call_gpt4o",
+            AsyncMock(return_value=(BALI_LOCATIONS_JSON, 150)),
+        ):
             await ExtractionService.extract(out, job=job)
 
         from app.services.job_service import JobService
+
         reloaded = await JobService.get(str(job.id))
         assert all(p["signal_type"] == SignalType.DESCRIPTION for p in reloaded.extracted_places)
 

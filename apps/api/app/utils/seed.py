@@ -14,6 +14,7 @@ Usage for local dev seeding:
 
 All factories accept keyword overrides — only provide what you need to vary.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -31,7 +32,6 @@ from app.models.documents import (
     TripDocument,
     UserDocument,
 )
-
 
 # ── Pin factory ────────────────────────────────────────────────
 
@@ -117,6 +117,7 @@ def make_pins(count: int = 3) -> list[PinDocument]:
 
 
 # ── SeedFactory ────────────────────────────────────────────────
+
 
 class SeedFactory:
     """
@@ -216,6 +217,7 @@ class SeedFactory:
     async def failed_job(user_id: str | None = None, **overrides: Any) -> JobDocument:
         """Insert a failed job with error details."""
         from app.models.documents import JobErrorCode
+
         return await SeedFactory.job(
             user_id=user_id,
             status=JobStatus.FAILED,
@@ -273,6 +275,7 @@ class SeedFactory:
 
 # ── Local dev seeding script ───────────────────────────────────
 
+
 async def seed_local_db() -> None:
     """
     Seed a local MongoDB database with realistic dev data.
@@ -280,6 +283,7 @@ async def seed_local_db() -> None:
     """
     import motor.motor_asyncio
     from beanie import init_beanie
+
     from app.config.settings import get_settings
     from app.models.documents import ALL_DOCUMENTS
 
@@ -290,15 +294,12 @@ async def seed_local_db() -> None:
     print(f"Seeding {settings.mongodb_db}...")
 
     # Create 3 independent user scenarios
-    for i in range(3):
+    for _i in range(3):
         scenario = await SeedFactory.full_scenario()
         user = scenario["user"]
         trips = scenario["trips"]
         jobs = scenario["jobs"]
-        print(
-            f"  Created user {user.email}: "
-            f"{len(trips)} trips, {len(jobs)} jobs"
-        )
+        print(f"  Created user {user.email}: " f"{len(trips)} trips, {len(jobs)} jobs")
 
     # One guest trip
     await SeedFactory.guest_trip(title="Anonymous Bali Trip")

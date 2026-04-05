@@ -17,6 +17,7 @@ flattens them into a consistent structure before the LLM call:
   signal_type  — which signal is primary (for analytics / debugging)
   token_count  — pre-computed tiktoken count of the best_text field
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -39,11 +40,12 @@ class SignalType(StrEnum):
     Records which source produced the primary extraction text.
     Stored on Job.extracted_places for analytics.
     """
-    YOUTUBE_CC = "youtube_cc"       # YouTube closed captions
-    WHISPER = "whisper"             # OpenAI Whisper transcription
-    DESCRIPTION = "description"     # Platform description / caption
-    HASHTAGS = "hashtags"           # Hashtags only — sparsest
-    NONE = "none"                   # No usable signal
+
+    YOUTUBE_CC = "youtube_cc"  # YouTube closed captions
+    WHISPER = "whisper"  # OpenAI Whisper transcription
+    DESCRIPTION = "description"  # Platform description / caption
+    HASHTAGS = "hashtags"  # Hashtags only — sparsest
+    NONE = "none"  # No usable signal
 
 
 @dataclass
@@ -52,13 +54,14 @@ class ExtractionSignals:
     Normalised signal bundle consumed by ExtractionService.
     Built from AdapterOutput via build_signals().
     """
+
     # ── Primary text ───────────────────────────────────────────
-    best_text: str                          # richest available text for extraction
-    signal_type: SignalType                 # which source produced best_text
-    token_count: int                        # tiktoken count of best_text
+    best_text: str  # richest available text for extraction
+    signal_type: SignalType  # which source produced best_text
+    token_count: int  # tiktoken count of best_text
 
     # ── All available signals ──────────────────────────────────
-    transcript: str | None = None           # full plain-text transcript
+    transcript: str | None = None  # full plain-text transcript
     segments: list[TranscriptSegment] = field(default_factory=list)
     description: str | None = None
     hashtags: list[str] = field(default_factory=list)
@@ -67,7 +70,7 @@ class ExtractionSignals:
     platform: Platform = Platform.UNKNOWN
 
     # ── Diagnostics ────────────────────────────────────────────
-    signal_quality: str = "sparse"          # rich / medium / sparse
+    signal_quality: str = "sparse"  # rich / medium / sparse
 
     @property
     def has_timed_segments(self) -> bool:
@@ -108,12 +111,13 @@ class ExtractionSignals:
 
 # ── Token thresholds ───────────────────────────────────────────
 
-CHUNK_THRESHOLD_TOKENS = 4_000    # above this, use chunking strategy
-CHUNK_SIZE_TOKENS = 2_000         # target size per chunk
-CHUNK_OVERLAP_TOKENS = 200        # overlap between chunks to catch boundary places
+CHUNK_THRESHOLD_TOKENS = 4_000  # above this, use chunking strategy
+CHUNK_SIZE_TOKENS = 2_000  # target size per chunk
+CHUNK_OVERLAP_TOKENS = 200  # overlap between chunks to catch boundary places
 
 
 # ── Builder ────────────────────────────────────────────────────
+
 
 def build_signals(adapter_output: AdapterOutput) -> ExtractionSignals:
     """

@@ -18,6 +18,7 @@ Apple Maps notes:
   - On macOS: double-click the .gpx — Maps opens it directly
   - Individual pin links use https://maps.apple.com/?q=name&ll=lat,lng
 """
+
 from __future__ import annotations
 
 import urllib.parse
@@ -26,7 +27,6 @@ from datetime import UTC, datetime
 from typing import Literal
 
 from app.models.documents import PinDocument, TripDocument
-
 
 ExportFormat = Literal["google_maps", "apple_maps", "kml", "gpx", "geojson"]
 
@@ -111,6 +111,7 @@ def export_trip(
 
 # ── Format builders ────────────────────────────────────────────
 
+
 def _google_maps_url(pins: list[PinDocument]) -> str:
     """
     Builds a Google Maps URL with all pins as ordered waypoints.
@@ -149,11 +150,13 @@ def _apple_maps_pin_links(pins: list[PinDocument]) -> list[dict]:
         name_encoded = urllib.parse.quote(p.place_name)
         # maps.apple.com links work as universal links — iOS opens Maps.app directly
         url = f"https://maps.apple.com/?q={name_encoded}&ll={p.lat},{p.lng}"
-        links.append({
-            "name": p.place_name,
-            "url": url,
-            "address": p.address,
-        })
+        links.append(
+            {
+                "name": p.place_name,
+                "url": url,
+                "address": p.address,
+            }
+        )
     return links
 
 
@@ -165,13 +168,16 @@ def _gpx(trip: TripDocument, pins: list[PinDocument]) -> str:
     On iOS: tap a .gpx file → share → 'Open in Maps' → all pins appear.
     On macOS: double-click → Maps imports automatically.
     """
-    root = ET.Element("gpx", {
-        "version": "1.1",
-        "creator": "ReelRoutes",
-        "xmlns": "http://www.topografix.com/GPX/1/1",
-        "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-        "xsi:schemaLocation": "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd",
-    })
+    root = ET.Element(
+        "gpx",
+        {
+            "version": "1.1",
+            "creator": "ReelRoutes",
+            "xmlns": "http://www.topografix.com/GPX/1/1",
+            "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            "xsi:schemaLocation": "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd",
+        },
+    )
 
     metadata = ET.SubElement(root, "metadata")
     ET.SubElement(metadata, "name").text = trip.title
@@ -251,25 +257,27 @@ def _geojson(trip: TripDocument, pins: list[PinDocument]) -> str:
 
     features = []
     for i, pin in enumerate(pins):
-        features.append({
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [pin.lng, pin.lat],
-            },
-            "properties": {
-                "order": i + 1,
-                "name": pin.place_name,
-                "address": pin.address,
-                "city": pin.city,
-                "country_code": pin.country_code,
-                "context_quote": pin.context_quote,
-                "timestamp_hint": pin.timestamp_hint,
-                "confidence": pin.confidence,
-                "notes": pin.notes,
-                "tags": pin.tags,
-            },
-        })
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [pin.lng, pin.lat],
+                },
+                "properties": {
+                    "order": i + 1,
+                    "name": pin.place_name,
+                    "address": pin.address,
+                    "city": pin.city,
+                    "country_code": pin.country_code,
+                    "context_quote": pin.context_quote,
+                    "timestamp_hint": pin.timestamp_hint,
+                    "confidence": pin.confidence,
+                    "notes": pin.notes,
+                    "tags": pin.tags,
+                },
+            }
+        )
 
     collection = {
         "type": "FeatureCollection",
@@ -288,6 +296,7 @@ def _geojson(trip: TripDocument, pins: list[PinDocument]) -> str:
 def _safe_filename(title: str) -> str:
     """Convert a trip title to a safe filename."""
     import re
-    safe = re.sub(r'[^\w\s-]', '', title)
-    safe = re.sub(r'[\s]+', '-', safe.strip())
+
+    safe = re.sub(r"[^\w\s-]", "", title)
+    safe = re.sub(r"[\s]+", "-", safe.strip())
     return safe[:60] or "ReelRoutes-Trip"

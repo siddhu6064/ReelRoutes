@@ -4,14 +4,14 @@ tests/integration/test_trip_document.py
 Integration tests for TripDocument and embedded PinDocument.
 Covers insert, read, pin operations, and sharing lifecycle.
 """
+
 from __future__ import annotations
 
 import secrets
-import uuid
 
 import pytest
 
-from app.models.documents import Platform, PinDocument, TripDocument
+from app.models.documents import Platform, TripDocument
 from app.utils.seed import SeedFactory, make_pin, make_pins
 
 
@@ -83,18 +83,14 @@ class TestTripQueryPatterns:
         await SeedFactory.trip(user_id=user_id, title="Trip B")
         await SeedFactory.trip(user_id="clerk_other", title="Other user trip")
 
-        user_trips = await TripDocument.find(
-            TripDocument.user_id == user_id
-        ).to_list()
+        user_trips = await TripDocument.find(TripDocument.user_id == user_id).to_list()
         assert len(user_trips) == 2
         titles = {t.title for t in user_trips}
         assert "Trip A" in titles
         assert "Trip B" in titles
 
     async def test_find_trips_sorted_newest_first(self) -> None:
-        from datetime import timedelta
-        from datetime import UTC
-        from datetime import datetime
+        from datetime import UTC, datetime, timedelta
 
         uid = "clerk_sort"
         now = datetime.now(UTC)
@@ -112,9 +108,11 @@ class TestTripQueryPatterns:
         t3.created_at = now
         await t3.save()
 
-        trips = await TripDocument.find(
-            TripDocument.user_id == uid
-        ).sort(-TripDocument.created_at).to_list()
+        trips = (
+            await TripDocument.find(TripDocument.user_id == uid)
+            .sort(-TripDocument.created_at)
+            .to_list()
+        )
 
         assert trips[0].title == "Newest"
         assert trips[-1].title == "Oldest"

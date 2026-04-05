@@ -15,9 +15,12 @@ Fetch strategy:
 Rate limits: YouTube Data API = 10,000 units/day on free tier.
 A videos.list call costs 1 unit. Safe for hundreds of imports/day.
 """
+
 from __future__ import annotations
 
+import asyncio
 import re
+from functools import partial
 from typing import Any
 
 import httpx
@@ -172,9 +175,7 @@ class YouTubeAdapter(BaseAdapter):
         Sets output.transcript, output.caption_segments, output.captions_source.
         """
         try:
-            transcript_list = await _run_in_thread(
-                YouTubeTranscriptApi.list_transcripts, video_id
-            )
+            transcript_list = await _run_in_thread(YouTubeTranscriptApi.list_transcripts, video_id)
 
             # Preference order for transcript selection
             transcript = None
@@ -228,9 +229,6 @@ class YouTubeAdapter(BaseAdapter):
 
 
 # ── Thread helper for sync youtube-transcript-api calls ────────
-
-import asyncio
-from functools import partial
 
 
 async def _run_in_thread(fn, *args, **kwargs):

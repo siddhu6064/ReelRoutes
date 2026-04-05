@@ -5,6 +5,7 @@ AI travel assistant backed by GPT-4o.
 Each request includes the full trip context in the system prompt so the
 assistant can answer precise questions about the specific trip.
 """
+
 from __future__ import annotations
 
 from app.config.logging import get_logger
@@ -41,7 +42,13 @@ def _build_system_prompt(trip: TripDocument) -> str:
         f"{i + 1}. {p.place_name}"
         + (f", {p.city}" if p.city else "")
         + (f" ({p.country_code})" if p.country_code else "")
-        + (f' — "{p.context_quote[:80]}…"' if p.context_quote and len(p.context_quote) > 80 else f' — "{p.context_quote}"' if p.context_quote else "")
+        + (
+            f' — "{p.context_quote[:80]}…"'
+            if p.context_quote and len(p.context_quote) > 80
+            else f' — "{p.context_quote}"'
+            if p.context_quote
+            else ""
+        )
         for i, p in enumerate(sorted(trip.pins, key=lambda p: p.order))
     )
     return _SYSTEM_TEMPLATE.format(
@@ -73,6 +80,7 @@ async def chat(
 
     try:
         from openai import AsyncOpenAI  # lazy import — not needed until chat is called
+
         client = AsyncOpenAI(api_key=settings.openai_api_key)
 
         messages: list[dict] = [{"role": "system", "content": _build_system_prompt(trip)}]
@@ -87,7 +95,11 @@ async def chat(
             temperature=0.7,
         )
         reply = response.choices[0].message.content or ""
-        logger.info("chat_response_generated", trip_id=str(trip.id), tokens=response.usage.total_tokens if response.usage else 0)
+        logger.info(
+            "chat_response_generated",
+            trip_id=str(trip.id),
+            tokens=response.usage.total_tokens if response.usage else 0,
+        )
         return reply
 
     except Exception as exc:
@@ -103,9 +115,11 @@ def _mock_response(message: str, trip: TripDocument) -> str:
     if any(w in msg_lower for w in ["itinerary", "day", "schedule", "plan"]):
         days = []
         for i in range(0, len(stops), 2):
-            day_stops = stops[i:i+2]
+            day_stops = stops[i : i + 2]
             days.append(f"**Day {i//2 + 1}:** {' → '.join(day_stops)}")
-        return "Here's a suggested itinerary:\n\n" + "\n".join(days) + "\n\nAllow 2-3 hours per stop."
+        return (
+            "Here's a suggested itinerary:\n\n" + "\n".join(days) + "\n\nAllow 2-3 hours per stop."
+        )
 
     if any(w in msg_lower for w in ["budget", "cost", "money", "price"]):
         return f"For a trip to {stops[0] if stops else 'this destination'}, budget roughly $100-150/day for mid-range travel (accommodation, meals, transport). Entry fees are typically $5-20 per attraction."
@@ -114,6 +128,6 @@ def _mock_response(message: str, trip: TripDocument) -> str:
         return "Packing essentials: comfortable walking shoes, layers for varying temperatures, a compact daypack, reusable water bottle, portable charger, and a camera. Check local weather before you go!"
 
     if any(w in msg_lower for w in ["season", "time", "when", "best"]):
-        return f"Spring (March-May) and autumn (September-November) tend to offer the best balance of weather and fewer crowds for this type of trip. Avoid major local holidays if you prefer quieter experiences."
+        return "Spring (March-May) and autumn (September-November) tend to offer the best balance of weather and fewer crowds for this type of trip. Avoid major local holidays if you prefer quieter experiences."
 
     return f"Great question about your {trip.title} trip! With {len(stops)} stops including {', '.join(stops[:3])}{'...' if len(stops) > 3 else ''}, you have a fantastic itinerary. What specific aspect would you like to explore?"

@@ -14,6 +14,7 @@ Strategy:
   - Classify errors into retryable vs. permanent before retrying
   - Provide clear user-facing messages per failure type
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -47,8 +48,7 @@ ERROR_MESSAGES: dict[AdapterErrorType, str] = {
         "We extracted what we could from the description and hashtags."
     ),
     AdapterErrorType.PRIVATE_CONTENT: (
-        "This video is private or requires login. "
-        "Only public videos can be imported."
+        "This video is private or requires login. " "Only public videos can be imported."
     ),
     AdapterErrorType.GEO_BLOCKED: (
         "This video isn't available in our server's region. "
@@ -59,12 +59,10 @@ ERROR_MESSAGES: dict[AdapterErrorType, str] = {
         "Processing continued with available signals."
     ),
     AdapterErrorType.NETWORK_ERROR: (
-        "Network error fetching video. "
-        "Processing continued with available signals."
+        "Network error fetching video. " "Processing continued with available signals."
     ),
     AdapterErrorType.UNKNOWN: (
-        "Could not fetch full video metadata. "
-        "Extracted what was available."
+        "Could not fetch full video metadata. " "Extracted what was available."
     ),
 }
 
@@ -108,8 +106,16 @@ def classify_error(exc: Exception) -> ClassifiedError:
             raw_message=str(exc),
         )
 
-    if any(x in msg for x in ("unable to extract", "unsupported url", "no video formats",
-                               "format changed", "sign_in_required")):
+    if any(
+        x in msg
+        for x in (
+            "unable to extract",
+            "unsupported url",
+            "no video formats",
+            "format changed",
+            "sign_in_required",
+        )
+    ):
         return ClassifiedError(
             AdapterErrorType.STALE_YTDLP,
             retryable=False,
@@ -151,7 +157,6 @@ async def ytdlp_extract_with_retry(
     from app.adapters._ytdlp_mixin import ytdlp_extract
 
     warnings: list[str] = []
-    last_error: ClassifiedError | None = None
 
     for attempt in range(max_retries + 1):
         try:
@@ -162,7 +167,6 @@ async def ytdlp_extract_with_retry(
 
         except Exception as exc:
             classified = classify_error(exc)
-            last_error = classified
 
             logger.warning(
                 "ytdlp_error",
@@ -179,7 +183,7 @@ async def ytdlp_extract_with_retry(
                 return {}, warnings
 
             if attempt < max_retries:
-                delay = base_delay * (2 ** attempt)
+                delay = base_delay * (2**attempt)
                 logger.info("ytdlp_retrying", attempt=attempt + 1, delay=delay)
                 await asyncio.sleep(delay)
             else:
@@ -202,12 +206,14 @@ async def check_ytdlp_version() -> bool:
 
     try:
         import yt_dlp
+
         version_str = yt_dlp.version.__version__
         # yt-dlp dates versions like 2024.08.07
         # Warn if the build is more than 90 days old
         parts = version_str.split(".")
         if len(parts) == 3:
             import datetime
+
             try:
                 build_date = datetime.date(int(parts[0]), int(parts[1]), int(parts[2]))
                 age_days = (datetime.date.today() - build_date).days

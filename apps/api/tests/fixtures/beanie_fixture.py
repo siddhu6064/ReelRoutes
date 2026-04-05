@@ -5,13 +5,14 @@ Provides a pytest fixture that initialises Beanie with an in-memory
 mongomock database so Document subclasses can be instantiated in unit tests
 without a running MongoDB process.
 """
+
 from __future__ import annotations
 
-import pytest_asyncio
 import mongomock_motor
+import pytest_asyncio
+from beanie import init_beanie
 
 from app.models.documents import ALL_DOCUMENTS
-from beanie import init_beanie
 
 
 @pytest_asyncio.fixture

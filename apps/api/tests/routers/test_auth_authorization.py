@@ -8,17 +8,21 @@ Task 5 — Authorization tests:
   - Trip claim links guest trip to user
   - Input validation rejects bad data with 422
 """
+
 from __future__ import annotations
 
-import pytest
-from httpx import AsyncClient
+from typing import TYPE_CHECKING
 
-from app.models.documents import Platform
+import pytest
+
 from app.utils.seed import SeedFactory
 from tests.fixtures.beanie_fixture import beanie_init  # noqa: F401
 
+if TYPE_CHECKING:
+    from httpx import AsyncClient
 
 # ── Cross-user access → 403 ────────────────────────────────────
+
 
 @pytest.mark.asyncio
 class TestCrossUserAccessForbidden:
@@ -28,7 +32,9 @@ class TestCrossUserAccessForbidden:
         assert r.status_code == 403
         assert r.json()["error"]["code"] == "FORBIDDEN"
 
-    async def test_update_trip_wrong_user_returns_403(self, client: AsyncClient, beanie_init) -> None:
+    async def test_update_trip_wrong_user_returns_403(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         trip = await SeedFactory.trip(user_id="clerk_owner", title="Original")
         r = await client.put(
             f"/api/trips/{trip.id}",
@@ -36,7 +42,9 @@ class TestCrossUserAccessForbidden:
         )
         assert r.status_code == 403
 
-    async def test_delete_trip_wrong_user_returns_403(self, client: AsyncClient, beanie_init) -> None:
+    async def test_delete_trip_wrong_user_returns_403(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         trip = await SeedFactory.trip(user_id="clerk_owner")
         r = await client.delete(f"/api/trips/{trip.id}?user_id=clerk_wrong")
         assert r.status_code == 403
@@ -49,14 +57,19 @@ class TestCrossUserAccessForbidden:
         )
         assert r.status_code == 403
 
-    async def test_delete_pin_wrong_user_returns_403(self, client: AsyncClient, beanie_init) -> None:
+    async def test_delete_pin_wrong_user_returns_403(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         from app.utils.seed import make_pin
+
         pin = make_pin(order=0)
         trip = await SeedFactory.trip(user_id="clerk_owner", pins=[pin])
         r = await client.delete(f"/api/trips/{trip.id}/pins/{pin.id}?user_id=clerk_wrong")
         assert r.status_code == 403
 
-    async def test_share_trip_wrong_user_returns_403(self, client: AsyncClient, beanie_init) -> None:
+    async def test_share_trip_wrong_user_returns_403(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         trip = await SeedFactory.trip(user_id="clerk_owner")
         r = await client.post(f"/api/trips/{trip.id}/share?user_id=clerk_wrong")
         assert r.status_code == 403
@@ -71,9 +84,12 @@ class TestCrossUserAccessForbidden:
 
 # ── Missing user_id → 401 ──────────────────────────────────────
 
+
 @pytest.mark.asyncio
 class TestMissingAuthReturns401:
-    async def test_update_without_user_id_returns_401(self, client: AsyncClient, beanie_init) -> None:
+    async def test_update_without_user_id_returns_401(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         trip = await SeedFactory.trip(user_id="clerk_u1")
         r = await client.put(
             f"/api/trips/{trip.id}",
@@ -82,13 +98,17 @@ class TestMissingAuthReturns401:
         assert r.status_code == 401
         assert "AUTHENTICATION_REQUIRED" in r.json()["error"]["code"]
 
-    async def test_delete_without_user_id_returns_422(self, client: AsyncClient, beanie_init) -> None:
+    async def test_delete_without_user_id_returns_422(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         """user_id is a required query param — missing → 422 validation error."""
         trip = await SeedFactory.trip(user_id="clerk_u2")
         r = await client.delete(f"/api/trips/{trip.id}")
         assert r.status_code == 422
 
-    async def test_add_pin_empty_user_id_returns_401(self, client: AsyncClient, beanie_init) -> None:
+    async def test_add_pin_empty_user_id_returns_401(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         trip = await SeedFactory.trip(user_id="clerk_u3")
         r = await client.post(
             f"/api/trips/{trip.id}/pins",
@@ -108,15 +128,20 @@ class TestMissingAuthReturns401:
 
 # ── Guest trips accessible without auth ───────────────────────
 
+
 @pytest.mark.asyncio
 class TestGuestTripAccess:
-    async def test_guest_trip_readable_without_user_id(self, client: AsyncClient, beanie_init) -> None:
+    async def test_guest_trip_readable_without_user_id(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         trip = await SeedFactory.guest_trip()
         r = await client.get(f"/api/trips/{trip.id}")
         assert r.status_code == 200
         assert r.json()["data"]["userId"] is None
 
-    async def test_guest_trip_editable_without_user_id(self, client: AsyncClient, beanie_init) -> None:
+    async def test_guest_trip_editable_without_user_id(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         trip = await SeedFactory.guest_trip()
         r = await client.put(
             f"/api/trips/{trip.id}",
@@ -135,7 +160,9 @@ class TestGuestTripAccess:
         assert r.status_code == 200
         assert r.json()["data"]["userId"] == "clerk_claimer"
 
-    async def test_claimed_trip_inaccessible_to_others(self, client: AsyncClient, beanie_init) -> None:
+    async def test_claimed_trip_inaccessible_to_others(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         trip = await SeedFactory.guest_trip()
         # Claim it
         await client.post(
@@ -148,6 +175,7 @@ class TestGuestTripAccess:
 
 
 # ── Input validation (Task 6 — schemas.py) ────────────────────
+
 
 @pytest.mark.asyncio
 class TestInputValidation:
@@ -189,7 +217,9 @@ class TestInputValidation:
         assert "<script>" not in r.json()["data"]["title"]
         assert "Japan Trip" in r.json()["data"]["title"]
 
-    async def test_chat_message_too_long_returns_422(self, client: AsyncClient, beanie_init) -> None:
+    async def test_chat_message_too_long_returns_422(
+        self, client: AsyncClient, beanie_init
+    ) -> None:
         trip = await SeedFactory.trip()
         r = await client.post(
             f"/api/trips/{trip.id}/chat",

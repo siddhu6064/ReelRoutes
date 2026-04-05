@@ -11,19 +11,20 @@ Collections:
 
 Pins are embedded inside Trip documents — no separate collection.
 """
+
 from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
 from enum import StrEnum as Enum
-from typing import Annotated
+from typing import Annotated, ClassVar
 
 from beanie import Document, Indexed
 from pydantic import BaseModel, Field
 from pymongo import ASCENDING, DESCENDING, IndexModel
 
-
 # ── Enums ──────────────────────────────────────────────────────
+
 
 class Platform(Enum):
     YOUTUBE = "youtube"
@@ -60,8 +61,8 @@ class JobErrorCode(Enum):
     UNKNOWN_ERROR = "UNKNOWN_ERROR"
 
 
-
 # ── Expense models ─────────────────────────────────────────────
+
 
 class SplitType(Enum):
     EQUAL = "equal"
@@ -93,6 +94,7 @@ class TripExpense(BaseModel):
     - Split (split_with has members): tracks who paid and who owes what
     Other people don\'t need a ReelRoutes account — just a name.
     """
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     amount: float
@@ -114,6 +116,7 @@ class TripExpense(BaseModel):
 
 # ── Collaborator model ─────────────────────────────────────────
 
+
 class CollaboratorRole(Enum):
     EDITOR = "editor"
     VIEWER = "viewer"
@@ -126,6 +129,7 @@ class TripCollaborator(BaseModel):
     Active = signed in and accepted.
     Editors can add/edit pins and add expenses.
     """
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     email: str | None = None
@@ -139,13 +143,15 @@ class TripCollaborator(BaseModel):
 
 # ── Embedded: Pin ─────────────────────────────────────────────
 
+
 class TripDay(BaseModel):
     """
     One day in a structured itinerary.
     Pins are referenced by id, ordered for the day's visit sequence.
     """
-    day_number: int                     # 1-indexed
-    label: str | None = None           # e.g. "Day 1 — Tokyo"
+
+    day_number: int  # 1-indexed
+    label: str | None = None  # e.g. "Day 1 — Tokyo"
     pin_ids: list[str] = Field(default_factory=list)
     notes: str | None = None
 
@@ -155,6 +161,7 @@ class PinDocument(BaseModel):
     Embedded inside TripDocument.pins[].
     Not a top-level collection — pins have no independent lifecycle.
     """
+
     id: str = Field(..., description="Client-generated UUID, stable across edits")
     order: int
     place_name: str
@@ -174,7 +181,7 @@ class PinDocument(BaseModel):
     # Google Places enrichment (Week 2) — stored from Places API response
     rating: float | None = None
     user_ratings_total: int | None = None
-    open_now: bool | None = None                           # current open/closed status
+    open_now: bool | None = None  # current open/closed status
     opening_hours_text: list[str] = Field(default_factory=list)  # ["Monday: 9 AM – 10 PM", …]
     website: str | None = None
     phone_number: str | None = None
@@ -192,11 +199,13 @@ class PinDocument(BaseModel):
 
 # ── Document: User ────────────────────────────────────────────
 
+
 class UserDocument(Document):
     """
     Mirrors a Clerk user into MongoDB for trip ownership queries.
     Synced via Clerk webhooks (user.created, user.updated).
     """
+
     clerk_id: Annotated[str, Indexed(unique=True)]
     email: str
     name: str
@@ -209,8 +218,8 @@ class UserDocument(Document):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     class Settings:
-        name = "users"
-        indexes = [
+        name: ClassVar[str] = "users"
+        indexes: ClassVar[list] = [
             IndexModel([("clerk_id", ASCENDING)], unique=True, name="uq_users_clerk_id"),
             IndexModel([("email", ASCENDING)], name="idx_users_email"),
         ]
@@ -218,11 +227,13 @@ class UserDocument(Document):
 
 # ── Document: Trip ────────────────────────────────────────────
 
+
 class TripDocument(Document):
     """
     Primary user-facing document. Pins are embedded here.
     userId is null for guest (unauthenticated) trips.
     """
+
     user_id: str | None = None  # clerk_id reference; null = guest
     title: str
     source_url: str
@@ -238,15 +249,15 @@ class TripDocument(Document):
 
     # Expenses — solo tracking + optional splitting
     expenses: list[TripExpense] = Field(default_factory=list)
-    expense_currency: str = "USD"       # default currency for trip
-    expense_budget: float | None = None # optional total budget
+    expense_currency: str = "USD"  # default currency for trip
+    expense_budget: float | None = None  # optional total budget
 
     # Collaborators — people invited to view or edit this trip
     collaborators: list[TripCollaborator] = Field(default_factory=list)
 
     # Source video attribution (Feature 1 — deep link)
-    video_creator: str | None = None    # e.g. "@kara_and_nate"
-    video_channel: str | None = None    # e.g. "Kara and Nate"
+    video_creator: str | None = None  # e.g. "@kara_and_nate"
+    video_channel: str | None = None  # e.g. "Kara and Nate"
 
     # Sharing
     share_token: str | None = None
@@ -256,8 +267,8 @@ class TripDocument(Document):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     class Settings:
-        name = "trips"
-        indexes = [
+        name: ClassVar[str] = "trips"
+        indexes: ClassVar[list] = [
             # Primary list query: "all trips for user, newest first"
             IndexModel(
                 [("user_id", ASCENDING), ("created_at", DESCENDING)],
@@ -277,12 +288,14 @@ class TripDocument(Document):
 
 # ── Document: Job ─────────────────────────────────────────────
 
+
 class JobDocument(Document):
     """
     Represents a single video import/processing task.
     Workers update status, progress, and step fields as the
     pipeline advances. Client polls GET /api/jobs/:id every 3s.
     """
+
     user_id: str | None = None
     url: str
     platform: Platform = Platform.UNKNOWN
@@ -310,7 +323,9 @@ class JobDocument(Document):
     # ── Geocoding results (Task 4 + 6 Week 7) ─────────────────
     geocoded_places: list[dict] = Field(default_factory=list)
     place_resolution_candidates: dict = Field(default_factory=dict)
-    unresolved_places: list[dict] = Field(default_factory=list)  # surfaced in 'Did we miss anything?'
+    unresolved_places: list[dict] = Field(
+        default_factory=list
+    )  # surfaced in 'Did we miss anything?'
     geocoded_at: datetime | None = None
     signal_type_used: str | None = None
     geocoding_stats: dict = Field(default_factory=dict)
@@ -321,8 +336,8 @@ class JobDocument(Document):
     completed_at: datetime | None = None
 
     class Settings:
-        name = "jobs"
-        indexes = [
+        name: ClassVar[str] = "jobs"
+        indexes: ClassVar[list] = [
             # Deduplication: don't re-process the same URL if already queued
             IndexModel(
                 [("url", ASCENDING), ("status", ASCENDING)],

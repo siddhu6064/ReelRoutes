@@ -4,6 +4,7 @@ tests/services/test_trip_service.py
 Tests for TripService covering trip CRUD, pin operations,
 sharing lifecycle, and the "Add to existing trip" merge feature.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -66,6 +67,7 @@ class TestTripServiceGet:
 
     async def test_get_nonexistent_raises_not_found(self, beanie_init) -> None:
         from bson import ObjectId
+
         with pytest.raises(NotFoundError):
             await TripService.get(str(ObjectId()))
 
@@ -138,8 +140,7 @@ class TestPinService:
     async def test_add_pin_appends_to_trip(self, beanie_init) -> None:
         trip = await SeedFactory.trip(user_id="clerk_p1", pins=[])
         updated = await TripService.add_pin(
-            str(trip.id), "clerk_p1",
-            place_name="Shibuya Crossing", lat=35.6595, lng=139.7004
+            str(trip.id), "clerk_p1", place_name="Shibuya Crossing", lat=35.6595, lng=139.7004
         )
         assert len(updated.pins) == 1
         assert updated.pins[0].place_name == "Shibuya Crossing"
@@ -155,8 +156,7 @@ class TestPinService:
         pin = make_pin(order=0)
         trip = await SeedFactory.trip(user_id="clerk_p3", pins=[pin])
         updated = await TripService.update_pin(
-            str(trip.id), pin.id, "clerk_p3",
-            notes="Great spot!", tags=["must-visit"]
+            str(trip.id), pin.id, "clerk_p3", notes="Great spot!", tags=["must-visit"]
         )
         saved = next(p for p in updated.pins if p.id == pin.id)
         assert saved.notes == "Great spot!"
@@ -181,7 +181,7 @@ class TestPinService:
     async def test_reorder_pins_applies_new_order(self, beanie_init) -> None:
         pins = make_pins(3)
         trip = await SeedFactory.trip(user_id="clerk_p6", pins=pins)
-        reversed_ids = [p.id for p in reversed(sorted(pins, key=lambda p: p.order))]
+        reversed_ids = [p.id for p in sorted(pins, key=lambda p: p.order, reverse=True)]
         updated = await TripService.reorder_pins(str(trip.id), "clerk_p6", reversed_ids)
         ordered = sorted(updated.pins, key=lambda p: p.order)
         assert ordered[0].id == reversed_ids[0]

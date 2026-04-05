@@ -18,6 +18,7 @@ Signal quality: generally SPARSE — travel creators rarely post
 detailed trip content exclusively on X. ReelRoutes supports it for
 completeness but YouTube/Instagram/TikTok yield far richer signals.
 """
+
 from __future__ import annotations
 
 import re

@@ -16,6 +16,7 @@ Not available without auth:
 Facebook Reels use the same extraction path as Watch videos.
 fb.watch shortlinks are resolved by yt-dlp automatically.
 """
+
 from __future__ import annotations
 
 import re
@@ -80,11 +81,7 @@ class FacebookAdapter(BaseAdapter):
         cleaned_desc = self._clean_description(description)
 
         # Facebook sometimes exposes location directly in info_dict
-        location_tag = (
-            info.get("location")
-            or info.get("location_name")
-            or info.get("address")
-        )
+        location_tag = info.get("location") or info.get("location_name") or info.get("address")
 
         hashtags = extract_hashtags_from_ytdlp(info)
 

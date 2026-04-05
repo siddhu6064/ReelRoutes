@@ -7,6 +7,7 @@ structured request/response lines with timing information.
 Every log line emitted during a request will automatically
 include the request_id via structlog's contextvars.
 """
+
 from __future__ import annotations
 
 import time

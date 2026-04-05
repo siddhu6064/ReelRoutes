@@ -8,11 +8,11 @@ Key fixtures:
   - mock_db             — mongomock-motor in-memory MongoDB
   - client              — AsyncClient wired to the FastAPI app
 """
+
 from __future__ import annotations
 
 import os
-from collections.abc import AsyncGenerator
-from typing import Any
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -29,11 +29,15 @@ os.environ.setdefault("OPENAI_API_KEY", "sk-test-fake-key-for-tests")
 # Fake Places key — non-empty so geocoder uses real path (mocked in tests, never hits Google)
 os.environ.setdefault("GOOGLE_PLACES_API_KEY", "fake-places-key-for-tests")
 
-from app.config.settings import get_settings  # noqa: E402
-from app.main import create_app  # noqa: E402
+from app.config.settings import get_settings
+from app.main import create_app
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
 
 
 # ── Settings ───────────────────────────────────────────────────
+
 
 @pytest.fixture(autouse=True)
 def settings_override() -> None:
@@ -44,6 +48,7 @@ def settings_override() -> None:
 
 
 # ── Database mock ──────────────────────────────────────────────
+
 
 @pytest.fixture
 def mock_db_ping() -> AsyncMock:
@@ -69,6 +74,7 @@ def mock_unhealthy_db() -> MagicMock:
 
 
 # ── HTTP client ────────────────────────────────────────────────
+
 
 @pytest_asyncio.fixture
 async def client(mock_healthy_db: MagicMock) -> AsyncGenerator[AsyncClient, None]:

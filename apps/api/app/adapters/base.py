@@ -14,6 +14,7 @@ platform the video came from — no platform-specific code leaks downstream.
 Signal priority (richest → sparsest):
   youtube_cc > auto_captions > whisper > description_only > hashtags_only
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -26,24 +27,26 @@ from app.models.documents import Platform
 
 logger = get_logger(__name__)
 
-
 # ── Caption / transcript source enum ──────────────────────────
 
+
 class CaptionsSource(StrEnum):
-    YOUTUBE_CC = "youtube_cc"          # YouTube closed captions / auto-generated
-    WHISPER = "whisper"                # OpenAI Whisper audio transcription
-    DESCRIPTION = "description"        # Platform description text only
-    HASHTAGS = "hashtags"              # Hashtags only — sparsest signal
-    NONE = "none"                      # No usable signal found
+    YOUTUBE_CC = "youtube_cc"  # YouTube closed captions / auto-generated
+    WHISPER = "whisper"  # OpenAI Whisper audio transcription
+    DESCRIPTION = "description"  # Platform description text only
+    HASHTAGS = "hashtags"  # Hashtags only — sparsest signal
+    NONE = "none"  # No usable signal found
 
 
 # ── Timed transcript segment ───────────────────────────────────
 
+
 @dataclass
 class TranscriptSegment:
     """One timed line from a caption file or Whisper output."""
-    start: float        # seconds from video start
-    end: float          # seconds from video start
+
+    start: float  # seconds from video start
+    end: float  # seconds from video start
     text: str
 
     @property
@@ -53,17 +56,19 @@ class TranscriptSegment:
 
 # ── Normalised adapter output ──────────────────────────────────
 
+
 @dataclass
 class AdapterOutput:
     """
     Consistent signal bundle produced by every platform adapter.
     The AI extraction service reads only this shape — never platform internals.
     """
+
     # ── Identity ───────────────────────────────────────────────
     platform: Platform
-    url: str                            # original URL as submitted
-    video_id: str                       # platform-specific ID (e.g. YouTube watch?v=)
-    canonical_url: str                  # cleaned, canonical URL
+    url: str  # original URL as submitted
+    video_id: str  # platform-specific ID (e.g. YouTube watch?v=)
+    canonical_url: str  # cleaned, canonical URL
 
     # ── Metadata ───────────────────────────────────────────────
     title: str
@@ -71,18 +76,18 @@ class AdapterOutput:
     thumbnail_url: str | None = None
     duration_seconds: float | None = None
     channel_name: str | None = None
-    creator_handle: str | None = None   # @username on Instagram/TikTok
-    published_at: str | None = None     # ISO 8601 or None
+    creator_handle: str | None = None  # @username on Instagram/TikTok
+    published_at: str | None = None  # ISO 8601 or None
 
     # ── Transcript / caption signals ───────────────────────────
-    transcript: str | None = None       # full plain-text transcript
+    transcript: str | None = None  # full plain-text transcript
     caption_segments: list[TranscriptSegment] = field(default_factory=list)
     captions_source: CaptionsSource = CaptionsSource.NONE
     has_captions: bool = False
 
     # ── Social signals ─────────────────────────────────────────
     hashtags: list[str] = field(default_factory=list)
-    location_tag: str | None = None     # tagged location if the creator set one
+    location_tag: str | None = None  # tagged location if the creator set one
     mentions: list[str] = field(default_factory=list)
 
     # ── Diagnostics ────────────────────────────────────────────
@@ -128,6 +133,7 @@ class AdapterOutput:
 
 # ── Abstract adapter ───────────────────────────────────────────
 
+
 class BaseAdapter(ABC):
     """
     All platform adapters inherit from this class and implement fetch().
@@ -163,6 +169,7 @@ class BaseAdapter(ABC):
     def _extract_hashtags(text: str) -> list[str]:
         """Pull #tags from any text string, deduplicated, lowercased."""
         import re
+
         tags = re.findall(r"#(\w+)", text)
         seen: set[str] = set()
         result: list[str] = []

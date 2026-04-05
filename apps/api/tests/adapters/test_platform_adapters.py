@@ -4,22 +4,23 @@ tests/adapters/test_platform_adapters.py
 Tests for Instagram, TikTok, Facebook, and Twitter adapters.
 All tests mock ytdlp_extract — no live network calls.
 """
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.adapters.base import CaptionsSource
+from app.adapters.base import AdapterOutput, CaptionsSource
+from app.adapters.facebook import FacebookAdapter, extract_facebook_id
 from app.adapters.instagram import InstagramAdapter, extract_shortcode
 from app.adapters.tiktok import TikTokAdapter, extract_tiktok_ids
-from app.adapters.facebook import FacebookAdapter, extract_facebook_id
 from app.adapters.twitter import TwitterAdapter, extract_tweet_id
 from app.models.documents import Platform
 from tests.adapters.conftest import load_fixture, mock_ytdlp_extract
 
-
 # ── Instagram ──────────────────────────────────────────────────
+
 
 class TestInstagramUrlParsing:
     def test_reel_url(self) -> None:
@@ -37,15 +38,13 @@ class TestInstagramUrlParsing:
 
 @pytest.mark.asyncio
 class TestInstagramAdapter:
-    async def _fetch(self) -> "AdapterOutput":
+    async def _fetch(self) -> AdapterOutput:
         fixture = load_fixture("instagram_bali_reel")
         with patch(
             "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
             AsyncMock(return_value=(fixture, [])),
         ):
-            return await InstagramAdapter().fetch(
-                "https://www.instagram.com/reel/CaB123dEfGH/"
-            )
+            return await InstagramAdapter().fetch("https://www.instagram.com/reel/CaB123dEfGH/")
 
     async def test_platform_is_instagram(self) -> None:
         out = await self._fetch()
@@ -88,6 +87,7 @@ class TestInstagramAdapter:
 
     async def test_graceful_failure_on_private(self) -> None:
         from unittest.mock import AsyncMock
+
         with patch(
             "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
             AsyncMock(return_value=({}, ["This content is private or requires login."])),
@@ -97,6 +97,7 @@ class TestInstagramAdapter:
 
     async def test_graceful_failure_on_rate_limit(self) -> None:
         from unittest.mock import AsyncMock
+
         with patch(
             "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
             AsyncMock(return_value=({}, ["This platform is temporarily rate-limited."])),
@@ -106,6 +107,7 @@ class TestInstagramAdapter:
 
 
 # ── TikTok ─────────────────────────────────────────────────────
+
 
 class TestTikTokUrlParsing:
     def test_standard_video_url(self) -> None:
@@ -123,7 +125,7 @@ class TestTikTokUrlParsing:
 
 @pytest.mark.asyncio
 class TestTikTokAdapter:
-    async def _fetch(self) -> "AdapterOutput":
+    async def _fetch(self) -> AdapterOutput:
         fixture = load_fixture("tiktok_morocco")
         with patch(
             "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
@@ -141,8 +143,7 @@ class TestTikTokAdapter:
         out = await self._fetch()
         assert out.description is not None
         assert any(
-            place in out.description
-            for place in ["Marrakech", "Sahara", "Chefchaouen", "Morocco"]
+            place in out.description for place in ["Marrakech", "Sahara", "Chefchaouen", "Morocco"]
         )
 
     async def test_hashtags_contain_destinations(self) -> None:
@@ -167,9 +168,7 @@ class TestTikTokAdapter:
             "app.adapters._ytdlp_health.ytdlp_extract_with_retry",
             AsyncMock(return_value=({}, ["This platform is temporarily rate-limited."])),
         ):
-            out = await TikTokAdapter().fetch(
-                "https://www.tiktok.com/@user/video/123"
-            )
+            out = await TikTokAdapter().fetch("https://www.tiktok.com/@user/video/123")
         assert len(out.fetch_warnings) > 0
 
     async def test_signal_quality_medium_with_description(self) -> None:
@@ -179,20 +178,30 @@ class TestTikTokAdapter:
 
 # ── Facebook ───────────────────────────────────────────────────
 
+
 class TestFacebookUrlParsing:
     def test_watch_url(self) -> None:
-        assert extract_facebook_id("https://www.facebook.com/watch/?v=10158234567891234") == "10158234567891234"
+        assert (
+            extract_facebook_id("https://www.facebook.com/watch/?v=10158234567891234")
+            == "10158234567891234"
+        )
 
     def test_video_url(self) -> None:
-        assert extract_facebook_id("https://www.facebook.com/user/videos/10158234567891234") == "10158234567891234"
+        assert (
+            extract_facebook_id("https://www.facebook.com/user/videos/10158234567891234")
+            == "10158234567891234"
+        )
 
     def test_reel_url(self) -> None:
-        assert extract_facebook_id("https://www.facebook.com/reels/10158234567891234") == "10158234567891234"
+        assert (
+            extract_facebook_id("https://www.facebook.com/reels/10158234567891234")
+            == "10158234567891234"
+        )
 
 
 @pytest.mark.asyncio
 class TestFacebookAdapter:
-    async def _fetch(self) -> "AdapterOutput":
+    async def _fetch(self) -> AdapterOutput:
         with patch(
             "app.adapters.facebook.ytdlp_extract",
             mock_ytdlp_extract("facebook_lisbon"),
@@ -221,6 +230,7 @@ class TestFacebookAdapter:
 
     async def test_graceful_on_login_required(self) -> None:
         from unittest.mock import AsyncMock
+
         with patch(
             "app.adapters.facebook.ytdlp_extract",
             AsyncMock(side_effect=Exception("login required for private content")),
@@ -231,9 +241,13 @@ class TestFacebookAdapter:
 
 # ── Twitter / X ────────────────────────────────────────────────
 
+
 class TestTwitterUrlParsing:
     def test_twitter_com_url(self) -> None:
-        assert extract_tweet_id("https://twitter.com/user/status/1758392847562910") == "1758392847562910"
+        assert (
+            extract_tweet_id("https://twitter.com/user/status/1758392847562910")
+            == "1758392847562910"
+        )
 
     def test_x_com_url(self) -> None:
         assert extract_tweet_id("https://x.com/user/status/1758392847562910") == "1758392847562910"
@@ -244,7 +258,7 @@ class TestTwitterUrlParsing:
 
 @pytest.mark.asyncio
 class TestTwitterAdapter:
-    async def _fetch(self) -> "AdapterOutput":
+    async def _fetch(self) -> AdapterOutput:
         with patch(
             "app.adapters.twitter.ytdlp_extract",
             mock_ytdlp_extract("twitter_iceland"),
@@ -260,7 +274,9 @@ class TestTwitterAdapter:
     async def test_tweet_text_as_description(self) -> None:
         out = await self._fetch()
         assert out.description is not None
-        assert any(p in out.description for p in ["Iceland", "Skógafoss", "Reykjavik", "Seljalandsfoss"])
+        assert any(
+            p in out.description for p in ["Iceland", "Skógafoss", "Reykjavik", "Seljalandsfoss"]
+        )
 
     async def test_hashtags_from_tweet(self) -> None:
         out = await self._fetch()
@@ -278,6 +294,7 @@ class TestTwitterAdapter:
 
     async def test_graceful_on_protected_account(self) -> None:
         from unittest.mock import AsyncMock
+
         with patch(
             "app.adapters.twitter.ytdlp_extract",
             AsyncMock(side_effect=Exception("This account's tweets are protected")),

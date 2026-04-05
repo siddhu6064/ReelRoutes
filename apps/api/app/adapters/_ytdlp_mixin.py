@@ -10,12 +10,12 @@ without captions, the Whisper fallback runs in Phase 3 Week 6.
 Thread note: yt-dlp's YoutubeDL is synchronous. We run it in an executor
 to avoid blocking the async event loop.
 """
+
 from __future__ import annotations
 
 import asyncio
 import io
 from contextlib import redirect_stderr
-from functools import partial
 from typing import Any
 
 from app.adapters.base import CaptionsSource, TranscriptSegment
@@ -28,7 +28,7 @@ _QUIET_OPTS = {
     "quiet": True,
     "no_warnings": True,
     "extract_flat": False,
-    "skip_download": True,       # metadata only — no video download
+    "skip_download": True,  # metadata only — no video download
     "writesubtitles": False,
     "writeautomaticsub": False,
     "noplaylist": True,
@@ -46,9 +46,8 @@ async def ytdlp_extract(url: str, extra_opts: dict | None = None) -> dict[str, A
 
     def _extract() -> dict:
         buf = io.StringIO()
-        with redirect_stderr(buf):
-            with yt_dlp.YoutubeDL(opts) as ydl:
-                return ydl.extract_info(url, download=False) or {}
+        with redirect_stderr(buf), yt_dlp.YoutubeDL(opts) as ydl:
+            return ydl.extract_info(url, download=False) or {}
 
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, _extract)
@@ -71,7 +70,7 @@ def parse_ytdlp_subtitles(info: dict) -> tuple[list[TranscriptSegment], Captions
             continue
 
         # Prefer English; fall back to first available language
-        for lang in ("en", "en-US", list(subs.keys())[0] if subs else None):
+        for lang in ("en", "en-US", next(iter(subs.keys())) if subs else None):
             if lang not in subs:
                 continue
             formats = subs[lang]
@@ -92,7 +91,7 @@ def extract_hashtags_from_ytdlp(info: dict) -> list[str]:
 
     tags: list[str] = []
     # yt-dlp 'tags' field
-    for tag in (info.get("tags") or []):
+    for tag in info.get("tags") or []:
         tags.append(str(tag).lower().lstrip("#"))
     # Also scan description
     desc = info.get("description") or ""

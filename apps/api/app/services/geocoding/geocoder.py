@@ -17,12 +17,12 @@ For 20-pin trips: ~20 calls per import. Very safe budget.
 Task 6 — Analytics: signal_type, platform, and extracted_at are stored
 on the Job document alongside geocoded results for debugging.
 """
+
 from __future__ import annotations
 
 import asyncio
 import math
 from dataclasses import dataclass, field
-from typing import Any
 
 import httpx
 
@@ -45,9 +45,10 @@ DEDUP_DISTANCE_METRES = 200
 @dataclass
 class GeocodedLocation:
     """A fully resolved location with coordinates and Google Places metadata."""
+
     # Source extraction fields
-    place_name: str                 # canonical name from Google Places
-    raw_name: str                   # original AI-extracted name
+    place_name: str  # canonical name from Google Places
+    raw_name: str  # original AI-extracted name
     context_quote: str
     confidence: float
     order: int
@@ -63,8 +64,8 @@ class GeocodedLocation:
 
     # Resolution status
     geocoded: bool = False
-    unresolved: bool = False        # True when zero Places results found
-    ambiguous: bool = False         # True when multiple candidates existed
+    unresolved: bool = False  # True when zero Places results found
+    ambiguous: bool = False  # True when multiple candidates existed
 
     # Candidates stored when ambiguous (Task 4)
     candidates: list[dict] = field(default_factory=list)
@@ -81,6 +82,7 @@ class GeocodedLocation:
 @dataclass
 class GeocodingResult:
     """Full output of one geocoding run."""
+
     locations: list[GeocodedLocation] = field(default_factory=list)
     geocoded_count: int = 0
     unresolved_count: int = 0
@@ -121,9 +123,9 @@ async def geocode_locations(
 
     result = GeocodingResult(
         locations=locations,
-        geocoded_count=sum(1 for l in locations if l.geocoded),
-        unresolved_count=sum(1 for l in locations if l.unresolved),
-        ambiguous_count=sum(1 for l in locations if l.ambiguous),
+        geocoded_count=sum(1 for loc in locations if loc.geocoded),
+        unresolved_count=sum(1 for loc in locations if loc.unresolved),
+        ambiguous_count=sum(1 for loc in locations if loc.ambiguous),
         dedup_removed=removed,
     )
 
@@ -139,6 +141,7 @@ async def geocode_locations(
 
 
 # ── Places API calls ───────────────────────────────────────────
+
 
 async def _resolve_place(
     loc: ExtractedLocation,
@@ -233,9 +236,8 @@ def _populate_from_result(loc: GeocodedLocation, result: dict) -> None:
         types = component.get("types", [])
         if "country" in types:
             loc.country_code = component.get("short_name")
-        if "locality" in types or "administrative_area_level_2" in types:
-            if not loc.city:
-                loc.city = component.get("long_name")
+        if ("locality" in types or "administrative_area_level_2" in types) and not loc.city:
+            loc.city = component.get("long_name")
 
     # Week 2 — enrichment from text search response
     if "rating" in result:
@@ -255,7 +257,7 @@ async def _enrich_with_details(
     loc: GeocodedLocation,
     place_id: str,
     api_key: str,
-    client: "httpx.AsyncClient",
+    client: httpx.AsyncClient,
 ) -> None:
     """Fetch website + phone from Place Details API (Week 2). Fails silently."""
     try:
@@ -289,6 +291,7 @@ async def _enrich_with_details(
 
 # ── Task 5 — Distance-based deduplication ─────────────────────
 
+
 def haversine_metres(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """Calculate distance in metres between two lat/lng points."""
     R = 6_371_000  # Earth radius in metres
@@ -301,6 +304,7 @@ def haversine_metres(lat1: float, lng1: float, lat2: float, lng2: float) -> floa
 
 def _normalise_name(name: str) -> str:
     import re
+
     return re.sub(r"[^\w]", "", name.lower())
 
 
@@ -334,9 +338,12 @@ def _deduplicate_locations(
 
             # Distance-based dedup (only for geocoded locations)
             if (
-                loc.geocoded and existing.geocoded
-                and loc.lat is not None and loc.lng is not None
-                and existing.lat is not None and existing.lng is not None
+                loc.geocoded
+                and existing.geocoded
+                and loc.lat is not None
+                and loc.lng is not None
+                and existing.lat is not None
+                and existing.lng is not None
             ):
                 dist = haversine_metres(loc.lat, loc.lng, existing.lat, existing.lng)
                 if dist <= DEDUP_DISTANCE_METRES:
@@ -364,6 +371,7 @@ def _deduplicate_locations(
 
 
 # ── Mock geocoding for local dev ───────────────────────────────
+
 
 def _mock_geocoding(extracted: list[ExtractedLocation]) -> GeocodingResult:
     """Deterministic mock geocoding — assigns plausible coords based on keywords."""

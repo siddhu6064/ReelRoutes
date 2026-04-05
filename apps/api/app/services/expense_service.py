@@ -17,6 +17,7 @@ Settlement algorithm:
     2. Repeatedly match the biggest debtor with the biggest creditor
     3. Returns the minimum number of transfers to settle everything
 """
+
 from __future__ import annotations
 
 import uuid
@@ -46,14 +47,15 @@ class ExpenseSummary(NamedTuple):
     total_spent: float
     currency: str
     by_category: dict[str, float]
-    per_person: dict[str, float]        # how much each person paid
-    per_person_owes: dict[str, float]   # how much each person owes
-    net_balances: dict[str, float]      # positive = owed money, negative = owes money
+    per_person: dict[str, float]  # how much each person paid
+    per_person_owes: dict[str, float]  # how much each person owes
+    net_balances: dict[str, float]  # positive = owed money, negative = owes money
     settlements: list[SettlementTransfer]
     expense_count: int
 
 
 # ── CRUD ──────────────────────────────────────────────────────
+
 
 async def add_expense(
     trip: TripDocument,
@@ -119,9 +121,9 @@ async def update_expense(
     """Update an existing expense by id."""
     expense = _find_expense(trip, expense_id)
 
-    if "title" in updates and updates["title"]:
+    if updates.get("title"):
         expense.title = updates["title"].strip()
-    if "amount" in updates and updates["amount"]:
+    if updates.get("amount"):
         expense.amount = updates["amount"]
     if "category" in updates:
         expense.category = ExpenseCategory(updates["category"])
@@ -143,7 +145,7 @@ async def update_expense(
 
 async def delete_expense(trip: TripDocument, expense_id: str) -> None:
     """Remove an expense from a trip."""
-    expense = _find_expense(trip, expense_id)
+    _find_expense(trip, expense_id)
     trip.expenses = [e for e in trip.expenses if e.id != expense_id]
     trip.updated_at = datetime.now(UTC)
     await trip.save()
@@ -177,6 +179,7 @@ async def set_budget(trip: TripDocument, budget: float, currency: str) -> TripDo
 
 # ── Summary & Settlement ───────────────────────────────────────
 
+
 def compute_summary(trip: TripDocument) -> ExpenseSummary:
     """
     Compute the full expense summary for a trip:
@@ -190,8 +193,8 @@ def compute_summary(trip: TripDocument) -> ExpenseSummary:
     currency = trip.expense_currency
     total = 0.0
     by_category: dict[str, float] = {}
-    per_paid: dict[str, float] = {}   # how much each person paid total
-    per_owes: dict[str, float] = {}   # how much each person owes total
+    per_paid: dict[str, float] = {}  # how much each person paid total
+    per_owes: dict[str, float] = {}  # how much each person owes total
 
     for exp in trip.expenses:
         total += exp.amount
@@ -235,6 +238,7 @@ def compute_summary(trip: TripDocument) -> ExpenseSummary:
 
 
 # ── Collaborator management ────────────────────────────────────
+
 
 async def invite_collaborator(
     trip: TripDocument,
@@ -291,6 +295,7 @@ async def remove_collaborator(
     """Remove a collaborator. Only the trip owner can do this."""
     if trip.user_id != requesting_user_id:
         from app.middleware.error_handler import ForbiddenError
+
         raise ForbiddenError("Only the trip owner can remove collaborators.")
 
     trip.collaborators = [c for c in trip.collaborators if c.id != collaborator_id]
@@ -309,14 +314,13 @@ def check_can_edit(trip: TripDocument, clerk_id: str | None) -> bool:
     if trip.user_id == clerk_id:
         return True
     return any(
-        c.clerk_id == clerk_id
-        and c.role == CollaboratorRole.EDITOR
-        and c.status == "active"
+        c.clerk_id == clerk_id and c.role == CollaboratorRole.EDITOR and c.status == "active"
         for c in trip.collaborators
     )
 
 
 # ── Private helpers ────────────────────────────────────────────
+
 
 def _find_expense(trip: TripDocument, expense_id: str) -> TripExpense:
     exp = next((e for e in trip.expenses if e.id == expense_id), None)
@@ -338,32 +342,38 @@ def _resolve_splits(
         # Adjust last person for rounding
         remainder = round(total - share * (len(members) - 1), 2)
         for i, m in enumerate(members):
-            splits.append(ExpenseSplit(
-                member_name=m.get("member_name", "Unknown"),
-                member_id=m.get("member_id"),
-                amount=remainder if i == len(members) - 1 else share,
-                settled=m.get("settled", False),
-            ))
+            splits.append(
+                ExpenseSplit(
+                    member_name=m.get("member_name", "Unknown"),
+                    member_id=m.get("member_id"),
+                    amount=remainder if i == len(members) - 1 else share,
+                    settled=m.get("settled", False),
+                )
+            )
 
     elif split_type == SplitType.EXACT:
         for m in members:
-            splits.append(ExpenseSplit(
-                member_name=m.get("member_name", "Unknown"),
-                member_id=m.get("member_id"),
-                amount=float(m.get("amount", 0)),
-                settled=m.get("settled", False),
-            ))
+            splits.append(
+                ExpenseSplit(
+                    member_name=m.get("member_name", "Unknown"),
+                    member_id=m.get("member_id"),
+                    amount=float(m.get("amount", 0)),
+                    settled=m.get("settled", False),
+                )
+            )
 
     elif split_type == SplitType.PERCENTAGE:
         for m in members:
             pct = float(m.get("percentage", 0))
-            splits.append(ExpenseSplit(
-                member_name=m.get("member_name", "Unknown"),
-                member_id=m.get("member_id"),
-                amount=round(total * pct / 100, 2),
-                percentage=pct,
-                settled=m.get("settled", False),
-            ))
+            splits.append(
+                ExpenseSplit(
+                    member_name=m.get("member_name", "Unknown"),
+                    member_id=m.get("member_id"),
+                    amount=round(total * pct / 100, 2),
+                    percentage=pct,
+                    settled=m.get("settled", False),
+                )
+            )
 
     return splits
 
@@ -391,12 +401,14 @@ def _compute_settlements(
 
         transfer = round(min(d_amt, c_amt), 2)
         if transfer > 0.01:
-            transfers.append(SettlementTransfer(
-                from_name=d_name,
-                to_name=c_name,
-                amount=transfer,
-                currency=currency,
-            ))
+            transfers.append(
+                SettlementTransfer(
+                    from_name=d_name,
+                    to_name=c_name,
+                    amount=transfer,
+                    currency=currency,
+                )
+            )
 
         d_amt -= transfer
         c_amt -= transfer

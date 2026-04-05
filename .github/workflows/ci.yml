@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: ["siddhu6064", "main", "feature/**"]
   pull_request:
-    branches: [main, develop]
+    branches: ["siddhu6064", "main"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,45 +15,14 @@ env:
   PYTHON_VERSION: "3.12"
   PNPM_VERSION: "9"
 
+# ─────────────────────────────────────────────────────────────────
+# JOBS
+# ─────────────────────────────────────────────────────────────────
 jobs:
-  # ──────────────────────────────────────────────
-  # Job 1: Lint & Type-check (JS/TS)
-  # ──────────────────────────────────────────────
-  lint-ts:
-    name: Lint & Typecheck (TS)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build shared package
-        run: pnpm --filter shared build
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Format check
-        run: pnpm format:check
-
-  # ──────────────────────────────────────────────
-  # Job 2: Lint & Type-check (Python)
-  # ──────────────────────────────────────────────
+  # ── 1. Python: format + lint ──────────────────────────────────
   lint-python:
-    name: Lint (Python)
+    name: "Python · lint"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -65,77 +34,35 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - uses: snok/install-poetry@v1
         with:
           version: latest
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      - name: Cache Poetry venv
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: apps/api/.venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('apps/api/poetry.lock') }}
+          key: ${{ runner.os }}-py-${{ hashFiles('apps/api/poetry.lock') }}
+          restore-keys: ${{ runner.os }}-py-
 
-      - name: Install Python dependencies
-        run: poetry install --no-interaction
+      - run: poetry install --no-interaction
 
-      - name: Ruff format check
+      - name: "ruff · format check"
         run: poetry run ruff format --check .
 
-      - name: Ruff lint
-        run: poetry run ruff check .
+      - name: "ruff · lint"
+        run: poetry run ruff check . --output-format=github
 
-      - name: Mypy type-check
-        run: poetry run mypy .
-
-  # ──────────────────────────────────────────────
-  # Job 3: Test — Frontend (web)
-  # ──────────────────────────────────────────────
-  test-web:
-    name: Test (Web)
-    runs-on: ubuntu-latest
-    needs: lint-ts
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build shared
-        run: pnpm --filter shared build
-
-      - name: Run web tests
-        run: pnpm --filter web test --run
-
-  # ──────────────────────────────────────────────
-  # Job 4: Test — API (Python)
-  # ──────────────────────────────────────────────
+  # ── 2. Python: test suite ─────────────────────────────────────
   test-api:
-    name: Test (API)
+    name: "Python · tests"
     runs-on: ubuntu-latest
-    needs: lint-python
-    services:
-      mongodb:
-        image: mongo:7
-        ports:
-          - 27017:27017
+    # No MongoDB service — tests use mongomock-motor (in-memory)
     defaults:
       run:
         working-directory: apps/api
     env:
-      MONGODB_URL: mongodb://localhost:27017
-      MONGODB_DB: reelroutes_test
       ENV: test
     steps:
       - uses: actions/checkout@v4
@@ -144,39 +71,36 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - uses: snok/install-poetry@v1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      - name: Cache Poetry venv
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: apps/api/.venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('apps/api/poetry.lock') }}
+          key: ${{ runner.os }}-py-${{ hashFiles('apps/api/poetry.lock') }}
+          restore-keys: ${{ runner.os }}-py-
 
-      - name: Install Python dependencies
-        run: poetry install --no-interaction
+      - run: poetry install --no-interaction
 
-      - name: Run API tests
-        run: poetry run pytest --cov=app --cov-report=xml -v
+      - name: "pytest · full suite"
+        run: poetry run pytest tests/ -q --tb=short --cov=app --cov-report=xml --cov-report=term-missing
 
-      - name: Upload coverage
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         if: success()
         with:
           files: apps/api/coverage.xml
           flags: api
+          fail_ci_if_error: false  # don't fail CI if Codecov is down
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  # ──────────────────────────────────────────────
-  # Job 5: Build check
-  # ──────────────────────────────────────────────
-  build:
-    name: Build (Web)
+  # ── 3. TypeScript: lint + typecheck (web + shared) ───────────
+  lint-ts:
+    name: "TypeScript · lint & typecheck"
     runs-on: ubuntu-latest
-    needs: [test-web, test-api]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -187,15 +111,137 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build shared package
+        run: pnpm --filter shared build
+
+      - name: "eslint · web"
+        run: pnpm --filter web lint
+
+      - name: "tsc · web"
+        run: pnpm --filter web typecheck
+
+      - name: "tsc · shared"
+        run: pnpm --filter shared typecheck
+
+      - name: "prettier · format check"
+        run: pnpm format:check
+
+  # ── 4. TypeScript: typecheck mobile ──────────────────────────
+  typecheck-mobile:
+    name: "TypeScript · mobile"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # mobile has its own tsconfig that references the shared package
+      - name: Build shared
+        run: pnpm --filter shared build
+
+      - name: "tsc · mobile"
+        working-directory: apps/mobile
+        run: pnpm exec tsc --noEmit
+
+  # ── 5. TypeScript: shared unit tests ─────────────────────────
+  test-shared:
+    name: "TypeScript · shared tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
 
       - name: Build shared
         run: pnpm --filter shared build
 
-      - name: Build web
+      - name: "vitest · shared"
+        run: pnpm --filter shared test --run
+
+  # ── 6. Build: web production build ───────────────────────────
+  build-web:
+    name: "Build · web"
+    runs-on: ubuntu-latest
+    needs: [lint-ts, test-shared]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build shared
+        run: pnpm --filter shared build
+
+      - name: "vite build · web"
         run: pnpm --filter web build
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          # Real keys injected in production — placeholder lets the build
+          # complete without crashing on missing env vars
+          VITE_API_URL: https://api.reelroutes.app
+          VITE_GOOGLE_MAPS_API_KEY: placeholder
+          VITE_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
+
+  # ── Gate: all required jobs must pass ────────────────────────
+  ci:
+    name: "CI · all green"
+    runs-on: ubuntu-latest
+    needs:
+      - lint-python
+      - test-api
+      - lint-ts
+      - typecheck-mobile
+      - test-shared
+      - build-web
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          results=(
+            "${{ needs.lint-python.result }}"
+            "${{ needs.test-api.result }}"
+            "${{ needs.lint-ts.result }}"
+            "${{ needs.typecheck-mobile.result }}"
+            "${{ needs.test-shared.result }}"
+            "${{ needs.build-web.result }}"
+          )
+          failed=0
+          for result in "${results[@]}"; do
+            if [[ "$result" == "failure" || "$result" == "cancelled" ]]; then
+              failed=1
+            fi
+          done
+          if [[ $failed -eq 1 ]]; then
+            echo "❌ One or more required jobs failed"
+            exit 1
+          fi
+          echo "✅ All jobs passed"

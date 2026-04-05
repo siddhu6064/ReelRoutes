@@ -7,9 +7,11 @@ WS   /ws/jobs/:job_id         — real-time status push via WebSocket
 The WebSocket sends a JSON status message every second until the job
 reaches a terminal state (completed or failed), then closes.
 """
+
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -63,10 +65,14 @@ async def job_status_websocket(websocket: WebSocket, job_id: str) -> None:
             try:
                 job = await JobService.get(job_id)
             except Exception as exc:
-                await websocket.send_text(json.dumps({
-                    "ok": False,
-                    "error": {"code": "JOB_NOT_FOUND", "message": str(exc)},
-                }))
+                await websocket.send_text(
+                    json.dumps(
+                        {
+                            "ok": False,
+                            "error": {"code": "JOB_NOT_FOUND", "message": str(exc)},
+                        }
+                    )
+                )
                 break
 
             payload = _job_payload(job)
@@ -81,7 +87,5 @@ async def job_status_websocket(websocket: WebSocket, job_id: str) -> None:
     except WebSocketDisconnect:
         pass
     finally:
-        try:
+        with contextlib.suppress(Exception):
             await websocket.close()
-        except Exception:
-            pass

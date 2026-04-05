@@ -5,15 +5,13 @@ Unit tests for all Beanie document models.
 Validates field defaults, enum values, embedded Pin structure,
 and index strategy declarations — without a live MongoDB connection.
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
 import pytest
-import pytest_asyncio
 from pymongo import ASCENDING, DESCENDING
-
-from tests.fixtures.beanie_fixture import beanie_init  # noqa: F401 — registers fixture
 
 from app.models.documents import (
     ALL_DOCUMENTS,
@@ -26,9 +24,10 @@ from app.models.documents import (
     TripDocument,
     UserDocument,
 )
-
+from tests.fixtures.beanie_fixture import beanie_init  # noqa: F401 — registers fixture
 
 # ── Platform enum ──────────────────────────────────────────────
+
 
 class TestPlatformEnum:
     def test_all_expected_platforms_exist(self) -> None:
@@ -46,6 +45,7 @@ class TestPlatformEnum:
 
 # ── JobStatus enum ─────────────────────────────────────────────
 
+
 class TestJobStatusEnum:
     def test_all_statuses_exist(self) -> None:
         values = {s.value for s in JobStatus}
@@ -56,6 +56,7 @@ class TestJobStatusEnum:
 
 
 # ── JobStep enum ───────────────────────────────────────────────
+
 
 class TestJobStepEnum:
     def test_exactly_five_steps(self) -> None:
@@ -68,6 +69,7 @@ class TestJobStepEnum:
 
 
 # ── JobErrorCode enum ──────────────────────────────────────────
+
 
 class TestJobErrorCodeEnum:
     def test_unknown_error_exists(self) -> None:
@@ -83,16 +85,17 @@ class TestJobErrorCodeEnum:
 
 # ── PinDocument ────────────────────────────────────────────────
 
+
 class TestPinDocument:
     def _make_pin(self, **overrides) -> PinDocument:
-        defaults = dict(
-            id="pin-uuid-001",
-            order=0,
-            place_name="Shibuya Crossing",
-            lat=35.6595,
-            lng=139.7004,
-            confidence=0.95,
-        )
+        defaults = {
+            "id": "pin-uuid-001",
+            "order": 0,
+            "place_name": "Shibuya Crossing",
+            "lat": 35.6595,
+            "lng": 139.7004,
+            "confidence": 0.95,
+        }
         return PinDocument(**{**defaults, **overrides})
 
     def test_creates_with_required_fields(self) -> None:
@@ -110,13 +113,12 @@ class TestPinDocument:
         assert pin.tags == []
 
     def test_defaults_confidence_to_full(self) -> None:
-        pin = PinDocument(
-            id="x", order=0, place_name="Test", lat=0.0, lng=0.0
-        )
+        pin = PinDocument(id="x", order=0, place_name="Test", lat=0.0, lng=0.0)
         assert pin.confidence == 1.0
 
     def test_confidence_clamped_to_0_1(self) -> None:
         from pydantic import ValidationError
+
         with pytest.raises(ValidationError):
             PinDocument(id="x", order=0, place_name="T", lat=0.0, lng=0.0, confidence=1.5)
         with pytest.raises(ValidationError):
@@ -151,6 +153,7 @@ class TestPinDocument:
 
 # ── UserDocument ───────────────────────────────────────────────
 
+
 class TestUserDocument:
     def test_settings_collection_name(self) -> None:
         assert UserDocument.Settings.name == "users"
@@ -174,6 +177,7 @@ class TestUserDocument:
 
 
 # ── TripDocument ───────────────────────────────────────────────
+
 
 class TestTripDocument:
     def test_settings_collection_name(self) -> None:
@@ -257,6 +261,7 @@ class TestTripDocument:
 
 # ── JobDocument ────────────────────────────────────────────────
 
+
 class TestJobDocument:
     def test_settings_collection_name(self) -> None:
         assert JobDocument.Settings.name == "jobs"
@@ -271,6 +276,7 @@ class TestJobDocument:
 
     def test_progress_clamped_0_100(self) -> None:
         from pydantic import ValidationError
+
         with pytest.raises(ValidationError):
             JobDocument.model_validate({"url": "https://youtube.com/watch?v=abc", "progress": 101})
         with pytest.raises(ValidationError):
@@ -324,6 +330,7 @@ class TestJobDocument:
 
 # ── ALL_DOCUMENTS ──────────────────────────────────────────────
 
+
 class TestAllDocuments:
     def test_contains_exactly_three_collections(self) -> None:
         assert len(ALL_DOCUMENTS) == 3
@@ -346,6 +353,4 @@ class TestAllDocuments:
     def test_all_have_indexes_declared(self) -> None:
         for doc_cls in ALL_DOCUMENTS:
             assert hasattr(doc_cls.Settings, "indexes")
-            assert len(doc_cls.Settings.indexes) > 0, (
-                f"{doc_cls.__name__} has no indexes declared"
-            )
+            assert len(doc_cls.Settings.indexes) > 0, f"{doc_cls.__name__} has no indexes declared"

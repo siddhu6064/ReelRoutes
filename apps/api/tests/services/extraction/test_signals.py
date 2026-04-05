@@ -3,20 +3,16 @@ tests/services/extraction/test_signals.py
 
 Tests for signals.py — ExtractionSignals building and chunking strategy.
 """
-from __future__ import annotations
 
-import pytest
+from __future__ import annotations
 
 from app.adapters.base import AdapterOutput, CaptionsSource, TranscriptSegment
 from app.models.documents import Platform
 from app.services.extraction.signals import (
-    ExtractionSignals,
     SignalType,
     build_signals,
     count_tokens,
     split_text_into_chunks,
-    CHUNK_THRESHOLD_TOKENS,
-    CHUNK_OVERLAP_TOKENS,
 )
 
 

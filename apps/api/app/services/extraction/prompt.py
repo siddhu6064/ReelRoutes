@@ -13,6 +13,7 @@ Design goals:
   - timestamp_hint is seconds from video start — only set when timed
     transcript segments are available
 """
+
 from __future__ import annotations
 
 SYSTEM_PROMPT = """\

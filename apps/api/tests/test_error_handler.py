@@ -4,12 +4,14 @@ tests/test_error_handler.py
 Tests for the global error handling middleware.
 Verifies consistent JSON error shapes, status codes, and exception types.
 """
+
 from __future__ import annotations
 
-import pytest
-from fastapi import FastAPI
-from httpx import ASGITransport, AsyncClient
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, patch
+
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 from app.middleware.error_handler import (
     AppError,
@@ -20,10 +22,14 @@ from app.middleware.error_handler import (
     ValidationError,
 )
 
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+
 
 def _make_test_app() -> FastAPI:
     """Minimal FastAPI app that throws specific errors on demand."""
     from app.main import create_app
+
     app = create_app()
 
     @app.get("/test/not-found")
@@ -147,25 +153,31 @@ class TestUnhandledException:
 
     async def test_handler_returns_500_response(self) -> None:
         from unittest.mock import MagicMock
+
         from app.middleware.error_handler import unhandled_exception_handler
 
         mock_request = MagicMock()
         mock_request.url.path = "/test/unhandled"
         mock_request.state.request_id = "test-req-id"
 
-        response = await unhandled_exception_handler(mock_request, RuntimeError("Something exploded"))
+        response = await unhandled_exception_handler(
+            mock_request, RuntimeError("Something exploded")
+        )
         assert response.status_code == 500
 
     async def test_handler_does_not_leak_internal_detail(self) -> None:
         import json
         from unittest.mock import MagicMock
+
         from app.middleware.error_handler import unhandled_exception_handler
 
         mock_request = MagicMock()
         mock_request.url.path = "/test/unhandled"
         mock_request.state.request_id = "test-req-id"
 
-        response = await unhandled_exception_handler(mock_request, RuntimeError("Something exploded"))
+        response = await unhandled_exception_handler(
+            mock_request, RuntimeError("Something exploded")
+        )
         data = json.loads(response.body)
         assert data["ok"] is False
         assert data["error"]["code"] == "INTERNAL_ERROR"
@@ -174,6 +186,7 @@ class TestUnhandledException:
     async def test_handler_response_is_generic_message(self) -> None:
         import json
         from unittest.mock import MagicMock
+
         from app.middleware.error_handler import unhandled_exception_handler
 
         mock_request = MagicMock()

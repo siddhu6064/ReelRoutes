@@ -11,12 +11,12 @@ Validation philosophy:
   - URLs validated with a regex (not just "is a string")
   - Never trust client-supplied IDs for ownership — always verify in service layer
 """
+
 from __future__ import annotations
 
 import re
-from typing import Annotated
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 # ── Shared validators ──────────────────────────────────────────
 
@@ -50,6 +50,7 @@ def _validate_url(url: str) -> str:
 
 # ── Process endpoint ───────────────────────────────────────────
 
+
 class ProcessRequest(BaseModel):
     url: str = Field(..., description="Social video URL to import")
     user_id: str | None = Field(None, description="Clerk user ID (null for guest)")
@@ -61,6 +62,7 @@ class ProcessRequest(BaseModel):
 
 
 # ── Trip endpoints ─────────────────────────────────────────────
+
 
 class CreateTripRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
@@ -88,6 +90,7 @@ class UpdateTripRequest(BaseModel):
 
 
 # ── Pin endpoints ──────────────────────────────────────────────
+
 
 class AddPinRequest(BaseModel):
     user_id: str
@@ -141,6 +144,7 @@ class ReorderPinsRequest(BaseModel):
 
 # ── Chat endpoint ──────────────────────────────────────────────
 
+
 class ChatMessage(BaseModel):
     role: str = Field(..., pattern="^(user|assistant)$")
     content: str = Field(..., min_length=1, max_length=10_000)
@@ -159,12 +163,14 @@ class ChatRequest(BaseModel):
 
 # ── Merge trips ────────────────────────────────────────────────
 
+
 class MergeTripsRequest(BaseModel):
     user_id: str
     source_trip_id: str
 
 
 # ── Share trip ─────────────────────────────────────────────────
+
 
 class ShareTripRequest(BaseModel):
     user_id: str

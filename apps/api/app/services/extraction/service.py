@@ -16,6 +16,7 @@ Usage:
     result = await ExtractionService.extract(adapter_output, job)
     # result.locations is List[ExtractedLocation]
 """
+
 from __future__ import annotations
 
 import json
@@ -54,6 +55,7 @@ RETRY_DELAY_SECONDS = 2.0
 @dataclass
 class ExtractionResult:
     """Full output of one extraction run — stored on Job."""
+
     locations: list[ExtractedLocation] = field(default_factory=list)
     signal_type: SignalType = SignalType.NONE
     model: str = ""
@@ -82,7 +84,6 @@ class ExtractionResult:
 
 
 class ExtractionService:
-
     @staticmethod
     async def extract(
         adapter_output: AdapterOutput,
@@ -147,6 +148,7 @@ class ExtractionService:
 
 # ── Single extraction (no chunking needed) ────────────────────
 
+
 async def _extract_single(
     signals: ExtractionSignals,
     model: str,
@@ -171,6 +173,7 @@ async def _extract_single(
 
 # ── Chunked extraction ────────────────────────────────────────
 
+
 async def _extract_chunked(
     signals: ExtractionSignals,
     model: str,
@@ -188,9 +191,11 @@ async def _extract_chunked(
 
     for i, chunk_text in enumerate(chunks):
         # Build per-chunk signals with same metadata but chunk text
-        chunk_context = signals.to_context_block().replace(
-            signals.best_text, chunk_text
-        ) if signals.best_text in signals.to_context_block() else chunk_text
+        chunk_context = (
+            signals.to_context_block().replace(signals.best_text, chunk_text)
+            if signals.best_text in signals.to_context_block()
+            else chunk_text
+        )
 
         raw, tokens = await _call_gpt4o(
             system=SYSTEM_PROMPT,
@@ -214,6 +219,7 @@ async def _extract_chunked(
 
 # ── GPT-4o API call with retry ────────────────────────────────
 
+
 async def _call_gpt4o(
     system: str,
     user: str,
@@ -225,7 +231,8 @@ async def _call_gpt4o(
     Retries on transient errors with exponential backoff.
     """
     import asyncio
-    from openai import AsyncOpenAI, RateLimitError, APIStatusError
+
+    from openai import APIStatusError, AsyncOpenAI, RateLimitError
 
     settings = get_settings()
     client = AsyncOpenAI(api_key=settings.openai_api_key)
@@ -238,7 +245,7 @@ async def _call_gpt4o(
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
                 ],
-                temperature=0.0,       # deterministic output
+                temperature=0.0,  # deterministic output
                 response_format={"type": "json_object"},
                 max_tokens=4096,
             )
@@ -251,13 +258,13 @@ async def _call_gpt4o(
             return content, tokens
 
         except RateLimitError:
-            wait = RETRY_DELAY_SECONDS * (2 ** attempt)
+            wait = RETRY_DELAY_SECONDS * (2**attempt)
             logger.warning("gpt4o_rate_limited", attempt=attempt, wait=wait)
             await asyncio.sleep(wait)
 
         except APIStatusError as exc:
             if exc.status_code >= 500 and attempt < retries - 1:
-                wait = RETRY_DELAY_SECONDS * (2 ** attempt)
+                wait = RETRY_DELAY_SECONDS * (2**attempt)
                 logger.warning("gpt4o_server_error", status=exc.status_code, attempt=attempt)
                 await asyncio.sleep(wait)
             else:
@@ -291,12 +298,14 @@ def _unwrap_if_needed(content: str) -> str:
 
 # ── Persist extracted places to Job document (Task 7) ────────
 
+
 async def _persist_to_job(job: JobDocument, result: ExtractionResult) -> None:
     """
     Task 7 — store extracted_places on the Job document.
     Includes signal_type, platform, confidence, and raw LLM response.
     """
     from datetime import UTC, datetime
+
     job.extracted_places = result.to_job_storage()  # type: ignore[attr-defined]
     job.extraction_model = result.model  # type: ignore[attr-defined]
     job.extraction_tokens = result.total_tokens  # type: ignore[attr-defined]
@@ -307,17 +316,17 @@ async def _persist_to_job(job: JobDocument, result: ExtractionResult) -> None:
 
 # ── Mock extraction for local dev without API key ─────────────
 
+
 def _mock_extraction(signals: ExtractionSignals) -> ExtractionResult:
     """
     Return placeholder locations when no OpenAI API key is set.
     Parses obvious place names from the text heuristically.
     """
     import re
+
     # Simple heuristic: find capitalised 2-3 word phrases that look like place names
     text = signals.best_text
-    candidates = re.findall(
-        r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b", text
-    )
+    candidates = re.findall(r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b", text)
     # Filter obvious non-places
     stop_words = {"The", "A", "An", "This", "That", "It", "We", "I", "My", "Our"}
     locations = []
