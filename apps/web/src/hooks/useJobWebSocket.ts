@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import type { JobStatus } from "@/api/client";
 
 type WsState = "connecting" | "open" | "closed" | "error";

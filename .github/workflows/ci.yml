@@ -171,7 +171,7 @@ jobs:
         run: pnpm --filter shared build
 
       - name: "vitest · shared"
-        run: pnpm --filter shared test --run
+        run: pnpm --filter shared test
 
   # ── 6. Build: web production build ───────────────────────────
   build-web:

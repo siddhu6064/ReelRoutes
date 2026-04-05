@@ -1,12 +1,15 @@
+import { Loader } from "@googlemaps/js-api-loader";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Loader } from "@googlemaps/js-api-loader";
-import { useTrip } from "@/api/client";
-import type { Pin } from "@/api/client";
-import { useAppStore } from "@/stores/appStore";
-import PinDetailPanel from "@/components/PinDetailPanel";
-import ChatPanel from "@/components/ChatPanel";
+
 import styles from "./TripMapPage.module.css";
+
+import type { Pin , type Trip, useTrip } from "@/api/client";
+
+import ChatPanel from "@/components/ChatPanel";
+import PinDetailPanel from "@/components/PinDetailPanel";
+import { useAppStore } from "@/stores/appStore";
+
 
 const CORAL = "#D85A30";
 const ACTIVE = "#a8401e";
@@ -64,7 +67,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   entertainment: "🎭", other: "📍",
 };
 
-async function saveForOffline(trip: import("@/api/client").Trip) {
+async function saveForOffline(trip: Trip) {
   try {
     const db = await new Promise<IDBDatabase>((res, rej) => {
       const req = indexedDB.open("reelroutes-offline", 1);
@@ -222,7 +225,7 @@ export default function TripMapPage() {
   function toggleCity(city: string) {
     setCollapsedCities(prev => {
       const next = new Set(prev);
-      next.has(city) ? next.delete(city) : next.add(city);
+      if (next.has(city)) { next.delete(city); } else { next.add(city); }
       return next;
     });
   }

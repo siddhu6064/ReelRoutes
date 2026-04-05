@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import styles from "./ImportPage.module.css";
+
 import { useProcessVideo } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
-import styles from "./ImportPage.module.css";
 
 const PLATFORMS = [
   { id: "youtube", label: "YouTube", pattern: /youtube\.com|youtu\.be/, color: "#FF0000", icon: "▶" },

@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useSharedTrip } from "@/api/client";
-import type { Pin } from "@/api/client";
+
 import styles from "./SharedTripPage.module.css";
+
+import type { Pin } from "@/api/client";
+
+import { useSharedTrip } from "@/api/client";
 
 export default function SharedTripPage() {
   const { shareToken } = useParams<{ shareToken: string }>();

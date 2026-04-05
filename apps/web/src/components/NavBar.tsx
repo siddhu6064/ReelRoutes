@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useAppStore } from "@/stores/appStore";
+
 import styles from "./NavBar.module.css";
+
+import { useAppStore } from "@/stores/appStore";
 
 export default function NavBar() {
   const { userId } = useAppStore();

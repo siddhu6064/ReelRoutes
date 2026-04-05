@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useChat } from "@/api/client";
-import type { ChatMessage } from "@/api/client";
-import { useAppStore } from "@/stores/appStore";
+
 import styles from "./ChatPanel.module.css";
+
+import type { ChatMessage } from "@/api/client";
+
+import { useChat } from "@/api/client";
+import { useAppStore } from "@/stores/appStore";
+
 
 const DEFAULT_CHIPS = [
   "Build a day-by-day itinerary",

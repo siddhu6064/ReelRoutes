@@ -1,8 +1,11 @@
 import { useState } from "react";
+
+import styles from "./PinDetailPanel.module.css";
+
 import type { Pin } from "@/api/client";
+
 import { useUpdatePin, useDeletePin } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
-import styles from "./PinDetailPanel.module.css";
 
 interface Props {
   pin: Pin;

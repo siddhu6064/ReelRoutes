@@ -44,6 +44,20 @@ export interface Pin {
   phoneNumber?: string;
 }
 
+export interface ItineraryDay {
+  dayNumber: number;
+  label: string | null;
+  pinIds: string[];
+  notes: string | null;
+}
+
+export interface TripCollaborator {
+  id: string;
+  name: string;
+  role: "editor" | "viewer";
+  status: "pending" | "active";
+}
+
 export interface Trip {
   id: string;
   userId: string | null;
@@ -64,19 +78,7 @@ export interface Trip {
   updatedAt: string;
 }
 
-export interface ItineraryDay {
-  dayNumber: number;
-  label: string | null;
-  pinIds: string[];
-  notes: string | null;
-}
 
-export interface TripCollaborator {
-  id: string;
-  name: string;
-  role: "editor" | "viewer";
-  status: "pending" | "active";
-}
 
 export interface JobStatus {
   jobId: string;
@@ -316,12 +318,6 @@ export function useOptimiseRoute() {
   });
 }
 
-export interface ItineraryDay {
-  dayNumber: number;
-  label: string | null;
-  pinIds: string[];
-  notes: string | null;
-}
 
 export function useGenerateItinerary() {
   const qc = useQueryClient();

@@ -1,8 +1,11 @@
 import { useState } from "react";
+
+import styles from "./LowConfidenceSuggestions.module.css";
+
 import type { Pin } from "@/api/client";
+
 import { useAddPin } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
-import styles from "./LowConfidenceSuggestions.module.css";
 
 interface Props {
   tripId: string;

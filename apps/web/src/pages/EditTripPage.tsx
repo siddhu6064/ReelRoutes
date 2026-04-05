@@ -1,12 +1,16 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
+import styles from "./EditTripPage.module.css";
+
+import type { Pin, OptimiseResult, ItineraryDay } from "@/api/client";
+
 import {
   useTrip, useUpdateTrip, useDeleteTrip, useReorderPins, useAddPin,
   useOptimiseRoute, useGenerateItinerary,
 } from "@/api/client";
-import type { Pin, OptimiseResult, ItineraryDay } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
-import styles from "./EditTripPage.module.css";
+
 
 // Day colours for itinerary view
 const DAY_COLOURS = [
