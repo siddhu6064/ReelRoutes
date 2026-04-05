@@ -56,6 +56,31 @@ function groupByCity(pins: Pin[]): Map<string, Pin[]> {
   return groups;
 }
 
+const CATEGORY_ICONS: Record<string, string> = {
+  restaurant: "🍜", landmark: "🏛", accommodation: "🏨",
+  nature: "🌿", shopping: "🛍", transport: "✈️",
+  entertainment: "🎭", other: "📍",
+};
+
+async function saveForOffline(trip: import("@/api/client").Trip) {
+  try {
+    const db = await new Promise<IDBDatabase>((res, rej) => {
+      const req = indexedDB.open("reelroutes-offline", 1);
+      req.onupgradeneeded = () => req.result.createObjectStore("trips", { keyPath: "id" });
+      req.onsuccess = () => res(req.result);
+      req.onerror = () => rej(req.error);
+    });
+    await new Promise<void>((res, rej) => {
+      const tx = db.transaction("trips", "readwrite");
+      tx.objectStore("trips").put({ ...trip, _savedAt: Date.now() });
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+    });
+  } catch (e) {
+    console.warn("Offline save failed:", e);
+  }
+}
+
 export default function TripMapPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
@@ -72,6 +97,9 @@ export default function TripMapPage() {
   const [showRoute, setShowRoute] = useState(true);
   const [cityFilter, setCityFilter] = useState<string | null>(null);
   const [collapsedCities, setCollapsedCities] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [offlineSaved, setOfflineSaved] = useState(false);
 
   // Init map
   useEffect(() => {
@@ -95,13 +123,32 @@ export default function TripMapPage() {
   const sorted = useMemo(() => trip ? [...trip.pins].sort((a, b) => a.order - b.order) : [], [trip]);
   const cityGroups = useMemo(() => groupByCity(sorted), [sorted]);
   const cities = useMemo(() => Array.from(cityGroups.keys()), [cityGroups]);
-  const visiblePins = useMemo(() =>
-    cityFilter ? sorted.filter(p => {
-      const key = p.cityGroup ?? (p.city ? `${p.city}${p.countryCode ? ", " + p.countryCode : ""}` : "Other");
-      return key === cityFilter;
-    }) : sorted,
-    [sorted, cityFilter]
+  const categories = useMemo(() =>
+    [...new Set(sorted.map(p => p.category).filter(Boolean))] as string[],
+    [sorted]
   );
+
+  const visiblePins = useMemo(() => {
+    let pins = sorted;
+    if (cityFilter) {
+      pins = pins.filter(p => {
+        const key = p.cityGroup ?? (p.city ? \`\${p.city}\${p.countryCode ? ", " + p.countryCode : ""}\` : "Other");
+        return key === cityFilter;
+      });
+    }
+    if (categoryFilter) {
+      pins = pins.filter(p => p.category === categoryFilter);
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      pins = pins.filter(p =>
+        p.placeName.toLowerCase().includes(q) ||
+        (p.city ?? "").toLowerCase().includes(q) ||
+        (p.address ?? "").toLowerCase().includes(q)
+      );
+    }
+    return pins;
+  }, [sorted, cityFilter, categoryFilter, search]);
 
   // Total route distance
   const totalKm = useMemo(() => {
@@ -270,6 +317,48 @@ export default function TripMapPage() {
             </div>
           )}
         </div>
+
+        {/* W7t4: Fuzzy search */}
+        <div className={styles.searchWrap}>
+          <input
+            className={styles.searchInput}
+            placeholder="Search stops…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button className={styles.searchClear} onClick={() => setSearch("")}>✕</button>
+          )}
+        </div>
+
+        {/* W7t3: Category filter chips */}
+        {categories.length > 1 && (
+          <div className={styles.categoryChips}>
+            <button
+              className={`${styles.catChip} ${categoryFilter === null ? styles.catChipActive : ""}`}
+              onClick={() => setCategoryFilter(null)}
+            >All</button>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                className={`${styles.catChip} ${categoryFilter === cat ? styles.catChipActive : ""}`}
+                onClick={() => setCategoryFilter(cat === categoryFilter ? null : cat)}
+              >
+                {CATEGORY_ICONS[cat] ?? "📍"} {cat}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* W8t1: Offline save button */}
+        {trip && (
+          <button
+            className={`${styles.offlineBtn} ${offlineSaved ? styles.offlineBtnSaved : ""}`}
+            onClick={async () => { await saveForOffline(trip); setOfflineSaved(true); }}
+          >
+            {offlineSaved ? "✓ Saved offline" : "⬇ Save for offline"}
+          </button>
+        )}
 
         {/* Stop list — grouped by city (W4t1) */}
         <div className={styles.stopList}>

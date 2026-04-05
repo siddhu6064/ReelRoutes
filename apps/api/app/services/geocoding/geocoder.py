@@ -70,6 +70,9 @@ class GeocodedLocation:
     # Candidates stored when ambiguous (Task 4)
     candidates: list[dict] = field(default_factory=list)
 
+    # Week 7 — place types for category classification
+    place_types: list[str] = field(default_factory=list)
+
     # Google Places enrichment (Week 2)
     rating: float | None = None
     user_ratings_total: int | None = None
@@ -168,7 +171,7 @@ async def _resolve_place(
                 params={
                     "query": query,
                     "key": api_key,
-                    "fields": "place_id,name,geometry,formatted_address,address_components,rating,user_ratings_total,opening_hours",
+                    "fields": "place_id,name,geometry,formatted_address,address_components,rating,user_ratings_total,opening_hours,types",
                 },
             )
             resp.raise_for_status()
@@ -238,6 +241,9 @@ def _populate_from_result(loc: GeocodedLocation, result: dict) -> None:
             loc.country_code = component.get("short_name")
         if ("locality" in types or "administrative_area_level_2" in types) and not loc.city:
             loc.city = component.get("long_name")
+
+    # Week 7 — store raw place types for category classification
+    loc.place_types = result.get("types", [])
 
     # Week 2 — enrichment from text search response
     if "rating" in result:

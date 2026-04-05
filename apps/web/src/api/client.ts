@@ -34,6 +34,7 @@ export interface Pin {
   manuallyAdded: boolean;
   notes?: string;
   tags: string[];
+  category?: string;
   // Week 2 — Places enrichment
   rating?: number;
   userRatingsTotal?: number;
@@ -281,5 +282,63 @@ export function useChat() {
         method: "POST",
         body: JSON.stringify({ message, history, user_id: userId ?? null }),
       }),
+  });
+}
+
+// ── Phase 2 — Route + Itinerary + Category ────────────────────
+
+export interface OptimiseResult {
+  originalDistanceKm: number;
+  optimisedDistanceKm: number;
+  savingPercent: number;
+  pins: Pin[];
+}
+
+export function useOptimiseRoute() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      user_id,
+      start_lat,
+      start_lng,
+    }: {
+      tripId: string;
+      user_id: string;
+      start_lat?: number;
+      start_lng?: number;
+    }) =>
+      apiFetch<OptimiseResult>(`/api/trips/${tripId}/optimise-route`, {
+        method: "POST",
+        body: JSON.stringify({ user_id, start_lat, start_lng }),
+      }),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+  });
+}
+
+export interface ItineraryDay {
+  dayNumber: number;
+  label: string | null;
+  pinIds: string[];
+  notes: string | null;
+}
+
+export function useGenerateItinerary() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      user_id,
+      trip_length_days,
+    }: {
+      tripId: string;
+      user_id: string;
+      trip_length_days: number;
+    }) =>
+      apiFetch<{ tripLengthDays: number; days: ItineraryDay[] }>(
+        `/api/trips/${tripId}/itinerary`,
+        { method: "POST", body: JSON.stringify({ user_id, trip_length_days }) }
+      ),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }

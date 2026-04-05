@@ -61,6 +61,20 @@ class JobErrorCode(Enum):
     UNKNOWN_ERROR = "UNKNOWN_ERROR"
 
 
+# ── Pin category ──────────────────────────────────────────────
+
+
+class PinCategory(Enum):
+    RESTAURANT = "restaurant"
+    LANDMARK = "landmark"
+    ACCOMMODATION = "accommodation"
+    NATURE = "nature"
+    SHOPPING = "shopping"
+    TRANSPORT = "transport"
+    ENTERTAINMENT = "entertainment"
+    OTHER = "other"
+
+
 # ── Expense models ─────────────────────────────────────────────
 
 
@@ -188,6 +202,9 @@ class PinDocument(BaseModel):
 
     # City grouping (Week 3) — e.g. "Tokyo, JP"
     city_group: str | None = None
+
+    # Category (Week 7) — auto-classified from Google Places types
+    category: PinCategory = PinCategory.OTHER
 
     # User-editable
     notes: str | None = None

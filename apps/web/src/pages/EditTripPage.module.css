@@ -197,3 +197,83 @@
   justify-content: center;
   color: var(--text-muted);
 }
+
+/* ── Phase 2 additions ── */
+.toolBtn {
+  font-size: 12px; font-weight: 700; padding: 5px 12px;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface2, #1e1e1c); color: var(--coral);
+  cursor: pointer; font-family: inherit; transition: all .12s;
+}
+.toolBtn:hover { background: #2a1a12; }
+
+.hint { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+.startRow { margin: 8px 0; }
+
+.actionBtn {
+  font-size: 13px; font-weight: 700; padding: 9px 18px;
+  border-radius: 8px; border: none; background: var(--coral);
+  color: #fff; cursor: pointer; font-family: inherit;
+  transition: opacity .12s; align-self: flex-start;
+}
+.actionBtn:hover { opacity: .88; }
+.actionBtn:disabled { opacity: .45; cursor: not-allowed; }
+
+.optimisePanel { display: flex; flex-direction: column; gap: 12px; }
+
+.optimiseResult { background: var(--bg, #FAFAF8); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.resultGrid { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.resultBox { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.resultLabel { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); }
+.resultValue { font-size: 20px; font-weight: 800; }
+.resultArrow { font-size: 20px; color: var(--text-muted); }
+.resultSaving {
+  margin-left: auto; font-size: 13px; font-weight: 800;
+  background: var(--green-light, #e5f7eb); color: var(--green, #2e9e4f);
+  padding: 4px 12px; border-radius: 99px;
+}
+
+.itineraryPanel { display: flex; flex-direction: column; gap: 14px; }
+.daysRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.daysLabel { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.daysStepper { display: flex; align-items: center; gap: 8px; }
+.daysStepper button {
+  width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface2, #1e1e1c); color: var(--text); font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.daysStepper span { font-size: 16px; font-weight: 800; min-width: 24px; text-align: center; }
+
+.itineraryDays { display: flex; flex-direction: column; gap: 10px; }
+.dayBlock { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.dayHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-left: 4px solid var(--coral);
+  background: var(--surface2, #1e1e1c);
+}
+.dayLabel { font-size: 13px; font-weight: 800; }
+.dayMapsBtn {
+  font-size: 11px; font-weight: 700; padding: 3px 9px;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface2, #1e1e1c); color: var(--coral);
+  cursor: pointer; font-family: inherit;
+}
+.dayNote { font-size: 12px; color: var(--text-muted); font-style: italic; padding: 6px 14px 0; }
+.dayPins { list-style: decimal; padding: 8px 14px 10px 30px; display: flex; flex-direction: column; gap: 3px; }
+.dayPins li { font-size: 13px; color: var(--text); }
+
+.itineraryActions { display: flex; gap: 8px; flex-wrap: wrap; }
+.exportBtn {
+  font-size: 12px; font-weight: 700; padding: 6px 14px;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface2, #1e1e1c); color: var(--text-muted);
+  cursor: pointer; font-family: inherit; transition: color .12s;
+}
+.exportBtn:hover { color: var(--text); }
+
+.dayDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.categoryTag {
+  font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 99px;
+  background: var(--blue-light, #e6f1fb); color: var(--blue, #378ADD);
+  white-space: nowrap;
+}

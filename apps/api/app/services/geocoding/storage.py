@@ -22,6 +22,102 @@ from app.services.geocoding.geocoder import GeocodedLocation, GeocodingResult
 logger = get_logger(__name__)
 
 
+# ── Week 7: place_type → PinCategory mapping ──────────────────
+
+from app.models.documents import PinCategory  # noqa: E402 — placed after logger
+
+_PLACE_TYPE_MAP: list[tuple[set[str], PinCategory]] = [
+    (
+        {"restaurant", "food", "bar", "cafe", "bakery", "meal_takeaway", "meal_delivery"},
+        PinCategory.RESTAURANT,
+    ),
+    ({"lodging", "hotel", "motel", "hostel", "campground", "rv_park"}, PinCategory.ACCOMMODATION),
+    # ENTERTAINMENT before LANDMARK so amusement_park/zoo beat tourist_attraction
+    (
+        {
+            "amusement_park",
+            "aquarium",
+            "bowling_alley",
+            "casino",
+            "movie_theater",
+            "night_club",
+            "stadium",
+            "zoo",
+            "spa",
+            "gym",
+            "entertainment",
+        },
+        PinCategory.ENTERTAINMENT,
+    ),
+    (
+        {
+            "tourist_attraction",
+            "museum",
+            "art_gallery",
+            "church",
+            "temple",
+            "mosque",
+            "synagogue",
+            "place_of_worship",
+            "landmark",
+            "historic_landmark",
+            "monument",
+            "castle",
+        },
+        PinCategory.LANDMARK,
+    ),
+    (
+        {
+            "park",
+            "nature_reserve",
+            "beach",
+            "mountain",
+            "lake",
+            "national_park",
+            "forest",
+            "waterfall",
+            "hiking_area",
+        },
+        PinCategory.NATURE,
+    ),
+    (
+        {
+            "shopping_mall",
+            "store",
+            "market",
+            "clothing_store",
+            "department_store",
+            "book_store",
+            "electronics_store",
+            "jewelry_store",
+            "shoe_store",
+        },
+        PinCategory.SHOPPING,
+    ),
+    (
+        {
+            "transit_station",
+            "bus_station",
+            "train_station",
+            "airport",
+            "subway_station",
+            "ferry_terminal",
+            "light_rail_station",
+        },
+        PinCategory.TRANSPORT,
+    ),
+]
+
+
+def classify_category(place_types: list[str]) -> PinCategory:
+    """Map Google Places types to our PinCategory enum."""
+    type_set = set(place_types)
+    for google_types, category in _PLACE_TYPE_MAP:
+        if google_types & type_set:
+            return category
+    return PinCategory.OTHER
+
+
 async def persist_geocoding_to_job(
     job: JobDocument,
     geocoding_result: GeocodingResult,
@@ -140,6 +236,8 @@ def geocoded_locations_to_pins(locations: list[GeocodedLocation]) -> list[PinDoc
             confidence=loc.confidence,
             manually_added=False,
             tags=[],
+            # Week 7 — auto-classify category from place types
+            category=classify_category(loc.place_types),
             # Week 2 — Places enrichment
             rating=loc.rating,
             user_ratings_total=loc.user_ratings_total,

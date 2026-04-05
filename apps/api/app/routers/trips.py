@@ -93,6 +93,8 @@ def _trip_response(trip: TripDocument) -> dict:
                 "phoneNumber": p.phone_number,
                 # Week 3 — city grouping
                 "cityGroup": p.city_group,
+                # Week 7 — category
+                "category": p.category,
             }
             for p in sorted(trip.pins, key=lambda p: p.order)
         ],

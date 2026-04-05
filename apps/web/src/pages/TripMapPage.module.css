@@ -273,3 +273,55 @@
 .openNow  { font-size: 10px; font-weight: 700; color: #4ade80; }
 .closedNow { font-size: 10px; font-weight: 700; color: #f87171; }
 .stopRating { font-size: 10px; font-weight: 700; color: #f59e0b; }
+
+/* ── Phase 2 Week 7+8 additions ── */
+.searchWrap {
+  position: relative;
+  margin: 6px 0 2px;
+}
+.searchInput {
+  width: 100%;
+  padding: 7px 30px 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #2a2a28);
+  background: var(--surface2, #1e1e1c);
+  color: var(--text, #f0ede8);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+.searchInput:focus { border-color: var(--coral, #D85A30); }
+.searchInput::placeholder { color: var(--muted, #6b6b62); }
+.searchClear {
+  position: absolute;
+  right: 8px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--muted, #6b6b62); cursor: pointer; font-size: 12px;
+}
+
+.categoryChips {
+  display: flex; gap: 5px; flex-wrap: wrap; padding: 4px 0;
+}
+.catChip {
+  font-size: 11px; font-weight: 700; padding: 3px 9px;
+  border-radius: 99px; border: 1px solid var(--border, #2a2a28);
+  background: var(--surface2, #1e1e1c); color: var(--muted, #6b6b62);
+  cursor: pointer; font-family: inherit; transition: all .12s; white-space: nowrap;
+}
+.catChip:hover { color: var(--text, #f0ede8); }
+.catChipActive {
+  background: #2a1a12; border-color: var(--coral, #D85A30); color: var(--coral, #D85A30);
+}
+
+.offlineBtn {
+  font-size: 11px; font-weight: 700; padding: 5px 12px;
+  border-radius: 6px; border: 1px solid var(--border, #2a2a28);
+  background: var(--surface2, #1e1e1c); color: var(--muted, #6b6b62);
+  cursor: pointer; font-family: inherit; transition: all .12s;
+  align-self: flex-start; margin: 2px 0;
+}
+.offlineBtn:hover { color: var(--text, #f0ede8); }
+.offlineBtnSaved {
+  background: #0d2215; border-color: var(--teal, #1D9E75); color: var(--teal, #1D9E75);
+}
