@@ -7,7 +7,6 @@ import type { ChatMessage } from "@/api/client";
 import { useChat } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
 
-
 const DEFAULT_CHIPS = [
   "Build a day-by-day itinerary",
   "How long at each stop?",
@@ -75,7 +74,9 @@ export default function ChatPanel({ tripId, onClose }: Props) {
             <div className={styles.sub}>Powered by GPT-4o</div>
           </div>
         </div>
-        <button className={styles.close} onClick={onClose} aria-label="Close chat">✕</button>
+        <button className={styles.close} onClick={onClose} aria-label="Close chat">
+          ✕
+        </button>
       </div>
 
       <div className={styles.messages}>
@@ -90,12 +91,13 @@ export default function ChatPanel({ tripId, onClose }: Props) {
             key={i}
             className={`${styles.bubble} ${msg.role === "user" ? styles.user : styles.assistant}`}
           >
-            {msg.role === "assistant" && (
-              <div className={styles.bubbleAvatar}>AI</div>
-            )}
+            {msg.role === "assistant" && <div className={styles.bubbleAvatar}>AI</div>}
             <div className={styles.bubbleText}>
               {msg.content.split("\n").map((line, j) => (
-                <span key={j}>{line}{j < msg.content.split("\n").length - 1 && <br />}</span>
+                <span key={j}>
+                  {line}
+                  {j < msg.content.split("\n").length - 1 && <br />}
+                </span>
               ))}
             </div>
           </div>
@@ -105,7 +107,9 @@ export default function ChatPanel({ tripId, onClose }: Props) {
           <div className={`${styles.bubble} ${styles.assistant}`}>
             <div className={styles.bubbleAvatar}>AI</div>
             <div className={styles.typing}>
-              <span /><span /><span />
+              <span />
+              <span />
+              <span />
             </div>
           </div>
         )}

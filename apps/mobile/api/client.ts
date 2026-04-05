@@ -8,8 +8,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 
 const API_BASE =
-  (Constants.expoConfig?.extra as Record<string, string> | undefined)?.['apiUrl'] ??
-  process.env['EXPO_PUBLIC_API_URL'] ??
+  (Constants.expoConfig?.extra as Record<string, string> | undefined)?.["apiUrl"] ??
+  process.env["EXPO_PUBLIC_API_URL"] ??
   "https://api.reelroutes.app";
 
 // ── Core fetch ─────────────────────────────────────────────────
@@ -103,10 +103,10 @@ export interface JobStatus {
 export function useProcessVideo() {
   return useMutation({
     mutationFn: ({ url, userId }: { url: string; userId?: string }) =>
-      apiFetch<{ jobId: string; status: string; deduplicated: boolean }>(
-        "/api/process",
-        { method: "POST", body: JSON.stringify({ url, user_id: userId ?? null }) }
-      ),
+      apiFetch<{ jobId: string; status: string; deduplicated: boolean }>("/api/process", {
+        method: "POST",
+        body: JSON.stringify({ url, user_id: userId ?? null }),
+      }),
   });
 }
 
@@ -129,10 +129,7 @@ export function useJobStatus(jobId: string | null) {
 export function useUserTrips(userId: string | null) {
   return useQuery({
     queryKey: ["trips", userId],
-    queryFn: () =>
-      apiFetch<{ items: Trip[]; total: number }>(
-        `/api/users/me/trips`
-      ),
+    queryFn: () => apiFetch<{ items: Trip[]; total: number }>(`/api/users/me/trips`),
     enabled: !!userId,
   });
 }
@@ -178,7 +175,10 @@ export function useReorderPins() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ tripId, ...body }: { tripId: string; user_id: string; pin_ids: string[] }) =>
-      apiFetch<Trip>(`/api/trips/${tripId}/pins/reorder`, { method: "POST", body: JSON.stringify(body) }),
+      apiFetch<Trip>(`/api/trips/${tripId}/pins/reorder`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
     onSuccess: (data: Trip) => qc.setQueryData(["trip", data.id], data),
   });
 }
@@ -187,7 +187,10 @@ export function useUpdatePin() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({
-      tripId, pinId, userId, ...body
+      tripId,
+      pinId,
+      userId,
+      ...body
     }: { tripId: string; pinId: string; userId: string } & Record<string, unknown>) =>
       apiFetch<Trip>(`/api/trips/${tripId}/pins/${pinId}`, {
         method: "PUT",
@@ -202,12 +205,20 @@ export function useUpdatePin() {
 export function useChat() {
   return useMutation({
     mutationFn: ({
-      tripId, message, history, userId,
-    }: { tripId: string; message: string; history: { role: string; content: string }[]; userId?: string }) =>
-      apiFetch<{ reply: string; suggestionChips: string[] }>(
-        `/api/trips/${tripId}/chat`,
-        { method: "POST", body: JSON.stringify({ message, history, user_id: userId ?? null }) }
-      ),
+      tripId,
+      message,
+      history,
+      userId,
+    }: {
+      tripId: string;
+      message: string;
+      history: { role: string; content: string }[];
+      userId?: string;
+    }) =>
+      apiFetch<{ reply: string; suggestionChips: string[] }>(`/api/trips/${tripId}/chat`, {
+        method: "POST",
+        body: JSON.stringify({ message, history, user_id: userId ?? null }),
+      }),
   });
 }
 
@@ -236,12 +247,18 @@ export function useGenerateItinerary() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({
-      tripId, user_id, trip_length_days,
-    }: { tripId: string; user_id: string; trip_length_days: number }) =>
-      apiFetch<{ tripLengthDays: number; days: ItineraryDay[] }>(
-        `/api/trips/${tripId}/itinerary`,
-        { method: "POST", body: JSON.stringify({ user_id, trip_length_days }) }
-      ),
+      tripId,
+      user_id,
+      trip_length_days,
+    }: {
+      tripId: string;
+      user_id: string;
+      trip_length_days: number;
+    }) =>
+      apiFetch<{ tripLengthDays: number; days: ItineraryDay[] }>(`/api/trips/${tripId}/itinerary`, {
+        method: "POST",
+        body: JSON.stringify({ user_id, trip_length_days }),
+      }),
     onSuccess: (_d, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }

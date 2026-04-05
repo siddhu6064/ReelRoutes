@@ -86,7 +86,10 @@ export default function NewTripScreen() {
 
   async function handleImport(importUrl?: string) {
     const trimmed = (importUrl ?? url).trim();
-    if (!trimmed) { setError("Please paste a video URL."); return; }
+    if (!trimmed) {
+      setError("Please paste a video URL.");
+      return;
+    }
     if (!detectPlatform(trimmed)) {
       setError("URL must be from YouTube, Instagram, TikTok, Facebook, or X.");
       return;
@@ -135,7 +138,11 @@ export default function NewTripScreen() {
           <TextInput
             style={styles.input}
             value={url}
-            onChangeText={(t) => { setUrl(t); setError(""); setSharedFrom(null); }}
+            onChangeText={(t) => {
+              setUrl(t);
+              setError("");
+              setSharedFrom(null);
+            }}
             placeholder="Paste video URL here…"
             placeholderTextColor={MUTED}
             autoCapitalize="none"
@@ -146,7 +153,13 @@ export default function NewTripScreen() {
             selectTextOnFocus
           />
           {url.trim() !== "" && (
-            <Pressable onPress={() => { setUrl(""); setSharedFrom(null); }} style={styles.clearBtn}>
+            <Pressable
+              onPress={() => {
+                setUrl("");
+                setSharedFrom(null);
+              }}
+              style={styles.clearBtn}
+            >
               <Text style={styles.clearBtnText}>✕</Text>
             </Pressable>
           )}
@@ -166,9 +179,7 @@ export default function NewTripScreen() {
           onPress={() => handleImport()}
           disabled={!url.trim() || isPending}
         >
-          <Text style={styles.btnText}>
-            {isPending ? "Extracting trip…" : "Extract Trip →"}
-          </Text>
+          <Text style={styles.btnText}>{isPending ? "Extracting trip…" : "Extract Trip →"}</Text>
         </Pressable>
 
         {/* Platform chips */}
@@ -204,18 +215,25 @@ const styles = StyleSheet.create({
   sub: { color: MUTED, fontSize: 15, lineHeight: 22 },
 
   sharedBanner: {
-    flexDirection: "row", alignItems: "center", gap: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
     backgroundColor: "rgba(74,222,128,0.1)",
-    borderWidth: 1, borderColor: "rgba(74,222,128,0.3)",
-    borderRadius: 10, padding: 12,
+    borderWidth: 1,
+    borderColor: "rgba(74,222,128,0.3)",
+    borderRadius: 10,
+    padding: 12,
   },
   sharedIcon: { color: GREEN, fontSize: 16, fontWeight: "800" },
   sharedText: { color: GREEN, fontSize: 13, fontWeight: "600", flex: 1 },
 
   inputWrap: {
-    flexDirection: "row", alignItems: "center",
-    backgroundColor: SURFACE, borderRadius: 14,
-    borderWidth: 1.5, borderColor: BORDER,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: SURFACE,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: BORDER,
   },
   inputActive: { borderColor: CORAL },
   inputIcon: { paddingLeft: 14, fontSize: 18 },
@@ -230,25 +248,34 @@ const styles = StyleSheet.create({
   error: { color: ERROR, fontSize: 13 },
 
   btn: {
-    paddingVertical: 16, borderRadius: 14,
-    backgroundColor: CORAL, alignItems: "center",
+    paddingVertical: 16,
+    borderRadius: 14,
+    backgroundColor: CORAL,
+    alignItems: "center",
   },
   btnDisabled: { opacity: 0.45 },
   btnText: { color: "#fff", fontWeight: "800", fontSize: 16, letterSpacing: 0.2 },
 
   platforms: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: {
-    paddingHorizontal: 12, paddingVertical: 6,
-    borderRadius: 999, borderWidth: 1, borderColor: BORDER,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: BORDER,
   },
   chipActive: { borderColor: CORAL },
   chipText: { color: MUTED, fontSize: 12, fontWeight: "600" },
   chipTextActive: { color: CORAL },
 
   tipBox: {
-    backgroundColor: SURFACE, borderRadius: 12,
-    borderWidth: 1, borderColor: BORDER,
-    padding: 16, gap: 6, marginTop: 4,
+    backgroundColor: SURFACE,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 16,
+    gap: 6,
+    marginTop: 4,
   },
   tipTitle: { color: TEXT, fontSize: 13, fontWeight: "700" },
   tipText: { color: MUTED, fontSize: 12, lineHeight: 18 },

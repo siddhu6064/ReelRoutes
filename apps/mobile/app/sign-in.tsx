@@ -55,9 +55,7 @@ export default function SignInScreen() {
         </Pressable>
 
         <Text style={styles.terms}>
-          By continuing, you agree to our{" "}
-          <Text style={{ color: CORAL }}>Terms of Service</Text>
-          {" "}and{" "}
+          By continuing, you agree to our <Text style={{ color: CORAL }}>Terms of Service</Text> and{" "}
           <Text style={{ color: CORAL }}>Privacy Policy</Text>.
         </Text>
       </View>
@@ -83,10 +81,16 @@ const styles = StyleSheet.create({
   sub: { color: MUTED, fontSize: 15, textAlign: "center", lineHeight: 22 },
 
   googleBtn: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    backgroundColor: "#fff", borderRadius: 14,
-    paddingVertical: 16, paddingHorizontal: 32,
-    marginTop: 8, width: "100%", justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    marginTop: 8,
+    width: "100%",
+    justifyContent: "center",
   },
   googleIcon: { fontSize: 18, fontWeight: "900", color: "#4285F4" },
   googleBtnText: { color: "#1a1a18", fontWeight: "700", fontSize: 16 },

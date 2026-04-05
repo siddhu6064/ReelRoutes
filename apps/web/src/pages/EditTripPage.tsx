@@ -6,16 +6,28 @@ import styles from "./EditTripPage.module.css";
 import type { Pin, OptimiseResult, ItineraryDay } from "@/api/client";
 
 import {
-  useTrip, useUpdateTrip, useDeleteTrip, useReorderPins, useAddPin,
-  useOptimiseRoute, useGenerateItinerary,
+  useTrip,
+  useUpdateTrip,
+  useDeleteTrip,
+  useReorderPins,
+  useAddPin,
+  useOptimiseRoute,
+  useGenerateItinerary,
 } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
 
-
 // Day colours for itinerary view
 const DAY_COLOURS = [
-  "#D85A30","#378ADD","#1D9E75","#7F77DD","#EF9F27",
-  "#D4537E","#2E9E4F","#E05252","#5DA0B5","#B07D3A",
+  "#D85A30",
+  "#378ADD",
+  "#1D9E75",
+  "#7F77DD",
+  "#EF9F27",
+  "#D4537E",
+  "#2E9E4F",
+  "#E05252",
+  "#5DA0B5",
+  "#B07D3A",
 ];
 
 export default function EditTripPage() {
@@ -43,7 +55,7 @@ export default function EditTripPage() {
   const [showItinerary, setShowItinerary] = useState(false);
   const [tripDays, setTripDays] = useState(3);
   const [itinerary, setItinerary] = useState<ItineraryDay[] | null>(
-    trip?.itinerary?.length ? trip.itinerary : null
+    trip?.itinerary?.length ? trip.itinerary : null,
   );
 
   const { mutateAsync: updateTrip, isPending: updatingTitle } = useUpdateTrip();
@@ -105,13 +117,18 @@ export default function EditTripPage() {
     setAddingPlace(true);
     try {
       await addPin({
-        tripId, user_id: userId, place_name: newPlace.name,
-        lat: parseFloat(newPlace.lat), lng: parseFloat(newPlace.lng),
+        tripId,
+        user_id: userId,
+        place_name: newPlace.name,
+        lat: parseFloat(newPlace.lat),
+        lng: parseFloat(newPlace.lng),
         address: newPlace.address || undefined,
       });
       setNewPlace({ name: "", lat: "", lng: "", address: "" });
       setShowAddPlace(false);
-    } finally { setAddingPlace(false); }
+    } finally {
+      setAddingPlace(false);
+    }
   }
 
   async function handleOptimise() {
@@ -142,7 +159,10 @@ export default function EditTripPage() {
     if (!first || !last) return;
     const origin = `${first.lat},${first.lng}`;
     const dest = `${last.lat},${last.lng}`;
-    const wps = pins.slice(1, -1).map((p) => `${p.lat},${p.lng}`).join("|");
+    const wps = pins
+      .slice(1, -1)
+      .map((p) => `${p.lat},${p.lng}`)
+      .join("|");
     const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}${wps ? `&waypoints=${wps}` : ""}`;
     window.open(url, "_blank");
   }
@@ -153,7 +173,9 @@ export default function EditTripPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate(`/trips/${tripId}`)}>← Back to map</button>
+        <button className={styles.backBtn} onClick={() => navigate(`/trips/${tripId}`)}>
+          ← Back to map
+        </button>
         <h1 className={styles.pageTitle}>Edit Trip</h1>
       </div>
 
@@ -164,7 +186,10 @@ export default function EditTripPage() {
           <input
             className={styles.titleInput}
             value={currentTitle}
-            onChange={(e) => { setTitle(e.target.value); setTitleDirty(true); }}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setTitleDirty(true);
+            }}
             placeholder="Name your trip"
           />
           {titleDirty && (
@@ -210,7 +235,9 @@ export default function EditTripPage() {
                 <div className={styles.resultGrid}>
                   <div className={styles.resultBox}>
                     <span className={styles.resultLabel}>Before</span>
-                    <span className={styles.resultValue}>{optimiseResult.originalDistanceKm} km</span>
+                    <span className={styles.resultValue}>
+                      {optimiseResult.originalDistanceKm} km
+                    </span>
                   </div>
                   <div className={styles.resultArrow}>→</div>
                   <div className={styles.resultBox}>
@@ -219,9 +246,7 @@ export default function EditTripPage() {
                       {optimiseResult.optimisedDistanceKm} km
                     </span>
                   </div>
-                  <div className={styles.resultSaving}>
-                    Saved {optimiseResult.savingPercent}%
-                  </div>
+                  <div className={styles.resultSaving}>Saved {optimiseResult.savingPercent}%</div>
                 </div>
                 <p className={styles.hint}>Stop order updated. View the new route on the map.</p>
               </div>
@@ -319,12 +344,13 @@ export default function EditTripPage() {
                 onDragStart={(e) => onDragStart(e, i)}
                 onDragOver={(e) => onDragOver(e, i)}
                 onDrop={(e) => onDrop(e, i)}
-                onDragEnd={() => { setDragging(null); setDragOver(null); }}
+                onDragEnd={() => {
+                  setDragging(null);
+                  setDragOver(null);
+                }}
               >
                 <span className={styles.handle}>⠿</span>
-                {dayColour && (
-                  <span className={styles.dayDot} style={{ background: dayColour }} />
-                )}
+                {dayColour && <span className={styles.dayDot} style={{ background: dayColour }} />}
                 <div className={styles.stopNum}>{i + 1}</div>
                 <div className={styles.stopInfo}>
                   <div className={styles.stopName}>{pin.placeName}</div>
@@ -341,20 +367,38 @@ export default function EditTripPage() {
           <div className={styles.addPlaceForm}>
             <h3 className={styles.addPlaceTitle}>Add a place manually</h3>
             <div className={styles.formGrid}>
-              <input className={styles.formInput} placeholder="Place name *" value={newPlace.name}
-                onChange={(e) => setNewPlace({ ...newPlace, name: e.target.value })} />
-              <input className={styles.formInput} placeholder="Address" value={newPlace.address}
-                onChange={(e) => setNewPlace({ ...newPlace, address: e.target.value })} />
-              <input className={styles.formInput} placeholder="Latitude *  e.g. 35.6595" value={newPlace.lat}
-                onChange={(e) => setNewPlace({ ...newPlace, lat: e.target.value })} />
-              <input className={styles.formInput} placeholder="Longitude *  e.g. 139.7004" value={newPlace.lng}
-                onChange={(e) => setNewPlace({ ...newPlace, lng: e.target.value })} />
+              <input
+                className={styles.formInput}
+                placeholder="Place name *"
+                value={newPlace.name}
+                onChange={(e) => setNewPlace({ ...newPlace, name: e.target.value })}
+              />
+              <input
+                className={styles.formInput}
+                placeholder="Address"
+                value={newPlace.address}
+                onChange={(e) => setNewPlace({ ...newPlace, address: e.target.value })}
+              />
+              <input
+                className={styles.formInput}
+                placeholder="Latitude *  e.g. 35.6595"
+                value={newPlace.lat}
+                onChange={(e) => setNewPlace({ ...newPlace, lat: e.target.value })}
+              />
+              <input
+                className={styles.formInput}
+                placeholder="Longitude *  e.g. 139.7004"
+                value={newPlace.lng}
+                onChange={(e) => setNewPlace({ ...newPlace, lng: e.target.value })}
+              />
             </div>
             <div className={styles.formActions}>
               <button className={styles.saveBtn} onClick={handleAddPlace} disabled={addingPlace}>
                 {addingPlace ? "Adding…" : "Add stop"}
               </button>
-              <button className={styles.cancelBtn} onClick={() => setShowAddPlace(false)}>Cancel</button>
+              <button className={styles.cancelBtn} onClick={() => setShowAddPlace(false)}>
+                Cancel
+              </button>
             </div>
           </div>
         )}

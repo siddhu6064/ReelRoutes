@@ -34,7 +34,9 @@ export default function SharedTripPage() {
         <div className={styles.errorIcon}>✕</div>
         <h2>Trip not found</h2>
         <p>This link may have expired or been removed.</p>
-        <Link to="/" className={styles.ctaBtn}>Create your own trip →</Link>
+        <Link to="/" className={styles.ctaBtn}>
+          Create your own trip →
+        </Link>
       </div>
     );
   }
@@ -62,7 +64,9 @@ export default function SharedTripPage() {
           <button className={styles.copyBtn} onClick={copyLink}>
             {copied ? "✓ Copied!" : "Copy link"}
           </button>
-          <Link to="/" className={styles.importBtn}>Import your own video →</Link>
+          <Link to="/" className={styles.importBtn}>
+            Import your own video →
+          </Link>
         </div>
       </header>
 
@@ -81,7 +85,8 @@ export default function SharedTripPage() {
                   <div className={styles.stopName}>{pin.placeName}</div>
                   {pin.city && (
                     <div className={styles.stopCity}>
-                      {pin.city}{pin.countryCode ? `, ${pin.countryCode}` : ""}
+                      {pin.city}
+                      {pin.countryCode ? `, ${pin.countryCode}` : ""}
                     </div>
                   )}
                 </div>
@@ -101,8 +106,8 @@ export default function SharedTripPage() {
                   className={`${styles.mapPin} ${selectedPin?.id === pin.id ? styles.mapPinActive : ""}`}
                   onClick={() => setSelectedPin(pin)}
                   style={{
-                    left: `${10 + (i * 7) % 80}%`,
-                    top: `${15 + (i * 11) % 65}%`,
+                    left: `${10 + ((i * 7) % 80)}%`,
+                    top: `${15 + ((i * 11) % 65)}%`,
                   }}
                   title={pin.placeName}
                 >
@@ -120,7 +125,7 @@ export default function SharedTripPage() {
             <div className={styles.pinDetail}>
               <div className={styles.pinDetailHeader}>
                 <div className={styles.pinDetailNum}>
-                  {sorted.findIndex(p => p.id === selectedPin.id) + 1}
+                  {sorted.findIndex((p) => p.id === selectedPin.id) + 1}
                 </div>
                 <div>
                   <h3 className={styles.pinDetailName}>{selectedPin.placeName}</h3>
@@ -128,14 +133,14 @@ export default function SharedTripPage() {
                     <p className={styles.pinDetailAddr}>{selectedPin.address}</p>
                   )}
                 </div>
-                <button className={styles.closeDetail} onClick={() => setSelectedPin(null)}>✕</button>
+                <button className={styles.closeDetail} onClick={() => setSelectedPin(null)}>
+                  ✕
+                </button>
               </div>
               {selectedPin.contextQuote && (
                 <blockquote className={styles.quote}>"{selectedPin.contextQuote}"</blockquote>
               )}
-              {selectedPin.notes && (
-                <p className={styles.notes}>{selectedPin.notes}</p>
-              )}
+              {selectedPin.notes && <p className={styles.notes}>{selectedPin.notes}</p>}
               {selectedPin.placeId && (
                 <a
                   href={`https://www.google.com/maps/place/?q=place_id:${selectedPin.placeId}`}
@@ -155,8 +160,8 @@ export default function SharedTripPage() {
       <div className={styles.growthBanner}>
         <div className={styles.growthInner}>
           <p>
-            <strong>Saw a travel video you love?</strong>{" "}
-            Turn it into your own trip map in 30 seconds.
+            <strong>Saw a travel video you love?</strong> Turn it into your own trip map in 30
+            seconds.
           </p>
           <Link to="/" className={styles.growthCta}>
             Import your video — it's free →

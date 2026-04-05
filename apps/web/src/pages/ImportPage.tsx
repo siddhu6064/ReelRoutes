@@ -7,10 +7,22 @@ import { useProcessVideo } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
 
 const PLATFORMS = [
-  { id: "youtube", label: "YouTube", pattern: /youtube\.com|youtu\.be/, color: "#FF0000", icon: "▶" },
+  {
+    id: "youtube",
+    label: "YouTube",
+    pattern: /youtube\.com|youtu\.be/,
+    color: "#FF0000",
+    icon: "▶",
+  },
   { id: "instagram", label: "Instagram", pattern: /instagram\.com/, color: "#E1306C", icon: "◈" },
   { id: "tiktok", label: "TikTok", pattern: /tiktok\.com/, color: "#010101", icon: "♪" },
-  { id: "facebook", label: "Facebook", pattern: /facebook\.com|fb\.watch/, color: "#1877F2", icon: "f" },
+  {
+    id: "facebook",
+    label: "Facebook",
+    pattern: /facebook\.com|fb\.watch/,
+    color: "#1877F2",
+    icon: "f",
+  },
   { id: "twitter", label: "X / Twitter", pattern: /twitter\.com|x\.com/, color: "#000", icon: "𝕏" },
 ];
 
@@ -39,7 +51,10 @@ export default function ImportPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!valid) { setError("Please enter a valid video URL."); return; }
+    if (!valid) {
+      setError("Please enter a valid video URL.");
+      return;
+    }
     setError("");
 
     try {
@@ -58,26 +73,29 @@ export default function ImportPage() {
       <div className={styles.hero}>
         <div className={styles.badge}>AI-Powered Trip Extraction</div>
         <h1 className={styles.title}>
-          Turn any travel video<br />into a trip plan
+          Turn any travel video
+          <br />
+          into a trip plan
         </h1>
         <p className={styles.sub}>
-          Paste a YouTube, Instagram, TikTok, or Facebook URL.
-          We extract every location and build your interactive map.
+          Paste a YouTube, Instagram, TikTok, or Facebook URL. We extract every location and build
+          your interactive map.
         </p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.inputWrap}>
             <span className={styles.inputIcon}>
-              {detected ? (
-                <span style={{ color: detected.color }}>{detected.icon}</span>
-              ) : "🔗"}
+              {detected ? <span style={{ color: detected.color }}>{detected.icon}</span> : "🔗"}
             </span>
             <input
               className={styles.input}
               type="url"
               placeholder="Paste a travel video URL…"
               value={url}
-              onChange={(e) => { setUrl(e.target.value); setError(""); }}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                setError("");
+              }}
               autoFocus
               autoComplete="off"
             />
@@ -90,13 +108,11 @@ export default function ImportPage() {
 
           {error && <p className={styles.error}>{error}</p>}
 
-          <button
-            className={styles.btn}
-            type="submit"
-            disabled={!valid || isPending}
-          >
+          <button className={styles.btn} type="submit" disabled={!valid || isPending}>
             {isPending ? (
-              <><span className={styles.spinner} /> Processing…</>
+              <>
+                <span className={styles.spinner} /> Processing…
+              </>
             ) : (
               "Extract Trip →"
             )}
@@ -119,8 +135,16 @@ export default function ImportPage() {
       <div className={styles.steps}>
         {[
           { n: "01", title: "Paste any URL", body: "YouTube, Instagram, TikTok, Facebook, or X" },
-          { n: "02", title: "AI extracts locations", body: "GPT-4o reads the transcript and finds every place mentioned" },
-          { n: "03", title: "Edit your trip map", body: "Reorder stops, add notes, chat with your AI travel assistant" },
+          {
+            n: "02",
+            title: "AI extracts locations",
+            body: "GPT-4o reads the transcript and finds every place mentioned",
+          },
+          {
+            n: "03",
+            title: "Edit your trip map",
+            body: "Reorder stops, add notes, chat with your AI travel assistant",
+          },
         ].map((s) => (
           <div key={s.n} className={styles.step}>
             <span className={styles.stepN}>{s.n}</span>

@@ -38,11 +38,7 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
 }
 
 function TabLabel({ label, focused }: { label: string; focused: boolean }) {
-  return (
-    <Text style={[styles.tabLabel, { color: focused ? CORAL : MUTED }]}>
-      {label}
-    </Text>
-  );
+  return <Text style={[styles.tabLabel, { color: focused ? CORAL : MUTED }]}>{label}</Text>;
 }
 
 export default function TabsLayout() {

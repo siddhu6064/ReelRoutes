@@ -24,7 +24,7 @@ export default function LowConfidenceSuggestions({ tripId, pins }: Props) {
 
   // Only show unresolved / low-confidence pins not manually added
   const suggestions = pins
-    .filter(p => !p.manuallyAdded && p.confidence < 0.6)
+    .filter((p) => !p.manuallyAdded && p.confidence < 0.6)
     .sort((a, b) => b.confidence - a.confidence)
     .slice(0, 3);
 
@@ -32,7 +32,7 @@ export default function LowConfidenceSuggestions({ tripId, pins }: Props) {
   const [added, setAdded] = useState<Set<string>>(new Set());
   const [adding, setAdding] = useState<string | null>(null);
 
-  const visible = suggestions.filter(s => !dismissed.has(s.id) && !added.has(s.id));
+  const visible = suggestions.filter((s) => !dismissed.has(s.id) && !added.has(s.id));
 
   if (visible.length === 0) return null;
 
@@ -48,14 +48,14 @@ export default function LowConfidenceSuggestions({ tripId, pins }: Props) {
         lng: pin.lng,
         address: pin.address,
       });
-      setAdded(prev => new Set([...prev, pin.id]));
+      setAdded((prev) => new Set([...prev, pin.id]));
     } finally {
       setAdding(null);
     }
   }
 
   function dismiss(pinId: string) {
-    setDismissed(prev => new Set([...prev, pinId]));
+    setDismissed((prev) => new Set([...prev, pinId]));
   }
 
   return (
@@ -65,14 +65,14 @@ export default function LowConfidenceSuggestions({ tripId, pins }: Props) {
         <div>
           <h3 className={styles.title}>Did we miss anything?</h3>
           <p className={styles.subtitle}>
-            {visible.length} low-confidence location{visible.length !== 1 ? "s" : ""} detected —
-            tap to confirm or dismiss
+            {visible.length} low-confidence location{visible.length !== 1 ? "s" : ""} detected — tap
+            to confirm or dismiss
           </p>
         </div>
       </div>
 
       <div className={styles.suggestions}>
-        {visible.map(pin => (
+        {visible.map((pin) => (
           <div key={pin.id} className={styles.suggestion}>
             <div className={styles.suggestionInfo}>
               <span className={styles.placeName}>{pin.placeName}</span>
@@ -80,10 +80,7 @@ export default function LowConfidenceSuggestions({ tripId, pins }: Props) {
                 <span className={styles.quote}>"{pin.contextQuote.slice(0, 70)}"</span>
               )}
               <div className={styles.confBar}>
-                <div
-                  className={styles.confFill}
-                  style={{ width: `${pin.confidence * 100}%` }}
-                />
+                <div className={styles.confFill} style={{ width: `${pin.confidence * 100}%` }} />
               </div>
               <span className={styles.confLabel}>
                 {Math.round(pin.confidence * 100)}% confident
@@ -99,10 +96,7 @@ export default function LowConfidenceSuggestions({ tripId, pins }: Props) {
                   {adding === pin.id ? "Adding…" : "+ Add"}
                 </button>
               )}
-              <button
-                className={styles.dismissBtn}
-                onClick={() => dismiss(pin.id)}
-              >
+              <button className={styles.dismissBtn} onClick={() => dismiss(pin.id)}>
                 Dismiss
               </button>
             </div>

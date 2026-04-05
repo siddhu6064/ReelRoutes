@@ -57,6 +57,6 @@ export const useAppStore = create<AppState>()(
         guestJob: state.guestJob,
         activeTripId: state.activeTripId,
       }),
-    }
-  )
+    },
+  ),
 );

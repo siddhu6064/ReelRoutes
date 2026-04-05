@@ -105,9 +105,7 @@ export default function ChatDrawer({ tripId, onClose }: Props) {
           </View>
         )}
         <View style={[isUser ? styles.userBubble : styles.aiBubble]}>
-          <Text style={[styles.bubbleText, isUser && styles.userBubbleText]}>
-            {item.content}
-          </Text>
+          <Text style={[styles.bubbleText, isUser && styles.userBubbleText]}>{item.content}</Text>
         </View>
       </View>
     );
@@ -184,7 +182,9 @@ export default function ChatDrawer({ tripId, onClose }: Props) {
           maxLength={2000}
           returnKeyType="send"
           blurOnSubmit={false}
-          onSubmitEditing={() => { if (!isPending) send(input); }}
+          onSubmitEditing={() => {
+            if (!isPending) send(input);
+          }}
         />
         <Pressable
           style={[styles.sendBtn, (!input.trim() || isPending) && styles.sendBtnDisabled]}
@@ -201,20 +201,29 @@ export default function ChatDrawer({ tripId, onClose }: Props) {
 const styles = StyleSheet.create({
   drawer: {
     position: "absolute",
-    bottom: 0, left: 0, right: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
     height: "60%",
     backgroundColor: SURFACE,
-    borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    borderWidth: 1, borderColor: BORDER,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderWidth: 1,
+    borderColor: BORDER,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.4, shadowRadius: 12,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
     elevation: 20,
   },
 
   header: {
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    padding: 16, borderBottomWidth: 1, borderBottomColor: BORDER,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
   },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
   headerTitle: { color: TEXT, fontSize: 14, fontWeight: "700" },
@@ -223,9 +232,12 @@ const styles = StyleSheet.create({
   closeBtnText: { color: MUTED, fontSize: 16 },
 
   aiAvatar: {
-    width: 32, height: 32, borderRadius: 16,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: CORAL,
-    alignItems: "center", justifyContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
   },
   aiAvatarText: { color: "#fff", fontSize: 10, fontWeight: "800" },
 
@@ -238,14 +250,18 @@ const styles = StyleSheet.create({
   userBubbleWrap: { justifyContent: "flex-end" },
 
   aiBubble: {
-    backgroundColor: SURFACE2, borderRadius: 16,
+    backgroundColor: SURFACE2,
+    borderRadius: 16,
     borderBottomLeftRadius: 4,
-    padding: 10, maxWidth: "80%",
+    padding: 10,
+    maxWidth: "80%",
   },
   userBubble: {
-    backgroundColor: CORAL, borderRadius: 16,
+    backgroundColor: CORAL,
+    borderRadius: 16,
     borderBottomRightRadius: 4,
-    padding: 10, maxWidth: "80%",
+    padding: 10,
+    maxWidth: "80%",
   },
   bubbleText: { color: TEXT, fontSize: 13, lineHeight: 19 },
   userBubbleText: { color: "#fff" },
@@ -254,30 +270,46 @@ const styles = StyleSheet.create({
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: MUTED },
 
   chips: {
-    paddingHorizontal: 12, paddingVertical: 8, gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
   },
   chip: {
-    paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 999, borderWidth: 1, borderColor: BORDER,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: BORDER,
     backgroundColor: SURFACE2,
   },
   chipText: { color: MUTED, fontSize: 12, fontWeight: "500" },
 
   inputRow: {
-    flexDirection: "row", gap: 8, padding: 12,
-    borderTopWidth: 1, borderTopColor: BORDER,
+    flexDirection: "row",
+    gap: 8,
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
     alignItems: "flex-end",
   },
   input: {
-    flex: 1, backgroundColor: SURFACE2,
-    borderRadius: 12, borderWidth: 1, borderColor: BORDER,
-    padding: 10, color: TEXT, fontSize: 13,
+    flex: 1,
+    backgroundColor: SURFACE2,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 10,
+    color: TEXT,
+    fontSize: 13,
     maxHeight: 100,
   },
   sendBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: CORAL,
-    alignItems: "center", justifyContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
   },
   sendBtnDisabled: { opacity: 0.4 },
   sendBtnText: { color: "#fff", fontSize: 18, fontWeight: "300", marginTop: -2 },

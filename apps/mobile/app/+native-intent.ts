@@ -13,18 +13,13 @@
  *   4. new-trip.tsx reads the intent via useShareIntentContext()
  *      and auto-populates the URL input
  */
-export function redirectSystemPath({
-  path,
-}: {
-  path: string;
-  initial?: boolean;
-}): string {
+export function redirectSystemPath({ path }: { path: string; initial?: boolean }): string {
   try {
     // expo-share-intent signals an incoming share via a special hostname
     const url = new URL(path);
     if (
       url.hostname === "expo-share-intent" ||
-      path.includes("dataType=") ||      // share intent deep link params
+      path.includes("dataType=") || // share intent deep link params
       path.includes("shareIntent")
     ) {
       // Send user directly to the import tab

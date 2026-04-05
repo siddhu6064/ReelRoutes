@@ -17,16 +17,17 @@ SQL would require a `trips` table, a `pins` table, and a join on every read. Mon
 
 ### Embedding vs Referencing — the decision matrix
 
-| Relationship | Pattern | Why |
-|---|---|---|
-| `Trip` → `Pin[]` | **Embedded** | Pins are always read with their trip. Max ~50 pins per trip. No independent pin queries. |
+| Relationship                     | Pattern                | Why                                                                                                  |
+| -------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `Trip` → `Pin[]`                 | **Embedded**           | Pins are always read with their trip. Max ~50 pins per trip. No independent pin queries.             |
 | `Trip.user_id` → `User.clerk_id` | **Reference (string)** | Users exist independently. Many trips per user. Cross-user access prevention requires user identity. |
-| `Job.user_id` → `User.clerk_id` | **Reference (string)** | Same rationale as trips. |
-| `Job` → `Trip` | **None at DB level** | `Trip.job_id` stores provenance only — it is never joined. |
+| `Job.user_id` → `User.clerk_id`  | **Reference (string)** | Same rationale as trips.                                                                             |
+| `Job` → `Trip`                   | **None at DB level**   | `Trip.job_id` stores provenance only — it is never joined.                                           |
 
 We use **Clerk's `clerk_id` string as the reference key** (not MongoDB ObjectId) because:
+
 - Auth tokens carry `clerk_id` — linking trips to users requires no DB lookup
-- Clerk webhooks fire `user.created` with `clerk_id` — syncing is straightforward  
+- Clerk webhooks fire `user.created` with `clerk_id` — syncing is straightforward
 - Avoids a MongoDB `users.findOne` on every authenticated request
 
 ---
@@ -52,6 +53,7 @@ Mirrors a Clerk user into MongoDB for ownership queries.
 ```
 
 **Indexes:**
+
 - `clerk_id` → UNIQUE. The primary lookup key. Must be unique.
 - `email` → Non-unique. Used for admin queries and email-based lookups.
 
@@ -75,7 +77,7 @@ The primary user-facing document. Contains all trip metadata and all pins.
   thumbnail_url: "https://..."     # optional
   video_duration: 1847.0           # seconds, optional
   job_id:        ObjectId          # provenance — the job that created this trip, optional
-  
+
   pins: [                          # EMBEDDED — always read with the trip
     {
       id:            "uuid-v4"     # client-generated, stable across edits
@@ -98,7 +100,7 @@ The primary user-facing document. Contains all trip metadata and all pins.
     },
     ...
   ]
-  
+
   share_token:   null              # set when user shares; generates unique URL slug
   is_shared:     false
   created_at:    ISODate
@@ -107,6 +109,7 @@ The primary user-facing document. Contains all trip metadata and all pins.
 ```
 
 **Indexes:**
+
 - `(user_id ASC, created_at DESC)` — The primary list query: "all trips for user, newest first." Most frequent read pattern.
 - `share_token ASC` — UNIQUE + SPARSE. Unique so share tokens don't collide. Sparse because most trips are never shared (null tokens must not trigger the unique constraint).
 - `created_at DESC` — For background cleanup of old anonymous guest trips.
@@ -131,20 +134,20 @@ Represents one video import processing task. Workers update this document as the
   user_id:          "clerk_abc123"  # null for guest imports
   url:              "https://youtube.com/watch?v=abc"
   platform:         "youtube"
-  
+
   status:           "queued"        # enum: queued|processing|completed|failed
   progress:         0               # 0–100 integer
   current_step:     null            # enum: fetching_video|transcribing|extracting_locations|geocoding|finalizing
   progress_message: null            # human-readable step description for the UI
-  
+
   # Pipeline artifacts — stored for debugging and re-extraction
   transcript:       null            # raw transcript text
   raw_locations:    []              # AI-extracted place name strings, pre-geocoding
-  
+
   # Error state
   error:            null            # human-readable error message
   error_code:       null            # machine-readable: TRANSCRIPT_FAILED, NO_LOCATIONS_FOUND, etc.
-  
+
   created_at:       ISODate
   started_at:       null            # set when worker picks up the job
   completed_at:     null            # set on completion or failure
@@ -152,6 +155,7 @@ Represents one video import processing task. Workers update this document as the
 ```
 
 **Indexes:**
+
 - `(url ASC, status ASC)` — **Deduplication check.** Before creating a new job, workers query this index to see if the same URL is already queued or processing. Prevents users from submitting duplicate imports.
 - `(user_id ASC, created_at DESC)` — User's job history page. Same pattern as trips.
 - `(status ASC, created_at ASC)` — **Worker polling.** ARQ workers query this index to find `queued` jobs in FIFO order.
@@ -173,16 +177,16 @@ Each status transition is atomic (a single `save()` call). Progress updates are 
 
 All production query patterns and their supporting indexes:
 
-| Query | Index used | Notes |
-|---|---|---|
-| `users.findOne({clerk_id})` | `uq_users_clerk_id` | Auth middleware on every request |
-| `trips.find({user_id}).sort({created_at: -1})` | `idx_trips_user_created` | Trip list page |
-| `trips.findOne({share_token})` | `uq_trips_share_token` | Public share URL |
-| `trips.findOne({_id})` | `_id` default | Trip detail page |
-| `jobs.findOne({_id})` | `_id` default | Client polling (every 3s) |
-| `jobs.findOne({url, status: queued})` | `idx_jobs_url_status` | Dedup before creating job |
-| `jobs.find({status: queued}).sort({created_at: 1})` | `idx_jobs_status_created` | Worker FIFO queue |
-| `jobs.find({user_id}).sort({created_at: -1})` | `idx_jobs_user_created` | Job history page |
+| Query                                               | Index used                | Notes                            |
+| --------------------------------------------------- | ------------------------- | -------------------------------- |
+| `users.findOne({clerk_id})`                         | `uq_users_clerk_id`       | Auth middleware on every request |
+| `trips.find({user_id}).sort({created_at: -1})`      | `idx_trips_user_created`  | Trip list page                   |
+| `trips.findOne({share_token})`                      | `uq_trips_share_token`    | Public share URL                 |
+| `trips.findOne({_id})`                              | `_id` default             | Trip detail page                 |
+| `jobs.findOne({_id})`                               | `_id` default             | Client polling (every 3s)        |
+| `jobs.findOne({url, status: queued})`               | `idx_jobs_url_status`     | Dedup before creating job        |
+| `jobs.find({status: queued}).sort({created_at: 1})` | `idx_jobs_status_created` | Worker FIFO queue                |
+| `jobs.find({user_id}).sort({created_at: -1})`       | `idx_jobs_user_created`   | Job history page                 |
 
 ---
 
@@ -191,6 +195,7 @@ All production query patterns and their supporting indexes:
 All indexes declared in `app/models/documents.py` under each class's `Settings.indexes` list. Run index validation in tests via `tests/test_models.py::TestUserDocument::test_index_strategy_*`.
 
 To apply indexes to a live Atlas cluster, run:
+
 ```bash
 poetry run python -c "
 import asyncio
@@ -213,11 +218,11 @@ Beanie calls `create_indexes()` during `init_beanie()`, which is idempotent — 
 
 MongoDB's BSON document size limit is **16 MB**. Practical limits for ReelRoutes:
 
-| Document | Estimated size | Limit | Safety margin |
-|---|---|---|---|
-| User | ~500 bytes | 16 MB | Unlimited |
+| Document              | Estimated size                 | Limit | Safety margin |
+| --------------------- | ------------------------------ | ----- | ------------- |
+| User                  | ~500 bytes                     | 16 MB | Unlimited     |
 | Job (with transcript) | ~50 KB (transcript ~30 KB avg) | 16 MB | 320× headroom |
-| Trip (50 pins) | ~25 KB | 16 MB | 640× headroom |
+| Trip (50 pins)        | ~25 KB                         | 16 MB | 640× headroom |
 
 No concern about hitting document size limits at current scale.
 

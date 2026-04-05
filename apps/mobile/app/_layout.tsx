@@ -31,18 +31,24 @@ const queryClient = new QueryClient({
 // Secure token cache for Clerk
 const tokenCache = {
   async getToken(key: string) {
-    try { return await SecureStore.getItemAsync(key); }
-    catch { return null; }
+    try {
+      return await SecureStore.getItemAsync(key);
+    } catch {
+      return null;
+    }
   },
   async saveToken(key: string, value: string) {
-    try { await SecureStore.setItemAsync(key, value); }
-    catch { /* ignore */ }
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch {
+      /* ignore */
+    }
   },
 };
 
 const CLERK_PUBLISHABLE_KEY =
-  (Constants.expoConfig?.extra as Record<string, string> | undefined)?.['clerkPublishableKey'] ??
-  process.env['EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY'] ??
+  (Constants.expoConfig?.extra as Record<string, string> | undefined)?.["clerkPublishableKey"] ??
+  process.env["EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY"] ??
   "";
 
 function RootLayoutNav() {

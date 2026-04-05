@@ -22,7 +22,9 @@ function StarRating({ rating, total }: { rating: number; total?: number }) {
       {half ? "½" : ""}
       {"☆".repeat(5 - full - (half ? 1 : 0))}
       <span className={styles.starsNum}> {rating.toFixed(1)}</span>
-      {total ? <span className={styles.starsCount}> · {total.toLocaleString()} reviews</span> : null}
+      {total ? (
+        <span className={styles.starsCount}> · {total.toLocaleString()} reviews</span>
+      ) : null}
     </span>
   );
 }
@@ -83,14 +85,19 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
           <h2 className={styles.placeName}>{pin.placeName}</h2>
           {pin.address && <p className={styles.address}>{pin.address}</p>}
         </div>
-        <button className={styles.close} onClick={onClose} aria-label="Close panel">✕</button>
+        <button className={styles.close} onClick={onClose} aria-label="Close panel">
+          ✕
+        </button>
       </div>
 
       {/* ── Rating + Open status ── */}
       {(pin.rating !== undefined || pin.openNow !== undefined) && (
         <div className={styles.enrichRow}>
           {pin.rating !== undefined && (
-            <StarRating rating={pin.rating} {...(pin.userRatingsTotal !== undefined ? { total: pin.userRatingsTotal } : {})} />
+            <StarRating
+              rating={pin.rating}
+              {...(pin.userRatingsTotal !== undefined ? { total: pin.userRatingsTotal } : {})}
+            />
           )}
           <OpenBadge openNow={pin.openNow} />
         </div>
@@ -99,12 +106,14 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
       {/* ── Opening hours ── */}
       {pin.openingHoursText && pin.openingHoursText.length > 0 && (
         <div className={styles.hoursBlock}>
-          <button className={styles.hoursToggle} onClick={() => setHoursOpen(o => !o)}>
+          <button className={styles.hoursToggle} onClick={() => setHoursOpen((o) => !o)}>
             🕐 Hours {hoursOpen ? "▲" : "▼"}
           </button>
           {hoursOpen && (
             <ul className={styles.hoursList}>
-              {pin.openingHoursText.map((line, i) => <li key={i}>{line}</li>)}
+              {pin.openingHoursText.map((line, i) => (
+                <li key={i}>{line}</li>
+              ))}
             </ul>
           )}
         </div>
@@ -140,7 +149,8 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
       <div className={styles.meta}>
         {pin.timestampHint !== undefined && (
           <span className={styles.metaChip}>
-            ⏱ {Math.floor(pin.timestampHint / 60)}:{String(Math.round(pin.timestampHint % 60)).padStart(2, "0")}
+            ⏱ {Math.floor(pin.timestampHint / 60)}:
+            {String(Math.round(pin.timestampHint % 60)).padStart(2, "0")}
           </span>
         )}
         {!pin.manuallyAdded && (
@@ -169,7 +179,12 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
           {tags.map((t) => (
             <span key={t} className={styles.tag}>
               {t}
-              <button className={styles.tagRemove} onClick={() => setTags(tags.filter((x) => x !== t))}>✕</button>
+              <button
+                className={styles.tagRemove}
+                onClick={() => setTags(tags.filter((x) => x !== t))}
+              >
+                ✕
+              </button>
             </span>
           ))}
           <input
@@ -206,8 +221,12 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
         ) : (
           <div className={styles.confirmRow}>
             <span className={styles.confirmText}>Remove this stop?</span>
-            <button className={styles.confirmYes} onClick={handleDelete}>Yes, remove</button>
-            <button className={styles.confirmNo} onClick={() => setConfirmDelete(false)}>Cancel</button>
+            <button className={styles.confirmYes} onClick={handleDelete}>
+              Yes, remove
+            </button>
+            <button className={styles.confirmNo} onClick={() => setConfirmDelete(false)}>
+              Cancel
+            </button>
           </div>
         )}
       </div>

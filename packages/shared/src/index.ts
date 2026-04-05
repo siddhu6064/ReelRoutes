@@ -1,12 +1,7 @@
 // ── Core domain types ─────────────────────────────────────────
 export type { User, CreateUserInput, UpdateUserInput } from "./types/user.js";
 
-export type {
-  Pin,
-  CreatePinInput,
-  UpdatePinInput,
-  ReorderPinsInput,
-} from "./types/pin.js";
+export type { Pin, CreatePinInput, UpdatePinInput, ReorderPinsInput } from "./types/pin.js";
 
 export type {
   Trip,

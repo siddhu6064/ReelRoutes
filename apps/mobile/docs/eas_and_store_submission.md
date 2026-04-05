@@ -3,6 +3,7 @@
 ## EAS Build Setup (Task 14)
 
 ### Prerequisites
+
 ```bash
 npm install -g eas-cli
 eas login
@@ -11,11 +12,11 @@ eas build:configure
 
 ### Build profiles (configured in eas.json)
 
-| Profile | Purpose | Distribution |
-|---------|---------|-------------|
-| `development` | Local dev with DevClient | Internal (simulator) |
-| `preview` | TestFlight / internal track | Internal |
-| `production` | App Store / Play Store | Store |
+| Profile       | Purpose                     | Distribution         |
+| ------------- | --------------------------- | -------------------- |
+| `development` | Local dev with DevClient    | Internal (simulator) |
+| `preview`     | TestFlight / internal track | Internal             |
+| `production`  | App Store / Play Store      | Store                |
 
 ### Build commands
 
@@ -34,6 +35,7 @@ eas build --profile production --platform all
 ```
 
 ### Required credentials (EAS manages these)
+
 - iOS: Apple Developer account, certificates, provisioning profiles
 - Android: Keystore (EAS auto-generates on first build)
 
@@ -45,23 +47,23 @@ Run these tests on physical iOS + Android devices before App Store submission.
 
 ### iOS (physical device required for share sheet)
 
-| Test | App | Steps | Expected |
-|------|-----|-------|---------|
-| YouTube share | YouTube iOS app | Open video → Share → ReelRoutes | App opens, URL pre-filled |
-| Instagram share | Instagram iOS | Open Reel → Share → More → ReelRoutes | App opens, URL pre-filled |
-| TikTok share | TikTok iOS | Open video → Share → More → ReelRoutes | App opens, URL pre-filled |
-| Facebook share | Facebook iOS | Open video → Share → ReelRoutes | App opens, URL pre-filled |
-| Safari share | Safari | Open YouTube in Safari → Share → ReelRoutes | App opens, URL pre-filled |
-| Import completes | Any | Share URL → Import | Processing screen → trip map |
-| Add to existing trip | Any | Import with existing trips → Add to trip sheet | Merge works |
+| Test                 | App             | Steps                                          | Expected                     |
+| -------------------- | --------------- | ---------------------------------------------- | ---------------------------- |
+| YouTube share        | YouTube iOS app | Open video → Share → ReelRoutes                | App opens, URL pre-filled    |
+| Instagram share      | Instagram iOS   | Open Reel → Share → More → ReelRoutes          | App opens, URL pre-filled    |
+| TikTok share         | TikTok iOS      | Open video → Share → More → ReelRoutes         | App opens, URL pre-filled    |
+| Facebook share       | Facebook iOS    | Open video → Share → ReelRoutes                | App opens, URL pre-filled    |
+| Safari share         | Safari          | Open YouTube in Safari → Share → ReelRoutes    | App opens, URL pre-filled    |
+| Import completes     | Any             | Share URL → Import                             | Processing screen → trip map |
+| Add to existing trip | Any             | Import with existing trips → Add to trip sheet | Merge works                  |
 
 ### Android (physical device or emulator)
 
-| Test | Steps | Expected |
-|------|-------|---------|
-| YouTube share | YouTube → Share → ReelRoutes | App opens, URL pre-filled |
-| Chrome share | YouTube in Chrome → Share → ReelRoutes | App opens, URL pre-filled |
-| Intent handler | `adb shell am start -a android.intent.action.SEND -t text/plain -e android.intent.extra.TEXT https://youtube.com/watch?v=abc app.reelroutes.mobile` | App opens |
+| Test           | Steps                                                                                                                                               | Expected                  |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| YouTube share  | YouTube → Share → ReelRoutes                                                                                                                        | App opens, URL pre-filled |
+| Chrome share   | YouTube in Chrome → Share → ReelRoutes                                                                                                              | App opens, URL pre-filled |
+| Intent handler | `adb shell am start -a android.intent.action.SEND -t text/plain -e android.intent.extra.TEXT https://youtube.com/watch?v=abc app.reelroutes.mobile` | App opens                 |
 
 ### Core flow validation (both platforms)
 
@@ -89,11 +91,13 @@ Run these tests on physical iOS + Android devices before App Store submission.
 ### Apple App Store
 
 1. **Build:**
+
    ```bash
    eas build --profile production --platform ios
    ```
 
 2. **Submit:**
+
    ```bash
    eas submit --profile production --platform ios
    ```
@@ -118,11 +122,13 @@ Run these tests on physical iOS + Android devices before App Store submission.
 ### Google Play Store
 
 1. **Build:**
+
    ```bash
    eas build --profile production --platform android
    ```
 
 2. **Submit:**
+
    ```bash
    eas submit --profile production --platform android
    ```

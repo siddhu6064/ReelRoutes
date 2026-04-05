@@ -78,8 +78,6 @@ export interface Trip {
   updatedAt: string;
 }
 
-
-
 export interface JobStatus {
   jobId: string;
   status: "queued" | "processing" | "completed" | "failed";
@@ -128,8 +126,7 @@ export function useJobStatus(jobId: string | null, enabled = true) {
 export function useTrip(tripId: string | null, userId?: string) {
   return useQuery({
     queryKey: ["trip", tripId],
-    queryFn: () =>
-      apiFetch<Trip>(`/api/trips/${tripId}${userId ? `?user_id=${userId}` : ""}`),
+    queryFn: () => apiFetch<Trip>(`/api/trips/${tripId}${userId ? `?user_id=${userId}` : ""}`),
     enabled: !!tripId,
   });
 }
@@ -137,8 +134,7 @@ export function useTrip(tripId: string | null, userId?: string) {
 export function useUserTrips(userId: string | null) {
   return useQuery({
     queryKey: ["trips", userId],
-    queryFn: () =>
-      apiFetch<{ items: Trip[]; total: number }>(`/api/trips?user_id=${userId}`),
+    queryFn: () => apiFetch<{ items: Trip[]; total: number }>(`/api/trips?user_id=${userId}`),
     enabled: !!userId,
   });
 }
@@ -191,7 +187,7 @@ export function useShareTrip() {
     mutationFn: ({ tripId, userId }: { tripId: string; userId: string }) =>
       apiFetch<{ shareToken: string; isShared: boolean }>(
         `/api/trips/${tripId}/share?user_id=${userId}`,
-        { method: "POST" }
+        { method: "POST" },
       ),
     onSuccess: (_d, { tripId }) => qc.invalidateQueries({ queryKey: ["trip", tripId] }),
   });
@@ -230,15 +226,7 @@ export function useUpdatePin() {
 export function useDeletePin() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      tripId,
-      pinId,
-      userId,
-    }: {
-      tripId: string;
-      pinId: string;
-      userId: string;
-    }) =>
+    mutationFn: ({ tripId, pinId, userId }: { tripId: string; pinId: string; userId: string }) =>
       apiFetch<Trip>(`/api/trips/${tripId}/pins/${pinId}?user_id=${userId}`, {
         method: "DELETE",
       }),
@@ -249,14 +237,7 @@ export function useDeletePin() {
 export function useReorderPins() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      tripId,
-      ...body
-    }: {
-      tripId: string;
-      user_id: string;
-      pin_ids: string[];
-    }) =>
+    mutationFn: ({ tripId, ...body }: { tripId: string; user_id: string; pin_ids: string[] }) =>
       apiFetch<Trip>(`/api/trips/${tripId}/pins/reorder`, {
         method: "POST",
         body: JSON.stringify(body),
@@ -318,7 +299,6 @@ export function useOptimiseRoute() {
   });
 }
 
-
 export function useGenerateItinerary() {
   const qc = useQueryClient();
   return useMutation({
@@ -331,10 +311,10 @@ export function useGenerateItinerary() {
       user_id: string;
       trip_length_days: number;
     }) =>
-      apiFetch<{ tripLengthDays: number; days: ItineraryDay[] }>(
-        `/api/trips/${tripId}/itinerary`,
-        { method: "POST", body: JSON.stringify({ user_id, trip_length_days }) }
-      ),
+      apiFetch<{ tripLengthDays: number; days: ItineraryDay[] }>(`/api/trips/${tripId}/itinerary`, {
+        method: "POST",
+        body: JSON.stringify({ user_id, trip_length_days }),
+      }),
     onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }

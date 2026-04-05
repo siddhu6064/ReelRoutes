@@ -7,17 +7,8 @@
  * creating a new one.
  */
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import BottomSheet, {
-  BottomSheetBackdrop,
-} from "@gorhom/bottom-sheet";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { useAuth } from "@clerk/clerk-expo";
 import { useUserTrips } from "@/api/client";
 import type { Trip } from "@/api/client";
@@ -102,7 +93,9 @@ export const AddToTripSheet = forwardRef<AddToTripSheetRef, Props>(
                   disabled={mergingId === item.id}
                 >
                   <View style={styles.tripInfo}>
-                    <Text style={styles.tripName} numberOfLines={1}>{item.title}</Text>
+                    <Text style={styles.tripName} numberOfLines={1}>
+                      {item.title}
+                    </Text>
                     <Text style={styles.tripMeta}>
                       {item.pinCount} stops · {item.platform}
                     </Text>
@@ -125,7 +118,7 @@ export const AddToTripSheet = forwardRef<AddToTripSheetRef, Props>(
         </View>
       </BottomSheet>
     );
-  }
+  },
 );
 
 AddToTripSheet.displayName = "AddToTripSheet";
@@ -140,10 +133,15 @@ const styles = StyleSheet.create({
 
   list: { flex: 1 },
   tripRow: {
-    flexDirection: "row", alignItems: "center",
-    paddingVertical: 12, paddingHorizontal: 14,
-    backgroundColor: SURFACE2, borderRadius: 10,
-    borderWidth: 1, borderColor: BORDER, marginBottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: SURFACE2,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
+    marginBottom: 8,
   },
   tripInfo: { flex: 1 },
   tripName: { color: TEXT, fontSize: 13, fontWeight: "700" },
@@ -151,9 +149,12 @@ const styles = StyleSheet.create({
   mergeText: { color: CORAL, fontSize: 13, fontWeight: "700" },
 
   keepBtn: {
-    paddingVertical: 14, borderRadius: 10,
-    borderWidth: 1, borderColor: BORDER,
-    backgroundColor: SURFACE2, alignItems: "center",
+    paddingVertical: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
+    backgroundColor: SURFACE2,
+    alignItems: "center",
   },
   keepBtnText: { color: MUTED, fontSize: 14, fontWeight: "600" },
 });

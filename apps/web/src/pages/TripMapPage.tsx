@@ -9,7 +9,6 @@ import ChatPanel from "@/components/ChatPanel";
 import PinDetailPanel from "@/components/PinDetailPanel";
 import { useAppStore } from "@/stores/appStore";
 
-
 const CORAL = "#D85A30";
 const ACTIVE = "#a8401e";
 
@@ -25,7 +24,13 @@ const MAP_STYLE: google.maps.MapTypeStyle[] = [
 ];
 
 function makeMarkerLabel(n: number): google.maps.MarkerLabel {
-  return { text: String(n), color: "#fff", fontFamily: "'Syne', sans-serif", fontWeight: "800", fontSize: "12px" };
+  return {
+    text: String(n),
+    color: "#fff",
+    fontFamily: "'Syne', sans-serif",
+    fontWeight: "800",
+    fontSize: "12px",
+  };
 }
 
 /** Haversine distance in km between two pins */
@@ -33,7 +38,9 @@ function distKm(a: Pin, b: Pin) {
   const R = 6371;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;
   const dLng = ((b.lng - a.lng) * Math.PI) / 180;
-  const x = Math.sin(dLat / 2) ** 2 + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 }
 
@@ -44,7 +51,10 @@ function googleMapsUrl(pins: Pin[]) {
   if (!first) return "#";
   const origin = `${first.lat},${first.lng}`;
   const dest = last ? `${last.lat},${last.lng}` : origin;
-  const waypoints = pins.slice(1, -1).map((p) => `${p.lat},${p.lng}`).join("|");
+  const waypoints = pins
+    .slice(1, -1)
+    .map((p) => `${p.lat},${p.lng}`)
+    .join("|");
   const base = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`;
   return waypoints ? `${base}&waypoints=${waypoints}` : base;
 }
@@ -53,7 +63,9 @@ function googleMapsUrl(pins: Pin[]) {
 function groupByCity(pins: Pin[]): Map<string, Pin[]> {
   const groups = new Map<string, Pin[]>();
   for (const pin of pins) {
-    const key = pin.cityGroup ?? (pin.city ? `${pin.city}${pin.countryCode ? ", " + pin.countryCode : ""}` : "Other");
+    const key =
+      pin.cityGroup ??
+      (pin.city ? `${pin.city}${pin.countryCode ? ", " + pin.countryCode : ""}` : "Other");
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(pin);
   }
@@ -61,9 +73,14 @@ function groupByCity(pins: Pin[]): Map<string, Pin[]> {
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
-  restaurant: "🍜", landmark: "🏛", accommodation: "🏨",
-  nature: "🌿", shopping: "🛍", transport: "✈️",
-  entertainment: "🎭", other: "📍",
+  restaurant: "🍜",
+  landmark: "🏛",
+  accommodation: "🏨",
+  nature: "🌿",
+  shopping: "🛍",
+  transport: "✈️",
+  entertainment: "🎭",
+  other: "📍",
 };
 
 async function saveForOffline(trip: Trip) {
@@ -124,31 +141,37 @@ export default function TripMapPage() {
     });
   }, []);
 
-  const sorted = useMemo(() => trip ? [...trip.pins].sort((a, b) => a.order - b.order) : [], [trip]);
+  const sorted = useMemo(
+    () => (trip ? [...trip.pins].sort((a, b) => a.order - b.order) : []),
+    [trip],
+  );
   const cityGroups = useMemo(() => groupByCity(sorted), [sorted]);
   const cities = useMemo(() => Array.from(cityGroups.keys()), [cityGroups]);
-  const categories = useMemo(() =>
-    [...new Set(sorted.map(p => p.category).filter(Boolean))] as string[],
-    [sorted]
+  const categories = useMemo(
+    () => [...new Set(sorted.map((p) => p.category).filter(Boolean))] as string[],
+    [sorted],
   );
 
   const visiblePins = useMemo(() => {
     let pins = sorted;
     if (cityFilter) {
-      pins = pins.filter(p => {
-        const key = p.cityGroup ?? (p.city ? `${p.city}${p.countryCode ? ", " + p.countryCode : ""}` : "Other");
+      pins = pins.filter((p) => {
+        const key =
+          p.cityGroup ??
+          (p.city ? `${p.city}${p.countryCode ? ", " + p.countryCode : ""}` : "Other");
         return key === cityFilter;
       });
     }
     if (categoryFilter) {
-      pins = pins.filter(p => p.category === categoryFilter);
+      pins = pins.filter((p) => p.category === categoryFilter);
     }
     if (search.trim()) {
       const q = search.toLowerCase();
-      pins = pins.filter(p =>
-        p.placeName.toLowerCase().includes(q) ||
-        (p.city ?? "").toLowerCase().includes(q) ||
-        (p.address ?? "").toLowerCase().includes(q)
+      pins = pins.filter(
+        (p) =>
+          p.placeName.toLowerCase().includes(q) ||
+          (p.city ?? "").toLowerCase().includes(q) ||
+          (p.address ?? "").toLowerCase().includes(q),
       );
     }
     return pins;
@@ -157,7 +180,10 @@ export default function TripMapPage() {
   // Total route distance
   const totalKm = useMemo(() => {
     if (sorted.length < 2) return 0;
-    return sorted.reduce((acc, pin, i) => { const prev = sorted[i - 1]; return i === 0 || !prev ? acc : acc + distKm(prev, pin); }, 0);
+    return sorted.reduce((acc, pin, i) => {
+      const prev = sorted[i - 1];
+      return i === 0 || !prev ? acc : acc + distKm(prev, pin);
+    }, 0);
   }, [sorted]);
   const totalMins = Math.round((totalKm / 60) * 60); // ~60 km/h avg drive
 
@@ -166,14 +192,21 @@ export default function TripMapPage() {
     if (!mapInstance.current || !sorted.length) return;
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
-    if (polylineRef.current) { polylineRef.current.setMap(null); polylineRef.current = null; }
+    if (polylineRef.current) {
+      polylineRef.current.setMap(null);
+      polylineRef.current = null;
+    }
 
     const bounds = new google.maps.LatLngBounds();
     const path: google.maps.LatLngLiteral[] = [];
 
     sorted.forEach((pin, i) => {
       const pos = { lat: pin.lat, lng: pin.lng };
-      const isFiltered = cityFilter && (pin.cityGroup ?? (pin.city ? `${pin.city}${pin.countryCode ? ", " + pin.countryCode : ""}` : "Other")) !== cityFilter;
+      const isFiltered =
+        cityFilter &&
+        (pin.cityGroup ??
+          (pin.city ? `${pin.city}${pin.countryCode ? ", " + pin.countryCode : ""}` : "Other")) !==
+          cityFilter;
       const marker = new google.maps.Marker({
         position: pos,
         map: mapInstance.current!,
@@ -181,7 +214,7 @@ export default function TripMapPage() {
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
           scale: 16,
-          fillColor: isFiltered ? "#555" : (i === activeIndex ? ACTIVE : CORAL),
+          fillColor: isFiltered ? "#555" : i === activeIndex ? ACTIVE : CORAL,
           fillOpacity: isFiltered ? 0.3 : 1,
           strokeColor: "#fff",
           strokeWeight: isFiltered ? 1 : 2,
@@ -190,7 +223,10 @@ export default function TripMapPage() {
         zIndex: isFiltered ? 1 : 10,
       });
       if (!isFiltered) {
-        marker.addListener("click", () => { setSelectedPin(pin); setActiveIndex(i); });
+        marker.addListener("click", () => {
+          setSelectedPin(pin);
+          setActiveIndex(i);
+        });
       }
       markersRef.current.push(marker);
       bounds.extend(pos);
@@ -222,19 +258,27 @@ export default function TripMapPage() {
   }
 
   function toggleCity(city: string) {
-    setCollapsedCities(prev => {
+    setCollapsedCities((prev) => {
       const next = new Set(prev);
-      if (next.has(city)) { next.delete(city); } else { next.add(city); }
+      if (next.has(city)) {
+        next.delete(city);
+      } else {
+        next.add(city);
+      }
       return next;
     });
   }
 
   if (isLoading) return <div className={styles.loading}>Loading trip…</div>;
-  if (error || !trip) return (
-    <div className={styles.loading}>
-      Trip not found. <Link to="/" className={styles.backLink}>Go home</Link>
-    </div>
-  );
+  if (error || !trip)
+    return (
+      <div className={styles.loading}>
+        Trip not found.{" "}
+        <Link to="/" className={styles.backLink}>
+          Go home
+        </Link>
+      </div>
+    );
 
   return (
     <div className={styles.layout}>
@@ -254,14 +298,20 @@ export default function TripMapPage() {
               )}
               <div className={styles.attrInfo}>
                 <span className={styles.attrLabel}>▶ Source video</span>
-                {trip.videoCreator && <span className={styles.attrCreator}>{trip.videoCreator}</span>}
-                {trip.videoChannel && <span className={styles.attrChannel}>{trip.videoChannel}</span>}
+                {trip.videoCreator && (
+                  <span className={styles.attrCreator}>{trip.videoCreator}</span>
+                )}
+                {trip.videoChannel && (
+                  <span className={styles.attrChannel}>{trip.videoChannel}</span>
+                )}
               </div>
             </a>
           )}
 
           <div className={styles.titleRow}>
-            <button className={styles.backBtn} onClick={() => navigate(-1)}>← Back</button>
+            <button className={styles.backBtn} onClick={() => navigate(-1)}>
+              ← Back
+            </button>
             <h1 className={styles.tripTitle}>{trip.title}</h1>
           </div>
 
@@ -269,7 +319,16 @@ export default function TripMapPage() {
           <p className={styles.tripMeta}>
             {sorted.length} stops · {trip.platform}
             {totalKm > 0 && (
-              <> · <span className={styles.distBadge}>🚗 {totalKm.toFixed(0)} km{totalMins > 0 ? ` · ~${totalMins >= 60 ? Math.floor(totalMins / 60) + "h " + (totalMins % 60) + "m" : totalMins + "m"}` : ""}</span></>
+              <>
+                {" "}
+                ·{" "}
+                <span className={styles.distBadge}>
+                  🚗 {totalKm.toFixed(0)} km
+                  {totalMins > 0
+                    ? ` · ~${totalMins >= 60 ? Math.floor(totalMins / 60) + "h " + (totalMins % 60) + "m" : totalMins + "m"}`
+                    : ""}
+                </span>
+              </>
             )}
           </p>
 
@@ -278,7 +337,7 @@ export default function TripMapPage() {
             {/* Route toggle (W3t2) */}
             <button
               className={`${styles.toolBtn} ${showRoute ? styles.toolBtnActive : ""}`}
-              onClick={() => setShowRoute(v => !v)}
+              onClick={() => setShowRoute((v) => !v)}
               title="Toggle route line"
             >
               {showRoute ? "— Hide route" : "— Show route"}
@@ -296,7 +355,9 @@ export default function TripMapPage() {
               <button className={styles.chatToggle} onClick={() => setChatOpen(!chatOpen)}>
                 💬 {chatOpen ? "Close" : "AI"}
               </button>
-              <Link to={`/trips/${trip.id}/edit`} className={styles.editBtn}>Edit</Link>
+              <Link to={`/trips/${trip.id}/edit`} className={styles.editBtn}>
+                Edit
+              </Link>
             </div>
           </div>
 
@@ -309,7 +370,7 @@ export default function TripMapPage() {
               >
                 All
               </button>
-              {cities.map(city => (
+              {cities.map((city) => (
                 <button
                   key={city}
                   className={`${styles.cityChip} ${cityFilter === city ? styles.cityChipActive : ""}`}
@@ -331,7 +392,9 @@ export default function TripMapPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
           {search && (
-            <button className={styles.searchClear} onClick={() => setSearch("")}>✕</button>
+            <button className={styles.searchClear} onClick={() => setSearch("")}>
+              ✕
+            </button>
           )}
         </div>
 
@@ -341,8 +404,10 @@ export default function TripMapPage() {
             <button
               className={`${styles.catChip} ${categoryFilter === null ? styles.catChipActive : ""}`}
               onClick={() => setCategoryFilter(null)}
-            >All</button>
-            {categories.map(cat => (
+            >
+              All
+            </button>
+            {categories.map((cat) => (
               <button
                 key={cat}
                 className={`${styles.catChip} ${categoryFilter === cat ? styles.catChipActive : ""}`}
@@ -358,7 +423,10 @@ export default function TripMapPage() {
         {trip && (
           <button
             className={`${styles.offlineBtn} ${offlineSaved ? styles.offlineBtnSaved : ""}`}
-            onClick={async () => { await saveForOffline(trip); setOfflineSaved(true); }}
+            onClick={async () => {
+              await saveForOffline(trip);
+              setOfflineSaved(true);
+            }}
           >
             {offlineSaved ? "✓ Saved offline" : "⬇ Save for offline"}
           </button>
@@ -378,20 +446,34 @@ export default function TripMapPage() {
                       <span className={styles.cityGroupCount}>{pins.length} stops</span>
                       <span className={styles.cityGroupChev}>{hidden ? "▶" : "▼"}</span>
                     </button>
-                    {!hidden && pinsToShow.map(pin => {
-                      const i = sorted.indexOf(pin);
-                      return (
-                        <StopRow key={pin.id} pin={pin} index={i} active={activeIndex === i} onClick={() => selectPin(pin, i)} />
-                      );
-                    })}
+                    {!hidden &&
+                      pinsToShow.map((pin) => {
+                        const i = sorted.indexOf(pin);
+                        return (
+                          <StopRow
+                            key={pin.id}
+                            pin={pin}
+                            index={i}
+                            active={activeIndex === i}
+                            onClick={() => selectPin(pin, i)}
+                          />
+                        );
+                      })}
                   </div>
                 );
               })
             : visiblePins.map((pin, i) => {
                 const realIdx = sorted.indexOf(pin);
-                return <StopRow key={pin.id} pin={pin} index={i} active={activeIndex === realIdx} onClick={() => selectPin(pin, realIdx)} />;
-              })
-          }
+                return (
+                  <StopRow
+                    key={pin.id}
+                    pin={pin}
+                    index={i}
+                    active={activeIndex === realIdx}
+                    onClick={() => selectPin(pin, realIdx)}
+                  />
+                );
+              })}
         </div>
       </aside>
 
@@ -403,7 +485,11 @@ export default function TripMapPage() {
             <p>🗺 Map renders with VITE_GOOGLE_MAPS_API_KEY set</p>
             <div className={styles.mockPins}>
               {sorted.map((pin, i) => (
-                <div key={pin.id} className={`${styles.mockPin} ${activeIndex === i ? styles.active : ""}`} onClick={() => selectPin(pin, i)}>
+                <div
+                  key={pin.id}
+                  className={`${styles.mockPin} ${activeIndex === i ? styles.active : ""}`}
+                  onClick={() => selectPin(pin, i)}
+                >
                   {i + 1}
                 </div>
               ))}
@@ -422,23 +508,44 @@ export default function TripMapPage() {
   );
 }
 
-function StopRow({ pin, index, active, onClick }: { pin: Pin; index: number; active: boolean; onClick: () => void }) {
+function StopRow({
+  pin,
+  index,
+  active,
+  onClick,
+}: {
+  pin: Pin;
+  index: number;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button className={`${styles.stop} ${active ? styles.active : ""}`} onClick={onClick}>
       <div className={styles.stopNum}>{index + 1}</div>
       <div className={styles.stopInfo}>
         <div className={styles.stopName}>{pin.placeName}</div>
         <div className={styles.stopMeta}>
-          {pin.city && <span>{pin.city}{pin.countryCode ? `, ${pin.countryCode}` : ""}</span>}
+          {pin.city && (
+            <span>
+              {pin.city}
+              {pin.countryCode ? `, ${pin.countryCode}` : ""}
+            </span>
+          )}
           {pin.openNow !== undefined && (
             <span className={pin.openNow ? styles.openNow : styles.closedNow}>
               {pin.openNow ? "● Open" : "● Closed"}
             </span>
           )}
-          {pin.rating !== undefined && <span className={styles.stopRating}>★ {pin.rating.toFixed(1)}</span>}
+          {pin.rating !== undefined && (
+            <span className={styles.stopRating}>★ {pin.rating.toFixed(1)}</span>
+          )}
         </div>
       </div>
-      {pin.confidence < 0.5 && <span className={styles.lowConf} title="Low AI confidence">⚠</span>}
+      {pin.confidence < 0.5 && (
+        <span className={styles.lowConf} title="Low AI confidence">
+          ⚠
+        </span>
+      )}
     </button>
   );
 }

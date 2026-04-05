@@ -9,7 +9,17 @@
   "duration": 43.0,
   "thumbnail": "https://p16-sign.tiktokcdn-us.com/thumbnail_abc.jpeg",
   "timestamp": 1713484800,
-  "tags": ["morocco", "marrakech", "travel", "sahara", "chefchaouen", "africa", "traveltiktok", "travelwithme", "hiddengems"],
+  "tags": [
+    "morocco",
+    "marrakech",
+    "travel",
+    "sahara",
+    "chefchaouen",
+    "africa",
+    "traveltiktok",
+    "travelwithme",
+    "hiddengems"
+  ],
   "webpage_url": "https://www.tiktok.com/@alexjamietravel/video/7384729104857362",
   "extractor": "tiktok"
 }

@@ -36,7 +36,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
 
     // Path aliases — configured per package (not in base)
   },

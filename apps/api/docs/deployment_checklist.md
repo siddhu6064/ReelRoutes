@@ -6,26 +6,31 @@ Check off each item — every blank = a broken feature.
 ## Backend (Railway)
 
 ### Required — app won't start without these
+
 - [ ] `ENV` = `staging` or `production`
 - [ ] `MONGODB_URL` — Atlas connection string (SRV format)
 - [ ] `MONGODB_DB` = `reelroutes`
 - [ ] `REDIS_URL` — Upstash or Railway Redis
 
 ### Auth — Clerk
+
 - [ ] `CLERK_SECRET_KEY` — `sk_live_...` (not test key)
 - [ ] `CLERK_PUBLISHABLE_KEY` — `pk_live_...`
 - [ ] `CLERK_WEBHOOK_SECRET` — from Clerk Dashboard → Webhooks
 
 ### AI & Geocoding
+
 - [ ] `OPENAI_API_KEY` — with GPT-4o + Whisper access
 - [ ] `GOOGLE_PLACES_API_KEY` — Places API + YouTube Data API v3 enabled
 - [ ] `YOUTUBE_API_KEY` — same key or separate, YouTube Data API v3 enabled
 
 ### Observability
+
 - [ ] `SENTRY_DSN` — project DSN from sentry.io
 - [ ] `SENTRY_ENVIRONMENT` = `production`
 
 ### CORS
+
 - [ ] `CORS_ORIGINS` = `https://reelroutes.app` (no trailing slash)
 
 ---
@@ -63,12 +68,14 @@ Check off each item — every blank = a broken feature.
 ## Pre-deploy smoke test
 
 After deploy, hit these endpoints and confirm 200:
+
 ```bash
 curl https://api.reelroutes.app/health
 curl https://api.reelroutes.app/version
 ```
 
 Then run a real import:
+
 ```bash
 poetry run python demo.py https://www.youtube.com/watch?v=dQw4w9WgXcQ
 ```

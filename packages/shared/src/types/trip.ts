@@ -58,8 +58,7 @@ export interface UpdateTripInput {
   thumbnailUrl?: string;
 }
 
-export interface TripListItem
-  extends Omit<Trip, "pins"> {
+export interface TripListItem extends Omit<Trip, "pins"> {
   /** Summarised pin count instead of full pin array for list views */
   pinCount: number;
 }

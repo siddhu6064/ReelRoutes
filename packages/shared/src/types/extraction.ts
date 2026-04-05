@@ -71,9 +71,7 @@ export interface GeocodedLocation extends ExtractedLocation {
 /**
  * Converts a GeocodedLocation into a CreatePinInput for trip creation.
  */
-export function geocodedLocationToPin(
-  loc: GeocodedLocation,
-): CreatePinInput {
+export function geocodedLocationToPin(loc: GeocodedLocation): CreatePinInput {
   return {
     placeName: loc.placeName,
     placeId: loc.placeId,

@@ -4,15 +4,7 @@
  * Task 6 — Trip dashboard: FlatList of trip cards with thumbnail,
  * title, platform badge, stop count, and relative date.
  */
-import {
-  FlatList,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  RefreshControl,
-} from "react-native";
+import { FlatList, Image, Pressable, StyleSheet, Text, View, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "@clerk/clerk-expo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -65,7 +57,9 @@ function TripCard({ trip, onPress }: { trip: Trip; onPress: () => void }) {
 
       {/* Info */}
       <View style={styles.cardBody}>
-        <Text style={styles.cardTitle} numberOfLines={2}>{trip.title}</Text>
+        <Text style={styles.cardTitle} numberOfLines={2}>
+          {trip.title}
+        </Text>
         <View style={styles.cardMeta}>
           <Text style={styles.cardMetaText}>
             {trip.pinCount} stop{trip.pinCount !== 1 ? "s" : ""}
@@ -128,23 +122,14 @@ export default function HomeScreen() {
         data={trips}
         keyExtractor={(t) => t.id}
         renderItem={({ item }) => (
-          <TripCard
-            trip={item}
-            onPress={() => router.push(`/trip/${item.id}`)}
-          />
+          <TripCard trip={item} onPress={() => router.push(`/trip/${item.id}`)} />
         )}
         contentContainerStyle={trips.length === 0 ? styles.listEmpty : styles.list}
         ListEmptyComponent={
-          !isLoading ? (
-            <EmptyState onImport={() => router.push("/new-trip")} />
-          ) : null
+          !isLoading ? <EmptyState onImport={() => router.push("/new-trip")} /> : null
         }
         refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={refetch}
-            tintColor={CORAL}
-          />
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={CORAL} />
         }
         showsVerticalScrollIndicator={false}
       />

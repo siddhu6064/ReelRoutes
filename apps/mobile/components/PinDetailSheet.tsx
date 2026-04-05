@@ -5,37 +5,21 @@
  * Week 1: "▶ Watch in video" deep link button
  * Week 2: Rating, open/closed badge, opening hours, website, phone
  */
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
-import {
-  Linking,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import BottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetBackdrop,
-} from "@gorhom/bottom-sheet";
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
+import { Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import BottomSheet, { BottomSheetScrollView, BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { useAuth } from "@clerk/clerk-expo";
 import { useUpdatePin, type Pin } from "@/api/client";
 
-const CORAL   = "#D85A30";
+const CORAL = "#D85A30";
 const SURFACE = "#1a1a18";
 const SURFACE2 = "#232320";
-const BORDER  = "#2a2a28";
-const MUTED   = "#6b6b62";
-const TEXT    = "#f0ede8";
-const GREEN   = "#4ade80";
-const RED     = "#f87171";
-const AMBER   = "#f59e0b";
+const BORDER = "#2a2a28";
+const MUTED = "#6b6b62";
+const TEXT = "#f0ede8";
+const GREEN = "#4ade80";
+const RED = "#f87171";
+const AMBER = "#f59e0b";
 const SNAP_POINTS = ["50%", "85%"];
 
 export interface PinDetailSheetRef {
@@ -67,10 +51,8 @@ export const PinDetailSheet = forwardRef<PinDetailSheetRef>((_props, ref) => {
   }));
 
   const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
-    ),
-    []
+    (props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />,
+    [],
   );
 
   async function handleSave() {
@@ -138,12 +120,19 @@ export const PinDetailSheet = forwardRef<PinDetailSheetRef>((_props, ref) => {
                     <Text style={styles.ratingStars}>★</Text>
                     <Text style={styles.ratingNum}>{pin.rating.toFixed(1)}</Text>
                     {pin.userRatingsTotal !== undefined && (
-                      <Text style={styles.ratingCount}>· {pin.userRatingsTotal.toLocaleString()} reviews</Text>
+                      <Text style={styles.ratingCount}>
+                        · {pin.userRatingsTotal.toLocaleString()} reviews
+                      </Text>
                     )}
                   </View>
                 )}
                 {pin.openNow !== undefined && (
-                  <View style={[styles.openBadge, pin.openNow ? styles.openBadgeOpen : styles.openBadgeClosed]}>
+                  <View
+                    style={[
+                      styles.openBadge,
+                      pin.openNow ? styles.openBadgeOpen : styles.openBadgeClosed,
+                    ]}
+                  >
                     <Text style={[styles.openBadgeText, { color: pin.openNow ? GREEN : RED }]}>
                       ● {pin.openNow ? "Open now" : "Closed"}
                     </Text>
@@ -154,14 +143,16 @@ export const PinDetailSheet = forwardRef<PinDetailSheetRef>((_props, ref) => {
 
             {/* Opening hours accordion */}
             {pin.openingHoursText && pin.openingHoursText.length > 0 && (
-              <Pressable style={styles.hoursHeader} onPress={() => setHoursExpanded(v => !v)}>
-                <Text style={styles.hoursHeaderText}>🕐 Hours  {hoursExpanded ? "▲" : "▼"}</Text>
+              <Pressable style={styles.hoursHeader} onPress={() => setHoursExpanded((v) => !v)}>
+                <Text style={styles.hoursHeaderText}>🕐 Hours {hoursExpanded ? "▲" : "▼"}</Text>
               </Pressable>
             )}
             {hoursExpanded && pin.openingHoursText && (
               <View style={styles.hoursList}>
                 {pin.openingHoursText.map((line, i) => (
-                  <Text key={i} style={styles.hoursLine}>{line}</Text>
+                  <Text key={i} style={styles.hoursLine}>
+                    {line}
+                  </Text>
                 ))}
               </View>
             )}
@@ -171,7 +162,8 @@ export const PinDetailSheet = forwardRef<PinDetailSheetRef>((_props, ref) => {
               {pin.timestampHint !== undefined && (
                 <View style={styles.chip}>
                   <Text style={styles.chipText}>
-                    ⏱ {Math.floor(pin.timestampHint / 60)}:{String(Math.round(pin.timestampHint % 60)).padStart(2, "0")}
+                    ⏱ {Math.floor(pin.timestampHint / 60)}:
+                    {String(Math.round(pin.timestampHint % 60)).padStart(2, "0")}
                   </Text>
                 </View>
               )}
@@ -265,8 +257,14 @@ const styles = StyleSheet.create({
 
   header: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   stopBadge: {
-    width: 36, height: 36, borderRadius: 18,
-    backgroundColor: CORAL, alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: CORAL,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    marginTop: 2,
   },
   stopNum: { color: "#fff", fontSize: 14, fontWeight: "800" },
   headerText: { flex: 1 },
@@ -286,51 +284,94 @@ const styles = StyleSheet.create({
   hoursHeader: { paddingVertical: 6 },
   hoursHeaderText: { color: MUTED, fontSize: 12, fontWeight: "600" },
   hoursList: {
-    backgroundColor: SURFACE2, borderRadius: 10, borderWidth: 1,
-    borderColor: BORDER, padding: 12, gap: 4,
+    backgroundColor: SURFACE2,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 12,
+    gap: 4,
   },
   hoursLine: { color: MUTED, fontSize: 11, lineHeight: 18 },
 
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: {
-    paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999,
-    borderWidth: 1, borderColor: BORDER, backgroundColor: SURFACE2,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: BORDER,
+    backgroundColor: SURFACE2,
   },
   chipText: { color: MUTED, fontSize: 11, fontWeight: "700" },
 
   quoteWrap: {
-    backgroundColor: SURFACE2, borderLeftWidth: 3, borderLeftColor: CORAL,
-    borderRadius: 8, padding: 12, flexDirection: "row", gap: 4,
+    backgroundColor: SURFACE2,
+    borderLeftWidth: 3,
+    borderLeftColor: CORAL,
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: "row",
+    gap: 4,
   },
   quoteGlyph: { color: CORAL, fontSize: 20, fontWeight: "900", lineHeight: 22 },
   quoteText: { color: MUTED, fontSize: 13, lineHeight: 19, flex: 1, fontStyle: "italic" },
 
   section: { gap: 6 },
-  sectionLabel: { color: MUTED, fontSize: 10, fontWeight: "700", letterSpacing: 0.8, textTransform: "uppercase" },
+  sectionLabel: {
+    color: MUTED,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
   textarea: {
-    backgroundColor: SURFACE2, borderRadius: 10, borderWidth: 1,
-    borderColor: BORDER, padding: 12, color: TEXT, fontSize: 13, lineHeight: 20, minHeight: 80,
+    backgroundColor: SURFACE2,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 12,
+    color: TEXT,
+    fontSize: 13,
+    lineHeight: 20,
+    minHeight: 80,
   },
 
   actions: { gap: 8 },
   videoBtn: {
-    paddingVertical: 12, borderRadius: 10,
-    backgroundColor: CORAL, alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: CORAL,
+    alignItems: "center",
   },
   videoBtnText: { color: "#fff", fontSize: 13, fontWeight: "800" },
   secondaryBtn: {
-    paddingVertical: 10, borderRadius: 10, borderWidth: 1,
-    borderColor: BORDER, backgroundColor: SURFACE2, alignItems: "center",
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
+    backgroundColor: SURFACE2,
+    alignItems: "center",
   },
   secondaryBtnText: { color: TEXT, fontSize: 13, fontWeight: "600" },
 
   bottomActions: { flexDirection: "row", gap: 10 },
   mapsBtn: {
-    flex: 1, paddingVertical: 12, borderRadius: 10,
-    backgroundColor: SURFACE2, borderWidth: 1, borderColor: BORDER, alignItems: "center",
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: SURFACE2,
+    borderWidth: 1,
+    borderColor: BORDER,
+    alignItems: "center",
   },
   mapsBtnText: { color: CORAL, fontSize: 13, fontWeight: "700" },
-  saveBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: CORAL, alignItems: "center" },
+  saveBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: CORAL,
+    alignItems: "center",
+  },
   saveBtnDisabled: { opacity: 0.5 },
   saveBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
 });

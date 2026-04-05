@@ -11,7 +11,19 @@
   "timestamp": 1712275200,
   "location": "Ubud, Bali, Indonesia",
   "location_name": "Ubud, Bali, Indonesia",
-  "tags": ["bali", "indonesia", "travel", "travelgram", "balireels", "explore", "island", "asia", "wanderlust", "solotravel", "baliguide"],
+  "tags": [
+    "bali",
+    "indonesia",
+    "travel",
+    "travelgram",
+    "balireels",
+    "explore",
+    "island",
+    "asia",
+    "wanderlust",
+    "solotravel",
+    "baliguide"
+  ],
   "webpage_url": "https://www.instagram.com/reel/CaB123dEfGH/",
   "extractor": "instagram"
 }

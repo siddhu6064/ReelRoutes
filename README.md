@@ -52,23 +52,23 @@ reelroutes/
 
 ### Key technology decisions
 
-| Concern | Choice | Why |
-|---|---|---|
-| Backend | FastAPI + Python 3.12 | Async, fast, excellent AI/ML ecosystem |
-| Database | MongoDB Atlas + Beanie ODM | Flexible schema for embedded pins; no joins needed |
-| Job queue | ARQ (Redis-backed) | Lightweight async workers; integrates cleanly with FastAPI |
-| Auth | Clerk | Handles Google + Apple OAuth; free tier generous |
-| AI extraction | OpenAI GPT-4o | Best structured output quality for location extraction |
-| Transcription | Whisper API (fallback) | Used when video has no captions; YouTube CC preferred |
-| Geocoding | Google Places API | Most accurate; enables canonical placeId for deduplication |
-| Web frontend | React 18 + Vite + TanStack Query | Fast DX; excellent SSE support for job progress streaming |
-| Web maps | Google Maps JS API | Best data quality; Places Autocomplete integration |
-| Mobile | Expo + Expo Router | Single codebase for iOS + Android; EAS Build for deploys |
-| Mobile maps | react-native-maps (Google provider) | Consistent map style with web |
-| Analytics | PostHog | Self-hostable; good session replay |
-| Error monitoring | Sentry | FastAPI + React SDKs both excellent |
-| Web deploy | Vercel | Preview deploys on every PR |
-| API deploy | Railway | Postgres-less; easy env management |
+| Concern          | Choice                              | Why                                                        |
+| ---------------- | ----------------------------------- | ---------------------------------------------------------- |
+| Backend          | FastAPI + Python 3.12               | Async, fast, excellent AI/ML ecosystem                     |
+| Database         | MongoDB Atlas + Beanie ODM          | Flexible schema for embedded pins; no joins needed         |
+| Job queue        | ARQ (Redis-backed)                  | Lightweight async workers; integrates cleanly with FastAPI |
+| Auth             | Clerk                               | Handles Google + Apple OAuth; free tier generous           |
+| AI extraction    | OpenAI GPT-4o                       | Best structured output quality for location extraction     |
+| Transcription    | Whisper API (fallback)              | Used when video has no captions; YouTube CC preferred      |
+| Geocoding        | Google Places API                   | Most accurate; enables canonical placeId for deduplication |
+| Web frontend     | React 18 + Vite + TanStack Query    | Fast DX; excellent SSE support for job progress streaming  |
+| Web maps         | Google Maps JS API                  | Best data quality; Places Autocomplete integration         |
+| Mobile           | Expo + Expo Router                  | Single codebase for iOS + Android; EAS Build for deploys   |
+| Mobile maps      | react-native-maps (Google provider) | Consistent map style with web                              |
+| Analytics        | PostHog                             | Self-hostable; good session replay                         |
+| Error monitoring | Sentry                              | FastAPI + React SDKs both excellent                        |
+| Web deploy       | Vercel                              | Preview deploys on every PR                                |
+| API deploy       | Railway                             | Postgres-less; easy env management                         |
 
 ---
 
@@ -221,14 +221,14 @@ VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 
 ## Phases & Roadmap
 
-| Phase | Weeks | Focus |
-|---|---|---|
-| 1 | 1–2 | Foundation, monorepo, FastAPI skeleton, MongoDB |
-| 2 | 3–4 | Core data models, Trip/Pin/Job services |
-| 3 | 5–6 | Video ingestion, transcription, AI extraction |
-| 4 | 7–8 | Geocoding, map UI, trip detail view |
-| 5 | 9–12 | Auth, polish, share, analytics, deployment |
-| 6 | 13–14 | Mobile (Expo React Native), App Store |
+| Phase | Weeks | Focus                                           |
+| ----- | ----- | ----------------------------------------------- |
+| 1     | 1–2   | Foundation, monorepo, FastAPI skeleton, MongoDB |
+| 2     | 3–4   | Core data models, Trip/Pin/Job services         |
+| 3     | 5–6   | Video ingestion, transcription, AI extraction   |
+| 4     | 7–8   | Geocoding, map UI, trip detail view             |
+| 5     | 9–12  | Auth, polish, share, analytics, deployment      |
+| 6     | 13–14 | Mobile (Expo React Native), App Store           |
 
 Full checklist: [`reelroutes_v4_checklist.html`](./reelroutes_v4_checklist.html)
 

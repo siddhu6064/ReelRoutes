@@ -22,7 +22,15 @@ const queryClient = new QueryClient({
 
 function PageLoader() {
   return (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)" }}>
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "var(--text-muted)",
+      }}
+    >
       Loading…
     </div>
   );
@@ -40,12 +48,35 @@ export default function App() {
             <Route path="/trips/:tripId" element={<TripMapPage />} />
             <Route path="/trips/:tripId/edit" element={<EditTripPage />} />
             <Route path="/share/:shareToken" element={<SharedTripPage />} />
-            <Route path="*" element={
-              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16 }}>
-                <h1 style={{ fontFamily: "var(--font-display)", fontSize: 48, fontWeight: 800, color: "var(--text-faint)" }}>404</h1>
-                <a href="/" style={{ color: "var(--coral)", textDecoration: "underline" }}>Go home</a>
-              </div>
-            } />
+            <Route
+              path="*"
+              element={
+                <div
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    gap: 16,
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: 48,
+                      fontWeight: 800,
+                      color: "var(--text-faint)",
+                    }}
+                  >
+                    404
+                  </h1>
+                  <a href="/" style={{ color: "var(--coral)", textDecoration: "underline" }}>
+                    Go home
+                  </a>
+                </div>
+              }
+            />
           </Routes>
         </Suspense>
       </BrowserRouter>

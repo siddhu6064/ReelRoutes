@@ -12,17 +12,33 @@
   "like_count": 94821,
   "thumbnail": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
   "thumbnails": {
-    "maxres": { "url": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg", "width": 1280, "height": 720 },
-    "high": { "url": "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg", "width": 480, "height": 360 }
+    "maxres": {
+      "url": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+      "width": 1280,
+      "height": 720
+    },
+    "high": {
+      "url": "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      "width": 480,
+      "height": 360
+    }
   },
   "upload_date": "20240315",
   "timestamp": 1710460800,
-  "tags": ["japan", "tokyo", "kyoto", "osaka", "travel", "japantravel", "travelvlog", "asia", "backpacking"],
+  "tags": [
+    "japan",
+    "tokyo",
+    "kyoto",
+    "osaka",
+    "travel",
+    "japantravel",
+    "travelvlog",
+    "asia",
+    "backpacking"
+  ],
   "categories": ["Travel & Events"],
   "subtitles": {
-    "en": [
-      { "ext": "vtt", "url": "https://www.youtube.com/api/timedtext?v=dQw4w9WgXcQ&lang=en" }
-    ]
+    "en": [{ "ext": "vtt", "url": "https://www.youtube.com/api/timedtext?v=dQw4w9WgXcQ&lang=en" }]
   },
   "automatic_captions": {},
   "webpage_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",

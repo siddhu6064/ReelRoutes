@@ -19,8 +19,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import * as SecureStore from "expo-secure-store";
 
 const PUSH_TOKEN_KEY = "expo_push_token";
-const API_BASE =
-  (process.env.EXPO_PUBLIC_API_URL ?? "https://api.reelroutes.app");
+const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? "https://api.reelroutes.app";
 
 export function usePushNotifications() {
   const { userId, getToken } = useAuth();
@@ -35,7 +34,7 @@ export function usePushNotifications() {
 
 async function registerForPushNotifications(
   userId: string,
-  getToken: () => Promise<string | null>
+  getToken: () => Promise<string | null>,
 ) {
   // Avoid re-registering on every launch — check cached token first
   try {
@@ -111,9 +110,7 @@ async function registerForPushNotifications(
   }
 }
 
-function setupNotificationHandlers(
-  router: ReturnType<typeof import("expo-router").useRouter>
-) {
+function setupNotificationHandlers(router: ReturnType<typeof import("expo-router").useRouter>) {
   let Notifications: typeof import("expo-notifications") | null = null;
 
   import("expo-notifications")
@@ -121,16 +118,14 @@ function setupNotificationHandlers(
       Notifications = mod;
 
       // Handle tap on a notification when app is backgrounded or killed
-      const sub = Notifications.addNotificationResponseReceivedListener(
-        (response) => {
-          const data = response.notification.request.content.data as Record<string, string>;
-          if (data?.screen === "trip" && data?.tripId) {
-            router.push(`/trip/${data.tripId}`);
-          } else if (data?.screen === "new-trip") {
-            router.push("/(tabs)/new-trip");
-          }
+      const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+        const data = response.notification.request.content.data as Record<string, string>;
+        if (data?.screen === "trip" && data?.tripId) {
+          router.push(`/trip/${data.tripId}`);
+        } else if (data?.screen === "new-trip") {
+          router.push("/(tabs)/new-trip");
         }
-      );
+      });
 
       return () => sub.remove();
     })

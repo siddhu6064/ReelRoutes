@@ -18,7 +18,9 @@ export default function NavBar() {
       <div className={styles.right}>
         {userId ? (
           <>
-            <Link to="/trips" className={styles.navLink}>My trips</Link>
+            <Link to="/trips" className={styles.navLink}>
+              My trips
+            </Link>
             {/* Clerk SignOutButton would go here in production */}
             <button
               className={styles.authBtn}

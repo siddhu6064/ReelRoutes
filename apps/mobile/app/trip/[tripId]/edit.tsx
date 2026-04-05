@@ -8,25 +8,11 @@
  * falls back to a regular FlatList with up/down arrow buttons.
  */
 import { useState } from "react";
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@clerk/clerk-expo";
-import {
-  useTrip,
-  useUpdateTrip,
-  useDeleteTrip,
-  useAddPin,
-  useReorderPins,
-} from "@/api/client";
+import { useTrip, useUpdateTrip, useDeleteTrip, useAddPin, useReorderPins } from "@/api/client";
 
 const CORAL = "#D85A30";
 const SURFACE = "#1a1a18";
@@ -125,7 +111,10 @@ export default function EditTripScreen() {
             <TextInput
               style={styles.titleInput}
               value={titleDirty ? title : (trip?.title ?? "")}
-              onChangeText={(t) => { setTitle(t); setTitleDirty(true); }}
+              onChangeText={(t) => {
+                setTitle(t);
+                setTitleDirty(true);
+              }}
               placeholder="Name your trip"
               placeholderTextColor={MUTED}
             />
@@ -135,9 +124,7 @@ export default function EditTripScreen() {
                 onPress={handleSaveTitle}
                 disabled={savingTitle}
               >
-                <Text style={styles.saveBtnText}>
-                  {savingTitle ? "…" : "Save"}
-                </Text>
+                <Text style={styles.saveBtnText}>{savingTitle ? "…" : "Save"}</Text>
               </Pressable>
             )}
           </View>
@@ -158,7 +145,9 @@ export default function EditTripScreen() {
                 <Text style={styles.stopNumText}>{i + 1}</Text>
               </View>
               <View style={styles.stopInfo}>
-                <Text style={styles.stopName} numberOfLines={1}>{pin.placeName}</Text>
+                <Text style={styles.stopName} numberOfLines={1}>
+                  {pin.placeName}
+                </Text>
                 {pin.city && <Text style={styles.stopCity}>{pin.city}</Text>}
               </View>
               <View style={styles.stopArrows}>
@@ -224,10 +213,7 @@ export default function EditTripScreen() {
                 >
                   <Text style={styles.saveBtnText}>{addingPin ? "Adding…" : "Add stop"}</Text>
                 </Pressable>
-                <Pressable
-                  style={styles.cancelBtn}
-                  onPress={() => setShowAddPlace(false)}
-                >
+                <Pressable style={styles.cancelBtn} onPress={() => setShowAddPlace(false)}>
                   <Text style={styles.cancelBtnText}>Cancel</Text>
                 </Pressable>
               </View>
@@ -243,9 +229,7 @@ export default function EditTripScreen() {
             onPress={handleDeleteTrip}
             disabled={deleting}
           >
-            <Text style={styles.deleteBtnText}>
-              {deleting ? "Deleting…" : "Delete this trip"}
-            </Text>
+            <Text style={styles.deleteBtnText}>{deleting ? "Deleting…" : "Delete this trip"}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -257,9 +241,13 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#0f0f0d" },
 
   nav: {
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    paddingHorizontal: 16, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: BORDER,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
   },
   backBtn: { width: 60 },
   backBtnText: { color: CORAL, fontSize: 14, fontWeight: "600" },
@@ -270,34 +258,54 @@ const styles = StyleSheet.create({
   section: { gap: 12 },
   sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   sectionLabel: {
-    color: MUTED, fontSize: 10, fontWeight: "700",
-    letterSpacing: 0.8, textTransform: "uppercase",
+    color: MUTED,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
   },
   addBtnText: { color: CORAL, fontSize: 13, fontWeight: "700" },
 
   titleRow: { flexDirection: "row", gap: 10, alignItems: "center" },
   titleInput: {
-    flex: 1, backgroundColor: SURFACE, borderRadius: 10,
-    borderWidth: 1, borderColor: BORDER,
-    padding: 12, color: TEXT, fontSize: 15, fontWeight: "600",
+    flex: 1,
+    backgroundColor: SURFACE,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 12,
+    color: TEXT,
+    fontSize: 15,
+    fontWeight: "600",
   },
 
   saveBtn: {
-    paddingHorizontal: 16, paddingVertical: 11,
-    backgroundColor: CORAL, borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    backgroundColor: CORAL,
+    borderRadius: 10,
     alignItems: "center",
   },
   saveBtnDisabled: { opacity: 0.5 },
   saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
 
   stop: {
-    flexDirection: "row", alignItems: "center", gap: 10,
-    backgroundColor: SURFACE, borderRadius: 10, borderWidth: 1, borderColor: BORDER,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: SURFACE,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
     padding: 10,
   },
   stopNum: {
-    width: 28, height: 28, borderRadius: 14,
-    backgroundColor: CORAL, alignItems: "center", justifyContent: "center",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: CORAL,
+    alignItems: "center",
+    justifyContent: "center",
   },
   stopNumText: { color: "#fff", fontSize: 12, fontWeight: "800" },
   stopInfo: { flex: 1 },
@@ -305,33 +313,52 @@ const styles = StyleSheet.create({
   stopCity: { color: MUTED, fontSize: 11, marginTop: 2 },
   stopArrows: { flexDirection: "row", gap: 4 },
   arrow: {
-    width: 30, height: 30, borderRadius: 6,
-    backgroundColor: SURFACE2, alignItems: "center", justifyContent: "center",
+    width: 30,
+    height: 30,
+    borderRadius: 6,
+    backgroundColor: SURFACE2,
+    alignItems: "center",
+    justifyContent: "center",
   },
   arrowDisabled: { opacity: 0.3 },
   arrowText: { color: TEXT, fontSize: 16 },
 
   addPlaceForm: {
-    backgroundColor: SURFACE2, borderRadius: 12,
-    borderWidth: 1, borderColor: BORDER, padding: 14, gap: 10,
+    backgroundColor: SURFACE2,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 14,
+    gap: 10,
   },
   addPlaceTitle: { color: TEXT, fontSize: 14, fontWeight: "700" },
   formInput: {
-    backgroundColor: SURFACE, borderRadius: 8, borderWidth: 1, borderColor: BORDER,
-    padding: 10, color: TEXT, fontSize: 13,
+    backgroundColor: SURFACE,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 10,
+    color: TEXT,
+    fontSize: 13,
   },
   coordRow: { flexDirection: "row", gap: 8 },
   formActions: { flexDirection: "row", gap: 8 },
   cancelBtn: {
-    paddingHorizontal: 16, paddingVertical: 11,
-    backgroundColor: SURFACE, borderRadius: 10, borderWidth: 1, borderColor: BORDER,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    backgroundColor: SURFACE,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
     alignItems: "center",
   },
   cancelBtnText: { color: MUTED, fontSize: 13, fontWeight: "600" },
 
   deleteBtn: {
-    paddingVertical: 12, borderRadius: 10,
-    borderWidth: 1, borderColor: RED,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: RED,
     alignItems: "center",
     backgroundColor: "rgba(224,82,82,0.1)",
   },

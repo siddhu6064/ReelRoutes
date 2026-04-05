@@ -22,8 +22,7 @@ export function useJobWebSocket(jobId: string | null): UseJobWebSocketResult {
   const wsRef = useRef<WebSocket | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const isTerminal = (s: JobStatus | null) =>
-    s?.status === "completed" || s?.status === "failed";
+  const isTerminal = (s: JobStatus | null) => s?.status === "completed" || s?.status === "failed";
 
   const startPolling = useCallback((id: string) => {
     if (pollRef.current) clearInterval(pollRef.current);
