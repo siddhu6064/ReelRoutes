@@ -43,6 +43,7 @@ def _make_collab(clerk_id: str = "user_xyz", role: str = "viewer") -> MagicMock:
     c = MagicMock()
     c.id = str(uuid.uuid4())
     c.clerk_id = clerk_id
+    c.name = "Test Collaborator"
     c.role = role
     c.status = "active"
     c.joined_at = datetime(2024, 6, 1, tzinfo=UTC)

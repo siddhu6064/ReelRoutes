@@ -46,8 +46,6 @@ def _can_read(trip: TripDocument, user_id: str) -> bool:
 
 class InviteBody(BaseModel):
     role: CollaboratorRole = CollaboratorRole.VIEWER
-    name: str = "Collaborator"
-    email: str | None = None
 
 
 # ── Endpoints ────────────────────────────────────────────────────────
@@ -56,15 +54,14 @@ class InviteBody(BaseModel):
 @router.post("/trips/{trip_id}/invite")
 async def create_invite(
     trip_id: str,
-    user_id: str = Query(...),
+    user_id: str | None = Query(None),
     body: InviteBody = Body(...),
 ) -> dict:
     """Generate a shareable invite link. Only the trip owner can invite."""
     trip = await TripService.get(trip_id, user_id=user_id)
 
     pending = TripCollaborator(
-        name=body.name,
-        email=body.email,
+        name="Collaborator",
         role=body.role,
         status="pending",
     )
@@ -87,7 +84,7 @@ async def create_invite(
 @router.get("/invite/{token}/accept")
 async def accept_invite(
     token: str,
-    user_id: str = Query(...),
+    user_id: str | None = Query(None),
 ) -> dict:
     """Accept an invite by token — links the authenticated user to the trip."""
     trip = await TripDocument.find_one({"collaborators": {"$elemMatch": {"invite_token": token}}})
@@ -121,7 +118,7 @@ async def accept_invite(
 @router.get("/trips/{trip_id}/collaborators")
 async def list_collaborators(
     trip_id: str,
-    user_id: str = Query(...),
+    user_id: str | None = Query(None),
 ) -> dict:
     """List active collaborators (excludes pending invites)."""
     trip = await TripService.get(trip_id, user_id=user_id)
@@ -152,7 +149,7 @@ async def list_collaborators(
 async def update_collaborator_role(
     trip_id: str,
     collab_id: str,
-    user_id: str = Query(...),
+    user_id: str | None = Query(None),
     role: CollaboratorRole = Query(...),
 ) -> dict:
     """Change a collaborator's role. Owner only."""
@@ -174,7 +171,7 @@ async def update_collaborator_role(
 async def remove_collaborator(
     trip_id: str,
     collab_id: str,
-    user_id: str = Query(...),
+    user_id: str | None = Query(None),
 ) -> dict:
     """Remove a collaborator. Owner can remove anyone; members can remove themselves."""
     trip = await TripService.get(trip_id, user_id=user_id)
@@ -195,7 +192,7 @@ async def remove_collaborator(
 @router.get("/trips/{trip_id}/can-edit")
 async def check_edit_permission(
     trip_id: str,
-    user_id: str = Query(...),
+    user_id: str | None = Query(None),
 ) -> dict:
     """Quick permission check — used by frontend before showing edit UI."""
     trip = await TripDocument.get(trip_id)
