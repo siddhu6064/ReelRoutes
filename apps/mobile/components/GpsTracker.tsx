@@ -72,7 +72,7 @@ export function useGpsTracker({ tripId, userId, onAutoVisit, onLocationUpdate }:
           distanceInterval: 100, // only fire when moved 100m+
           timeInterval: 30_000,
         },
-        (loc) => {
+        (loc: Location.LocationObject) => {
           void postLocation(
             loc.coords.latitude,
             loc.coords.longitude,

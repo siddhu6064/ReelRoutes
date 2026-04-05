@@ -55,7 +55,7 @@ class TestDirections:
         assert data["mode"] == "driving"
         assert data["total_duration_seconds"] == 3600
         assert data["total_distance_label"] == "25.0 km"
-        assert data["total_duration_label"] == "60 min"
+        assert data["total_duration_label"] == "1h"
         assert len(data["legs"]) == 2
         assert data["legs"][0]["from"] == "Tokyo Station"
         assert data["legs"][0]["to"] == "Asakusa"

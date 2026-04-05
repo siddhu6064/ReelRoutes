@@ -60,7 +60,6 @@ export function BreadcrumbTrail({
           coordinates={seg.coords}
           strokeColor={`rgba(216, 90, 48, ${seg.opacity})`}
           strokeWidth={3}
-          lineDashPattern={undefined}
         />
       ))}
     </>
