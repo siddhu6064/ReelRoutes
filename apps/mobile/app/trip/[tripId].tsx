@@ -1,19 +1,14 @@
 /**
- * apps/mobile/app/trip/[tripId].tsx
- *
- * Phase 1 + 2 — Trip map screen
- * W5t4:  Optimise route button + result toast
- * W6t4:  Day selector bottom sheet, per-day stop list, swipe between days
- * W7t5:  Category filter chips above the map
- * W8t2:  AsyncStorage offline caching
- * W8t3:  Offline mode banner
- * W8t4:  AI chat degrades gracefully when offline
+ * apps/mobile/app/trip/[tripId].tsx — Phase 1 + 2
+ * W5t4: Optimise route toast · W6t4: Day tabs · W7t5: Category chips
+ * W8t2: AsyncStorage offline cache · W8t3: Offline banner · W8t4: Chat degradation
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Alert,
   FlatList,
   Linking,
-  NetInfo,
+  Platform,
   Pressable,
   ScrollView,
   SectionList,
@@ -21,17 +16,15 @@ import {
   Text,
   ToastAndroid,
   View,
-  Platform,
-  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@clerk/clerk-expo";
-import { useTrip, useOptimiseRoute, type Pin, type ItineraryDay } from "@/api/client";
+import { useTrip, useOptimiseRoute, type Pin, type Trip, type ItineraryDay } from "@/api/client";
 import { PinDetailSheet, type PinDetailSheetRef } from "@/components/PinDetailSheet";
-import { ChatDrawer } from "@/components/ChatDrawer";
+import ChatDrawer from "@/components/ChatDrawer";
 
 const CORAL   = "#D85A30";
 const SURFACE = "#1a1a18";
@@ -42,7 +35,6 @@ const TEXT    = "#f0ede8";
 const AMBER   = "#f59e0b";
 const GREEN   = "#4ade80";
 const RED     = "#f87171";
-const TEAL    = "#1D9E75";
 
 const DAY_COLOURS = [
   "#D85A30","#378ADD","#1D9E75","#7F77DD","#EF9F27",
@@ -55,8 +47,6 @@ const CATEGORY_ICONS: Record<string, string> = {
   entertainment: "🎭", other: "📍",
 };
 
-const OFFLINE_KEY = (id: string) => `rr-trip-offline-${id}`;
-
 const MAP_STYLE = [
   { elementType: "geometry", stylers: [{ color: "#1a1a18" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#1a1a18" }] },
@@ -67,19 +57,25 @@ const MAP_STYLE = [
   { featureType: "transit", stylers: [{ visibility: "off" }] },
 ];
 
-function googleMapsUrl(pins: Pin[]) {
-  if (!pins.length) return null;
-  if (pins.length === 1) return `https://maps.google.com/?q=${pins[0].lat},${pins[0].lng}`;
-  const o = `${pins[0].lat},${pins[0].lng}`;
-  const d = `${pins[pins.length - 1].lat},${pins[pins.length - 1].lng}`;
+function offlineKey(id: string) { return `rr-trip-offline-${id}`; }
+
+function googleMapsUrl(pins: Pin[]): string | null {
+  const first = pins[0];
+  const last = pins[pins.length - 1];
+  if (!first) return null;
+  if (pins.length === 1) return `https://maps.google.com/?q=${first.lat},${first.lng}`;
+  if (!last) return null;
+  const o = `${first.lat},${first.lng}`;
+  const d = `${last.lat},${last.lng}`;
   const wps = pins.slice(1, -1).map(p => `${p.lat},${p.lng}`).join("|");
   return `https://www.google.com/maps/dir/?api=1&origin=${o}&destination=${d}${wps ? `&waypoints=${wps}` : ""}`;
 }
 
-function buildSections(pins: Pin[]) {
+function buildSections(pins: Pin[]): Array<{ title: string; data: Pin[] }> {
   const map = new Map<string, Pin[]>();
   for (const pin of pins) {
-    const key = pin.cityGroup ?? (pin.city ? `${pin.city}${pin.countryCode ? ", " + pin.countryCode : ""}` : "Other");
+    const key = pin.cityGroup
+      ?? (pin.city ? `${pin.city}${pin.countryCode ? ", " + pin.countryCode : ""}` : "Other");
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(pin);
   }
@@ -87,14 +83,9 @@ function buildSections(pins: Pin[]) {
 }
 
 function showToast(msg: string) {
-  if (Platform.OS === "android") {
-    ToastAndroid.show(msg, ToastAndroid.SHORT);
-  } else {
-    Alert.alert("", msg);
-  }
+  if (Platform.OS === "android") ToastAndroid.show(msg, ToastAndroid.SHORT);
+  else Alert.alert("", msg);
 }
-
-// ─────────────────────────────────────────────────────────────
 
 export default function TripMapScreen() {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
@@ -104,40 +95,40 @@ export default function TripMapScreen() {
   const { data: liveTrip, isLoading } = useTrip(tripId ?? null);
   const { mutateAsync: optimiseRoute, isPending: optimising } = useOptimiseRoute();
 
-  const [offlineTrip, setOfflineTrip] = useState<typeof liveTrip | null>(null);
+  const [offlineTrip, setOfflineTrip] = useState<Trip | null>(null);
   const [isOnline, setIsOnline] = useState(true);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showRoute, setShowRoute] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  const [activeDay, setActiveDay] = useState<number | null>(null); // null = all days
-  const [showDaySheet, setShowDaySheet] = useState(false);
+  const [activeDay, setActiveDay] = useState<number | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
 
   const mapRef = useRef<MapView>(null);
-  const listRef = useRef<FlatList>(null);
+  const listRef = useRef<FlatList<Pin>>(null);
   const sheetRef = useRef<PinDetailSheetRef>(null);
 
   const trip = liveTrip ?? offlineTrip;
 
-  // W8t2 — cache trip to AsyncStorage when we get live data
+  // W8t2 — cache trip to AsyncStorage on every live load
   useEffect(() => {
     if (liveTrip && tripId) {
-      AsyncStorage.setItem(OFFLINE_KEY(tripId), JSON.stringify(liveTrip)).catch(() => {});
+      if (tripId) AsyncStorage.setItem(offlineKey(tripId), JSON.stringify(liveTrip)).catch(() => {});
     }
   }, [liveTrip, tripId]);
 
-  // W8t2 — load from cache when offline / on mount
+  // W8t2 — load from cache if no live data
   useEffect(() => {
     if (!liveTrip && tripId) {
-      AsyncStorage.getItem(OFFLINE_KEY(tripId))
-        .then(raw => { if (raw) setOfflineTrip(JSON.parse(raw)); })
+      AsyncStorage.getItem(offlineKey(tripId ?? ""))
+        .then((raw: string | null) => {
+          if (raw) setOfflineTrip(JSON.parse(raw) as Trip);
+        })
         .catch(() => {});
     }
   }, [liveTrip, tripId]);
 
-  // W8t3 — monitor network
+  // W8t3 — poll network connectivity every 30s
   useEffect(() => {
-    // expo-network or simple fetch check
     const check = async () => {
       try {
         const r = await fetch("https://www.google.com/favicon.ico", { method: "HEAD" });
@@ -145,24 +136,26 @@ export default function TripMapScreen() {
       } catch { setIsOnline(false); }
     };
     check();
-    const interval = setInterval(check, 30_000);
-    return () => clearInterval(interval);
+    const iv = setInterval(check, 30_000);
+    return () => clearInterval(iv);
   }, []);
 
   const sorted = useMemo(
     () => (trip ? [...trip.pins].sort((a, b) => a.order - b.order) : []),
-    [trip]
+    [trip],
   );
 
   const categories = useMemo(
-    () => [...new Set(sorted.map(p => p.category).filter(Boolean))] as string[],
-    [sorted]
+    () => [...new Set(sorted.map(p => p.category).filter((c): c is string => Boolean(c)))],
+    [sorted],
   );
 
   const itinerary: ItineraryDay[] = trip?.itinerary ?? [];
   const pinDayColour = useMemo(() => {
     const map = new Map<string, string>();
-    itinerary.forEach((day, i) => day.pinIds.forEach(id => map.set(id, DAY_COLOURS[i % DAY_COLOURS.length])));
+    itinerary.forEach((day, i) =>
+      day.pinIds.forEach(id => { const col = DAY_COLOURS[i % DAY_COLOURS.length]; if (col) map.set(id, col); })
+    );
     return map;
   }, [itinerary]);
 
@@ -170,45 +163,43 @@ export default function TripMapScreen() {
     let pins = sorted;
     if (categoryFilter) pins = pins.filter(p => p.category === categoryFilter);
     if (activeDay !== null && itinerary.length > 0) {
-      const dayPinIds = new Set(itinerary[activeDay]?.pinIds ?? []);
-      pins = pins.filter(p => dayPinIds.has(p.id));
+      const ids = new Set(itinerary[activeDay]?.pinIds ?? []);
+      pins = pins.filter(p => ids.has(p.id));
     }
     return pins;
   }, [sorted, categoryFilter, activeDay, itinerary]);
 
   const sections = useMemo(() => buildSections(displayedPins), [displayedPins]);
-  const hasMultipleCities = sections.length > 1;
-
   const routeCoords = useMemo(
     () => displayedPins.map(p => ({ latitude: p.lat, longitude: p.lng })),
-    [displayedPins]
+    [displayedPins],
   );
 
   const selectPin = useCallback((pin: Pin, index: number) => {
     setActiveIndex(index);
-    mapRef.current?.animateToRegion({ latitude: pin.lat, longitude: pin.lng, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400);
+    mapRef.current?.animateToRegion(
+      { latitude: pin.lat, longitude: pin.lng, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+      400,
+    );
     sheetRef.current?.open(pin, tripId ?? "");
   }, [tripId]);
 
-  // W5t4 — optimise route with toast result
   async function handleOptimise() {
     if (!userId || !tripId) return;
     try {
-      const result = await optimiseRoute({ tripId, user_id: userId });
-      showToast(`Route optimised — saved ${result.savingPercent}% (${result.originalDistanceKm} → ${result.optimisedDistanceKm} km)`);
-    } catch {
-      showToast("Could not optimise route");
-    }
+      const r = await optimiseRoute({ tripId, user_id: userId });
+      showToast(`Saved ${r.savingPercent}% — ${r.originalDistanceKm} → ${r.optimisedDistanceKm} km`);
+    } catch { showToast("Could not optimise route"); }
   }
 
   function openGoogleMaps() {
     const url = googleMapsUrl(displayedPins);
-    if (url) Linking.openURL(url);
+    if (url) Linking.openURL(url).catch(() => {});
   }
 
   if ((isLoading && !offlineTrip) || !trip) {
     return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <View style={[styles.container, styles.center]}>
         <Text style={{ color: MUTED }}>Loading trip…</Text>
       </View>
     );
@@ -219,16 +210,14 @@ export default function TripMapScreen() {
       {/* W8t3 — Offline banner */}
       {!isOnline && (
         <View style={[styles.offlineBanner, { paddingTop: insets.top }]}>
-          <Text style={styles.offlineBannerText}>
-            📴 Offline mode — showing cached data
-          </Text>
+          <Text style={styles.offlineText}>📴 Offline mode — showing cached data</Text>
         </View>
       )}
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + (isOnline ? 8 : 36) }]}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Text style={styles.backText}>←</Text>
+        <Pressable style={styles.iconBtn} onPress={() => router.back()}>
+          <Text style={styles.iconBtnText}>←</Text>
         </Pressable>
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle} numberOfLines={1}>{trip.title}</Text>
@@ -237,24 +226,33 @@ export default function TripMapScreen() {
             {itinerary.length > 0 ? ` · ${itinerary.length} days` : ""}
           </Text>
         </View>
-        <Pressable style={styles.iconBtn} onPress={handleOptimise} disabled={optimising || !isOnline}>
+        <Pressable
+          style={[styles.iconBtn, (optimising || !isOnline) && styles.iconBtnDisabled]}
+          onPress={handleOptimise}
+          disabled={optimising || !isOnline}
+        >
           <Text style={styles.iconBtnText}>⚡</Text>
         </Pressable>
         <Pressable style={[styles.iconBtn, { backgroundColor: CORAL }]} onPress={openGoogleMaps}>
           <Text style={styles.iconBtnText}>🗺</Text>
         </Pressable>
-        {/* W8t4 — Chat only available online */}
+        {/* W8t4 — Chat unavailable offline */}
         <Pressable
-          style={[styles.iconBtn, chatOpen && { backgroundColor: "#2a1a12" }]}
+          style={[styles.iconBtn, chatOpen && styles.iconBtnActive]}
           onPress={() => isOnline ? setChatOpen(true) : showToast("Reconnect to use AI chat")}
         >
           <Text style={styles.iconBtnText}>💬</Text>
         </Pressable>
       </View>
 
-      {/* W7t5 — Category filter chips */}
+      {/* W7t5 — Category chips */}
       {categories.length > 1 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll} contentContainerStyle={styles.chipRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.chipScroll}
+          contentContainerStyle={styles.chipRow}
+        >
           <Pressable
             style={[styles.chip, categoryFilter === null && styles.chipActive]}
             onPress={() => setCategoryFilter(null)}
@@ -277,24 +275,32 @@ export default function TripMapScreen() {
 
       {/* W6t4 — Day tabs */}
       {itinerary.length > 0 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayScroll} contentContainerStyle={styles.dayRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.dayScroll}
+          contentContainerStyle={styles.dayRow}
+        >
           <Pressable
             style={[styles.dayTab, activeDay === null && styles.dayTabActive]}
             onPress={() => setActiveDay(null)}
           >
             <Text style={[styles.dayTabText, activeDay === null && styles.dayTabTextActive]}>All</Text>
           </Pressable>
-          {itinerary.map((day, i) => (
-            <Pressable
-              key={day.dayNumber}
-              style={[styles.dayTab, activeDay === i && { backgroundColor: DAY_COLOURS[i % DAY_COLOURS.length] + "33", borderColor: DAY_COLOURS[i % DAY_COLOURS.length] }]}
-              onPress={() => setActiveDay(i === activeDay ? null : i)}
-            >
-              <Text style={[styles.dayTabText, activeDay === i && { color: DAY_COLOURS[i % DAY_COLOURS.length] }]}>
-                {day.label ?? `Day ${day.dayNumber}`}
-              </Text>
-            </Pressable>
-          ))}
+          {itinerary.map((day, i) => {
+            const col = DAY_COLOURS[i % DAY_COLOURS.length];
+            return (
+              <Pressable
+                key={day.dayNumber}
+                style={[styles.dayTab, activeDay === i && { backgroundColor: col + "33", borderColor: col }]}
+                onPress={() => setActiveDay(i === activeDay ? null : i)}
+              >
+                <Text style={[styles.dayTabText, activeDay === i && { color: col }]}>
+                  {day.label ?? `Day ${day.dayNumber}`}
+                </Text>
+              </Pressable>
+            );
+          })}
         </ScrollView>
       )}
 
@@ -307,7 +313,8 @@ export default function TripMapScreen() {
         initialRegion={{
           latitude: sorted[0]?.lat ?? 35.6762,
           longitude: sorted[0]?.lng ?? 139.6503,
-          latitudeDelta: 2, longitudeDelta: 2,
+          latitudeDelta: 2,
+          longitudeDelta: 2,
         }}
       >
         {showRoute && routeCoords.length > 1 && (
@@ -316,8 +323,17 @@ export default function TripMapScreen() {
         {displayedPins.map((pin, i) => {
           const dayColour = pinDayColour.get(pin.id);
           return (
-            <Marker key={pin.id} coordinate={{ latitude: pin.lat, longitude: pin.lng }} title={pin.placeName} onPress={() => selectPin(pin, i)}>
-              <View style={[styles.markerWrap, i === activeIndex && styles.markerWrapActive, dayColour ? { backgroundColor: dayColour } : {}]}>
+            <Marker
+              key={pin.id}
+              coordinate={{ latitude: pin.lat, longitude: pin.lng }}
+              title={pin.placeName}
+              onPress={() => selectPin(pin, i)}
+            >
+              <View style={[
+                styles.markerWrap,
+                i === activeIndex && styles.markerWrapActive,
+                dayColour ? { backgroundColor: dayColour } : undefined,
+              ]}>
                 <Text style={styles.markerText}>{sorted.indexOf(pin) + 1}</Text>
               </View>
             </Marker>
@@ -325,13 +341,16 @@ export default function TripMapScreen() {
         })}
       </MapView>
 
-      <Pressable style={[styles.routeToggle, { bottom: insets.bottom + 220 }]} onPress={() => setShowRoute(v => !v)}>
+      <Pressable
+        style={[styles.routeToggle, { bottom: insets.bottom + 220 }]}
+        onPress={() => setShowRoute(v => !v)}
+      >
         <Text style={styles.routeToggleText}>{showRoute ? "— Route" : "+ Route"}</Text>
       </Pressable>
 
       {/* Stop list */}
       <View style={[styles.listWrap, { paddingBottom: insets.bottom }]}>
-        {hasMultipleCities ? (
+        {sections.length > 1 ? (
           <SectionList
             sections={sections}
             keyExtractor={pin => pin.id}
@@ -339,14 +358,19 @@ export default function TripMapScreen() {
             renderSectionHeader={({ section }) => (
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>📍 {section.title}</Text>
-                <Text style={styles.sectionCount}>{section.data.length} stops</Text>
+                <Text style={styles.sectionCount}>{section.data.length}</Text>
               </View>
             )}
             renderItem={({ item: pin }) => {
               const idx = sorted.indexOf(pin);
-              const dayColour = pinDayColour.get(pin.id);
               return (
-                <StopCard pin={pin} index={idx} isActive={activeIndex === idx} dayColour={dayColour} onPress={() => selectPin(pin, idx)} />
+                <StopCard
+                  pin={pin}
+                  index={idx}
+                  isActive={activeIndex === idx}
+                  {...(pinDayColour.get(pin.id) ? { dayColour: pinDayColour.get(pin.id) as string } : {})}
+                  onPress={() => selectPin(pin, idx)}
+                />
               );
             }}
           />
@@ -360,9 +384,14 @@ export default function TripMapScreen() {
             contentContainerStyle={styles.flatListContent}
             renderItem={({ item: pin }) => {
               const idx = sorted.indexOf(pin);
-              const dayColour = pinDayColour.get(pin.id);
               return (
-                <StopCard pin={pin} index={idx} isActive={activeIndex === idx} dayColour={dayColour} onPress={() => selectPin(pin, idx)} />
+                <StopCard
+                  pin={pin}
+                  index={idx}
+                  isActive={activeIndex === idx}
+                  {...(pinDayColour.get(pin.id) ? { dayColour: pinDayColour.get(pin.id) as string } : {})}
+                  onPress={() => selectPin(pin, idx)}
+                />
               );
             }}
           />
@@ -371,31 +400,46 @@ export default function TripMapScreen() {
 
       <PinDetailSheet ref={sheetRef} />
 
-      {/* W8t4 — Chat drawer (only renders when online) */}
-      {chatOpen && isOnline && trip && (
+      {chatOpen && isOnline && (
         <ChatDrawer tripId={tripId ?? ""} onClose={() => setChatOpen(false)} />
       )}
     </View>
   );
 }
 
-function StopCard({ pin, index, isActive, dayColour, onPress }: {
+function StopCard({
+  pin, index, isActive, dayColour, onPress,
+}: {
   pin: Pin; index: number; isActive: boolean; dayColour?: string; onPress: () => void;
 }) {
   return (
     <Pressable style={[styles.stopCard, isActive && styles.stopCardActive]} onPress={onPress}>
-      <View style={[styles.stopNum, isActive && styles.stopNumActive, dayColour ? { backgroundColor: dayColour } : {}]}>
+      <View style={[
+        styles.stopNum,
+        isActive && styles.stopNumActive,
+        dayColour ? { backgroundColor: dayColour, borderColor: dayColour } : undefined,
+      ]}>
         <Text style={styles.stopNumText}>{index + 1}</Text>
       </View>
       <View style={styles.stopInfo}>
         <Text style={styles.stopName} numberOfLines={1}>{pin.placeName}</Text>
         <View style={styles.stopMeta}>
-          {pin.city && <Text style={styles.stopCity} numberOfLines={1}>{pin.city}{pin.countryCode ? `, ${pin.countryCode}` : ""}</Text>}
-          {pin.openNow !== undefined && <Text style={{ fontSize: 10, fontWeight: "700", color: pin.openNow ? GREEN : RED }}>● {pin.openNow ? "Open" : "Closed"}</Text>}
-          {pin.rating !== undefined && <Text style={styles.ratingLabel}>★ {pin.rating.toFixed(1)}</Text>}
-          {pin.category && pin.category !== "other" && (
+          {pin.city ? (
+            <Text style={styles.stopCity} numberOfLines={1}>
+              {pin.city}{pin.countryCode ? `, ${pin.countryCode}` : ""}
+            </Text>
+          ) : null}
+          {pin.openNow !== undefined ? (
+            <Text style={{ fontSize: 10, fontWeight: "700", color: pin.openNow ? GREEN : RED }}>
+              ● {pin.openNow ? "Open" : "Closed"}
+            </Text>
+          ) : null}
+          {pin.rating !== undefined ? (
+            <Text style={styles.ratingLabel}>★ {pin.rating.toFixed(1)}</Text>
+          ) : null}
+          {pin.category && pin.category !== "other" ? (
             <Text style={styles.categoryLabel}>{CATEGORY_ICONS[pin.category] ?? ""}</Text>
-          )}
+          ) : null}
         </View>
       </View>
     </Pressable>
@@ -404,22 +448,19 @@ function StopCard({ pin, index, isActive, dayColour, onPress }: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: SURFACE },
+  center: { justifyContent: "center", alignItems: "center" },
+
   offlineBanner: {
     position: "absolute", top: 0, left: 0, right: 0, zIndex: 99,
     backgroundColor: "#2e2010", paddingHorizontal: 16, paddingBottom: 8,
   },
-  offlineBannerText: { color: AMBER, fontSize: 12, fontWeight: "700", textAlign: "center" },
+  offlineText: { color: AMBER, fontSize: 12, fontWeight: "700", textAlign: "center" },
 
   header: {
     flexDirection: "row", alignItems: "center", gap: 8,
     paddingHorizontal: 14, paddingBottom: 10,
     backgroundColor: SURFACE, borderBottomWidth: 1, borderBottomColor: BORDER,
   },
-  backBtn: {
-    width: 34, height: 34, borderRadius: 17, backgroundColor: SURFACE2,
-    alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: BORDER,
-  },
-  backText: { color: TEXT, fontSize: 16, fontWeight: "700" },
   headerInfo: { flex: 1, minWidth: 0 },
   headerTitle: { color: TEXT, fontSize: 14, fontWeight: "800", letterSpacing: -0.3 },
   headerMeta: { color: MUTED, fontSize: 11, marginTop: 1 },
@@ -428,23 +469,19 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: BORDER,
   },
   iconBtnText: { fontSize: 16 },
+  iconBtnDisabled: { opacity: 0.4 },
+  iconBtnActive: { backgroundColor: "#2a1a12", borderColor: CORAL },
 
   chipScroll: { maxHeight: 40, backgroundColor: SURFACE, borderBottomWidth: 1, borderBottomColor: BORDER },
   chipRow: { paddingHorizontal: 10, paddingVertical: 6, gap: 6, alignItems: "center" },
-  chip: {
-    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99,
-    borderWidth: 1, borderColor: BORDER, backgroundColor: SURFACE2,
-  },
+  chip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 99, borderWidth: 1, borderColor: BORDER, backgroundColor: SURFACE2 },
   chipActive: { backgroundColor: "#2a1a12", borderColor: CORAL },
   chipText: { color: MUTED, fontSize: 11, fontWeight: "700" },
   chipTextActive: { color: CORAL },
 
   dayScroll: { maxHeight: 38, backgroundColor: SURFACE },
   dayRow: { paddingHorizontal: 10, paddingVertical: 5, gap: 6, alignItems: "center" },
-  dayTab: {
-    paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99,
-    borderWidth: 1, borderColor: BORDER, backgroundColor: SURFACE2,
-  },
+  dayTab: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99, borderWidth: 1, borderColor: BORDER, backgroundColor: SURFACE2 },
   dayTabActive: { backgroundColor: "#2a1a12", borderColor: CORAL },
   dayTabText: { color: MUTED, fontSize: 11, fontWeight: "700" },
   dayTabTextActive: { color: CORAL },
@@ -452,7 +489,8 @@ const styles = StyleSheet.create({
   map: { flex: 1 },
   routeToggle: {
     position: "absolute", right: 12, backgroundColor: SURFACE2,
-    borderRadius: 8, borderWidth: 1, borderColor: BORDER, paddingHorizontal: 10, paddingVertical: 6,
+    borderRadius: 8, borderWidth: 1, borderColor: BORDER,
+    paddingHorizontal: 10, paddingVertical: 6,
   },
   routeToggleText: { color: MUTED, fontSize: 11, fontWeight: "700" },
 

@@ -38,8 +38,7 @@
     "sourceMap": true,
     "skipLibCheck": true,
 
-    // Path aliases — extended per package
-    "baseUrl": "."
+    // Path aliases — configured per package (not in base)
   },
   "exclude": ["node_modules", "dist", "build", ".expo"]
 }

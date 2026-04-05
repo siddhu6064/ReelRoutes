@@ -8,8 +8,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 
 const API_BASE =
-  Constants.expoConfig?.extra?.apiUrl ??
-  process.env.EXPO_PUBLIC_API_URL ??
+  (Constants.expoConfig?.extra as Record<string, string> | undefined)?.['apiUrl'] ??
+  process.env['EXPO_PUBLIC_API_URL'] ??
   "https://api.reelroutes.app";
 
 // ── Core fetch ─────────────────────────────────────────────────
@@ -142,6 +142,44 @@ export function useTrip(tripId: string | null) {
     queryKey: ["trip", tripId],
     queryFn: () => apiFetch<Trip>(`/api/trips/${tripId}`),
     enabled: !!tripId,
+  });
+}
+
+// ── Trip mutations ────────────────────────────────────────────
+
+export function useUpdateTrip() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tripId, ...body }: { tripId: string; user_id: string; title?: string }) =>
+      apiFetch<Trip>(`/api/trips/${tripId}`, { method: "PUT", body: JSON.stringify(body) }),
+    onSuccess: (data: Trip) => qc.setQueryData(["trip", data.id], data),
+  });
+}
+
+export function useDeleteTrip() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tripId, userId }: { tripId: string; userId: string }) =>
+      apiFetch<void>(`/api/trips/${tripId}?user_id=${userId}`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["trips"] }),
+  });
+}
+
+export function useAddPin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tripId, ...body }: { tripId: string } & Record<string, unknown>) =>
+      apiFetch<Trip>(`/api/trips/${tripId}/pins`, { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: (data: Trip) => qc.setQueryData(["trip", data.id], data),
+  });
+}
+
+export function useReorderPins() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tripId, ...body }: { tripId: string; user_id: string; pin_ids: string[] }) =>
+      apiFetch<Trip>(`/api/trips/${tripId}/pins/reorder`, { method: "POST", body: JSON.stringify(body) }),
+    onSuccess: (data: Trip) => qc.setQueryData(["trip", data.id], data),
   });
 }
 

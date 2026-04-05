@@ -272,7 +272,7 @@ describe("@reelroutes/shared — Bootstrap Validation", () => {
         geocoded: true,
       };
 
-      const pin = geocodedLocationToPin(loc, 0);
+      const pin = geocodedLocationToPin(loc);
 
       expect(pin.placeName).toBe("Shibuya Crossing");
       expect(pin.placeId).toBe("ChIJ123");

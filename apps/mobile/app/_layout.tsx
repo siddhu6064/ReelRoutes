@@ -41,8 +41,8 @@ const tokenCache = {
 };
 
 const CLERK_PUBLISHABLE_KEY =
-  Constants.expoConfig?.extra?.clerkPublishableKey ??
-  process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ??
+  (Constants.expoConfig?.extra as Record<string, string> | undefined)?.['clerkPublishableKey'] ??
+  process.env['EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY'] ??
   "";
 
 function RootLayoutNav() {

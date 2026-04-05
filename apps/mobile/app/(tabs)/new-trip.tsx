@@ -93,7 +93,7 @@ export default function NewTripScreen() {
     }
     setError("");
     try {
-      const result = await processVideo({ url: trimmed, userId: userId ?? undefined });
+      const result = await processVideo({ url: trimmed, ...(userId ? { userId } : {}) });
       resetShareIntent();
       router.push(`/processing/${result.jobId}`);
     } catch (e) {

@@ -41,7 +41,7 @@ export default function ImportPage() {
     setError("");
 
     try {
-      const result = await processVideo({ url: url.trim(), userId: userId ?? undefined });
+      const result = await processVideo({ url: url.trim(), ...(userId ? { userId } : {}) });
       if (!userId) {
         setGuestJob({ jobId: result.jobId, url: url.trim(), tripId: null });
       }

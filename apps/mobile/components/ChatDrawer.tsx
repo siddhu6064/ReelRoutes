@@ -24,7 +24,6 @@ import { useChat } from "@/api/client";
 const CORAL = "#D85A30";
 const SURFACE = "#1a1a18";
 const SURFACE2 = "#232320";
-const SURFACE3 = "#2a2a28";
 const BORDER = "#2a2a28";
 const MUTED = "#6b6b62";
 const TEXT = "#f0ede8";
@@ -83,7 +82,7 @@ export default function ChatDrawer({ tripId, onClose }: Props) {
         tripId,
         message: userMsg.content,
         history: messages,
-        userId: userId ?? undefined,
+        ...(userId ? { userId } : {}),
       });
       setMessages([...updated, { role: "assistant", content: reply }]);
       if (suggestionChips?.length) setChips(suggestionChips.slice(0, 6));

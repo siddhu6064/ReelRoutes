@@ -56,7 +56,8 @@ export default function EditTripPage() {
   const pinDayColour = new Map<string, string>();
   const activeDays = itinerary ?? trip?.itinerary ?? [];
   activeDays.forEach((day, i) => {
-    day.pinIds.forEach((id) => pinDayColour.set(id, DAY_COLOURS[i % DAY_COLOURS.length]));
+    const col = DAY_COLOURS[i % DAY_COLOURS.length];
+    if (col) day.pinIds.forEach((id) => pinDayColour.set(id, col));
   });
 
   async function handleSaveTitle() {
@@ -86,7 +87,9 @@ export default function EditTripPage() {
     e.preventDefault();
     if (dragging === null || dragging === dropIndex || !userId || !tripId) return;
     const newOrder = [...sorted];
-    const [moved] = newOrder.splice(dragging, 1);
+    const spliced = newOrder.splice(dragging, 1);
+    const moved = spliced[0];
+    if (!moved) return;
     newOrder.splice(dropIndex, 0, moved);
     setDragging(null);
     setDragOver(null);
@@ -130,9 +133,11 @@ export default function EditTripPage() {
 
   function openDayInMaps(day: ItineraryDay) {
     const pins = day.pinIds.map((id) => sorted.find((p) => p.id === id)).filter(Boolean) as Pin[];
-    if (!pins.length) return;
-    const origin = `${pins[0].lat},${pins[0].lng}`;
-    const dest = `${pins[pins.length - 1].lat},${pins[pins.length - 1].lng}`;
+    const first = pins[0];
+    const last = pins[pins.length - 1];
+    if (!first || !last) return;
+    const origin = `${first.lat},${first.lng}`;
+    const dest = `${last.lat},${last.lng}`;
     const wps = pins.slice(1, -1).map((p) => `${p.lat},${p.lng}`).join("|");
     const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}${wps ? `&waypoints=${wps}` : ""}`;
     window.open(url, "_blank");

@@ -42,7 +42,7 @@ export default function ChatPanel({ tripId, onClose }: Props) {
         tripId,
         message: userMsg.content,
         history: messages,
-        userId: userId ?? undefined,
+        ...(userId ? { userId } : {}),
       });
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       if (suggestionChips?.length) setChips(suggestionChips);

@@ -15,7 +15,6 @@ import {
 import {
   Linking,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -78,7 +77,7 @@ export const PinDetailSheet = forwardRef<PinDetailSheetRef>((_props, ref) => {
     if (!pin || !userId) return;
     setSaving(true);
     try {
-      await updatePin({ tripId, pinId: pin.id, user_id: userId, notes });
+      await updatePin({ tripId, pinId: pin.id, userId: userId ?? "", notes });
     } finally {
       setSaving(false);
     }

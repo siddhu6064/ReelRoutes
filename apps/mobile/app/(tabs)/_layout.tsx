@@ -7,12 +7,11 @@
  *   Profile  — user account
  */
 import { Tabs } from "expo-router";
-import { Pressable, StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Coral accent matching web brand
 const CORAL = "#D85A30";
-const BG = "#0f0f0d";
 const SURFACE = "#1a1a18";
 const MUTED = "#6b6b62";
 

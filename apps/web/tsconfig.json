@@ -9,9 +9,13 @@
     "jsx": "react-jsx",
     "outDir": "./dist",
     "baseUrl": ".",
+    "ignoreDeprecations": "5.0",
     "paths": { "@/*": ["src/*"] },
+    "types": ["vite/client", "google.maps"],
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false
   },
   "include": ["src/**/*", "vite.config.ts"],
   "exclude": ["node_modules", "dist"]

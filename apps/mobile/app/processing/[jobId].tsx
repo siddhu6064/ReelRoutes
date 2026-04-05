@@ -6,7 +6,7 @@
  * Redirects to trip map when completed.
  */
 import { useEffect } from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useJobStatus } from "@/api/client";

@@ -15,10 +15,9 @@
  */
 export function redirectSystemPath({
   path,
-  initial,
 }: {
   path: string;
-  initial: boolean;
+  initial?: boolean;
 }): string {
   try {
     // expo-share-intent signals an incoming share via a special hostname

@@ -87,7 +87,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
       {(pin.rating !== undefined || pin.openNow !== undefined) && (
         <div className={styles.enrichRow}>
           {pin.rating !== undefined && (
-            <StarRating rating={pin.rating} total={pin.userRatingsTotal} />
+            <StarRating rating={pin.rating} {...(pin.userRatingsTotal !== undefined ? { total: pin.userRatingsTotal } : {})} />
           )}
           <OpenBadge openNow={pin.openNow} />
         </div>

@@ -73,7 +73,6 @@ export interface GeocodedLocation extends ExtractedLocation {
  */
 export function geocodedLocationToPin(
   loc: GeocodedLocation,
-  order: number,
 ): CreatePinInput {
   return {
     placeName: loc.placeName,
@@ -82,10 +81,11 @@ export function geocodedLocationToPin(
     lng: loc.lng,
     address: loc.address,
     countryCode: loc.countryCode,
-    city: loc.city,
-    contextQuote: loc.contextQuote,
-    timestampHint: loc.timestampHint,
-    confidence: loc.confidence,
+    // exactOptionalPropertyTypes: omit optional props when undefined
+    ...(loc.city !== undefined && { city: loc.city }),
+    ...(loc.contextQuote !== undefined && { contextQuote: loc.contextQuote }),
+    ...(loc.timestampHint !== undefined && { timestampHint: loc.timestampHint }),
+    ...(loc.confidence !== undefined && { confidence: loc.confidence }),
     tags: [],
   };
 }

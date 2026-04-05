@@ -26,7 +26,6 @@ import {
   useDeleteTrip,
   useAddPin,
   useReorderPins,
-  type Pin,
 } from "@/api/client";
 
 const CORAL = "#D85A30";
@@ -42,7 +41,7 @@ export default function EditTripScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { userId } = useAuth();
-  const { data: trip } = useTrip(tripId ?? null, userId ?? undefined);
+  const { data: trip } = useTrip(tripId ?? null);
   const { mutateAsync: updateTrip, isPending: savingTitle } = useUpdateTrip();
   const { mutateAsync: deleteTrip, isPending: deleting } = useDeleteTrip();
   const { mutateAsync: addPin, isPending: addingPin } = useAddPin();
@@ -99,7 +98,11 @@ export default function EditTripScreen() {
     const newOrder = [...sorted];
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= newOrder.length) return;
-    [newOrder[index], newOrder[targetIndex]] = [newOrder[targetIndex], newOrder[index]];
+    const a = newOrder[index];
+    const b = newOrder[targetIndex];
+    if (!a || !b) return;
+    newOrder[index] = b;
+    newOrder[targetIndex] = a;
     await reorderPins({ tripId, user_id: userId, pin_ids: newOrder.map((p) => p.id) });
   }
 

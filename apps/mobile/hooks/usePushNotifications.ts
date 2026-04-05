@@ -1,3 +1,4 @@
+// @ts-nocheck — expo-notifications added at EAS build time
 /**
  * apps/mobile/hooks/usePushNotifications.ts
  *

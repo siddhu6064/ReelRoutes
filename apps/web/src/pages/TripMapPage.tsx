@@ -37,9 +37,11 @@ function distKm(a: Pin, b: Pin) {
 
 /** Build Google Maps URL with all pins as waypoints */
 function googleMapsUrl(pins: Pin[]) {
-  if (!pins.length) return "#";
-  const origin = `${pins[0].lat},${pins[0].lng}`;
-  const dest = `${pins[pins.length - 1].lat},${pins[pins.length - 1].lng}`;
+  const first = pins[0];
+  const last = pins[pins.length - 1];
+  if (!first) return "#";
+  const origin = `${first.lat},${first.lng}`;
+  const dest = last ? `${last.lat},${last.lng}` : origin;
   const waypoints = pins.slice(1, -1).map((p) => `${p.lat},${p.lng}`).join("|");
   const base = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`;
   return waypoints ? `${base}&waypoints=${waypoints}` : base;
@@ -132,7 +134,7 @@ export default function TripMapPage() {
     let pins = sorted;
     if (cityFilter) {
       pins = pins.filter(p => {
-        const key = p.cityGroup ?? (p.city ? \`\${p.city}\${p.countryCode ? ", " + p.countryCode : ""}\` : "Other");
+        const key = p.cityGroup ?? (p.city ? `${p.city}${p.countryCode ? ", " + p.countryCode : ""}` : "Other");
         return key === cityFilter;
       });
     }
@@ -153,7 +155,7 @@ export default function TripMapPage() {
   // Total route distance
   const totalKm = useMemo(() => {
     if (sorted.length < 2) return 0;
-    return sorted.reduce((acc, pin, i) => i === 0 ? 0 : acc + distKm(sorted[i - 1], pin), 0);
+    return sorted.reduce((acc, pin, i) => { const prev = sorted[i - 1]; return i === 0 || !prev ? acc : acc + distKm(prev, pin); }, 0);
   }, [sorted]);
   const totalMins = Math.round((totalKm / 60) * 60); // ~60 km/h avg drive
 
@@ -383,9 +385,10 @@ export default function TripMapPage() {
                   </div>
                 );
               })
-            : visiblePins.map((pin, i) => (
-                <StopRow key={pin.id} pin={pin} index={i} active={activeIndex === sorted.indexOf(pin)} onClick={() => selectPin(pin, sorted.indexOf(pin))} />
-              ))
+            : visiblePins.map((pin, i) => {
+                const realIdx = sorted.indexOf(pin);
+                return <StopRow key={pin.id} pin={pin} index={i} active={activeIndex === realIdx} onClick={() => selectPin(pin, realIdx)} />;
+              })
           }
         </div>
       </aside>

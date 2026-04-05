@@ -1,6 +1,4 @@
 import type { Platform } from "./trip.js";
-import type { CreatePinInput } from "./pin.js";
-
 // ── Status enum ───────────────────────────────────────────────
 export const JOB_STATUSES = [
   "queued",
