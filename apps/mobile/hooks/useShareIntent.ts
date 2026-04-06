@@ -1,22 +1,27 @@
 /**
  * hooks/useShareIntent.ts
  *
- * Centralised share intent hook — wraps expo-share-intent's
- * useShareIntentContext() with:
- *  - URL extraction from any share format (web URL, plain text with URL, etc.)
- *  - Platform detection (YouTube / Instagram / TikTok / Facebook / X)
- *  - Source app name for the "Shared from Instagram" banner
- *  - Clean reset after import starts
+ * Unified share intent hook for iOS and Android.
  *
- * Usage in any screen:
- *   const { incomingUrl, sourceName, clearIntent } = useShareIntent();
+ * Handles three entry paths:
+ *   1. iOS Share Extension  — expo-share-intent via useShareIntentContext
+ *   2. Android ACTION_SEND  — expo-share-intent via useShareIntentContext
+ *   3. Android ACTION_VIEW  — Linking.getInitialURL() cold-start fallback
+ *      (when user taps "Open with ReelRoutes" on a link; expo-share-intent
+ *      doesn't always catch this, so we check Linking as a fallback)
+ *
+ * Returns a normalised result regardless of how the URL arrived.
  */
+
+import * as Linking from "expo-linking";
 import { useShareIntentContext } from "expo-share-intent";
+import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 
 export const SUPPORTED_PLATFORMS = [
   { label: "YouTube", pattern: /youtube\.com|youtu\.be/i },
   { label: "Instagram", pattern: /instagram\.com/i },
-  { label: "TikTok", pattern: /tiktok\.com/i },
+  { label: "TikTok", pattern: /tiktok\.com|vm\.tiktok\.com/i },
   { label: "Facebook", pattern: /facebook\.com|fb\.watch/i },
   { label: "X", pattern: /twitter\.com|x\.com/i },
 ] as const;
@@ -27,54 +32,105 @@ export function detectPlatform(url: string): PlatformLabel | null {
   return SUPPORTED_PLATFORMS.find((p) => p.pattern.test(url))?.label ?? null;
 }
 
-/** Extract the first https URL from a string (handles plain-text shares). */
+/** Extract the first https URL from a string. */
 function extractUrl(raw: string): string | null {
   const match = raw.match(/https?:\/\/[^\s"'<>]+/);
   return match ? match[0].trim() : null;
 }
 
+/** Check if a URL is a supported video platform URL. */
+function isSupportedVideoUrl(url: string): boolean {
+  return detectPlatform(url) !== null;
+}
+
 interface ShareIntentResult {
-  /** The clean URL extracted from the share, or null if nothing shared. */
+  /** Clean URL extracted from the share, or null if nothing shared. */
   incomingUrl: string | null;
-  /** Human-readable source app name, e.g. "Instagram" or "YouTube". */
+  /** Human-readable source name, e.g. "YouTube" or "Instagram". */
   sourceName: string | null;
-  /** Detected platform for the incoming URL. */
+  /** Detected platform for the URL. */
   platform: PlatformLabel | null;
   /** Whether a share intent is waiting to be handled. */
   hasIntent: boolean;
-  /** Call this after you've started processing to dismiss the intent. */
+  /** Call this after import starts to dismiss the intent. */
   clearIntent: () => void;
 }
 
 export function useShareIntent(): ShareIntentResult {
   const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntentContext();
 
-  if (!hasShareIntent || !shareIntent) {
+  // Android ACTION_VIEW fallback — cold-start with a video URL
+  const [linkingUrl, setLinkingUrl] = useState<string | null>(null);
+  const [linkingCleared, setLinkingCleared] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS !== "android" || linkingCleared) return;
+
+    // Check if the app was opened via a direct URL (ACTION_VIEW)
+    void Linking.getInitialURL().then((url) => {
+      if (url && isSupportedVideoUrl(url)) {
+        setLinkingUrl(url);
+      }
+    });
+
+    // Also listen for URLs while the app is already running (singleTask mode
+    // sends new intents to the foreground instance via onNewIntent)
+    const sub = Linking.addEventListener("url", ({ url }) => {
+      if (isSupportedVideoUrl(url)) {
+        setLinkingUrl(url);
+        setLinkingCleared(false);
+      }
+    });
+
+    return () => sub.remove();
+  }, [linkingCleared]);
+
+  // ── expo-share-intent result (iOS + Android ACTION_SEND) ──────────
+  if (hasShareIntent && shareIntent) {
+    const raw = shareIntent.webUrl ?? shareIntent.text ?? "";
+    const incomingUrl = extractUrl(raw);
+    const platform = incomingUrl ? detectPlatform(incomingUrl) : null;
+    const sourceName =
+      (shareIntent.meta as { title?: string } | undefined)?.title ?? platform ?? "another app";
+
     return {
-      incomingUrl: null,
-      sourceName: null,
-      platform: null,
-      hasIntent: false,
-      clearIntent: resetShareIntent,
+      incomingUrl,
+      sourceName,
+      platform,
+      hasIntent: true,
+      clearIntent: () => {
+        resetShareIntent();
+        setLinkingUrl(null);
+        setLinkingCleared(true);
+      },
     };
   }
 
-  // expo-share-intent surfaces the URL in webUrl for URL-type shares,
-  // and in text for plain-text shares (some apps share as text).
-  const raw = shareIntent.webUrl ?? shareIntent.text ?? "";
-  const incomingUrl = extractUrl(raw);
-  const platform = incomingUrl ? detectPlatform(incomingUrl) : null;
+  // ── Android ACTION_VIEW fallback (Linking) ────────────────────────
+  if (Platform.OS === "android" && linkingUrl && !linkingCleared) {
+    const platform = detectPlatform(linkingUrl);
+    return {
+      incomingUrl: linkingUrl,
+      sourceName: platform ?? "link",
+      platform,
+      hasIntent: true,
+      clearIntent: () => {
+        setLinkingUrl(null);
+        setLinkingCleared(true);
+      },
+    };
+  }
 
-  // Build a friendly source name from the meta title or fall back to
-  // the detected platform name.
-  const sourceName =
-    (shareIntent.meta as { title?: string } | undefined)?.title ?? platform ?? "another app";
-
+  // ── No intent ─────────────────────────────────────────────────────
   return {
-    incomingUrl,
-    sourceName,
-    platform,
-    hasIntent: true,
-    clearIntent: resetShareIntent,
+    incomingUrl: null,
+    sourceName: null,
+    platform: null,
+    hasIntent: false,
+    clearIntent: () => {
+      resetShareIntent();
+      setLinkingUrl(null);
+      setLinkingCleared(true);
+    },
   };
 }
