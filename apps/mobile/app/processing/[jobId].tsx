@@ -5,11 +5,13 @@
  * polling GET /api/jobs/:jobId every 3 seconds.
  * Redirects to trip map when completed.
  */
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useJobStatus } from "@/api/client";
+import { useAppStateReconnect } from "@/hooks/useAppStateReconnect";
 
 const CORAL = "#D85A30";
 const SURFACE = "#1a1a18";
@@ -30,7 +32,14 @@ export default function ProcessingScreen() {
   const { jobId } = useLocalSearchParams<{ jobId: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { data: status } = useJobStatus(jobId ?? null);
+  const { data: status, refetch } = useJobStatus(jobId ?? null);
+
+  // Reconnect/refresh when app returns from background (e.g. after sharing from YouTube)
+  useAppStateReconnect(() => {
+    if (status?.status !== "completed" && status?.status !== "failed") {
+      void refetch();
+    }
+  });
 
   // Redirect when complete
   useEffect(() => {
