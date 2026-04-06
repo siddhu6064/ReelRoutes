@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /explore
+Allow: /trips/
+
+Disallow: /api/
+Disallow: /sign-in
+Disallow: /sign-up
+
+Sitemap: https://reelroutes.app/sitemap.xml
