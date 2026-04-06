@@ -216,8 +216,14 @@ export default function TripMapPage() {
           scale: 16,
           fillColor: isFiltered ? "#555" : i === activeIndex ? ACTIVE : CORAL,
           fillOpacity: isFiltered ? 0.3 : 1,
-          strokeColor: "#fff",
-          strokeWeight: isFiltered ? 1 : 2,
+          // Open/closed indicator: green border = open, red = closed, white = unknown
+          strokeColor:
+            !isFiltered && pin.openNow === true
+              ? "#22c55e"
+              : !isFiltered && pin.openNow === false
+                ? "#ef4444"
+                : "#fff",
+          strokeWeight: isFiltered ? 1 : pin.openNow !== undefined ? 3 : 2,
         },
         title: pin.placeName,
         zIndex: isFiltered ? 1 : 10,

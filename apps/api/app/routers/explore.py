@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time as _time
 import uuid
 from copy import deepcopy
 from datetime import UTC, datetime
@@ -12,6 +13,13 @@ from app.models.documents import TripDocument
 from app.services.trip_service import TripService
 
 router = APIRouter(prefix="/api", tags=["explore"])
+
+# ── Simple in-process trending cache (5-minute TTL) ──────────────────
+# Trending is sorted by view/share count — expensive on large collections.
+# A short cache prevents hammering MongoDB on every page load.
+# In production with Redis available, swap for redis.set/get with EX=300.
+_trending_cache: dict = {"data": None, "at": 0.0}
+_TRENDING_TTL = 300.0  # 5 minutes
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
@@ -72,14 +80,22 @@ async def get_explore(
 async def get_trending(
     limit: int = Query(20, ge=1, le=50),
 ) -> dict:
-    """Public trips sorted by view_count + share_count over last 7 days."""
+    """Public trips sorted by view_count + share_count — cached for 5 minutes."""
+    now = _time.monotonic()
+    cached = _trending_cache.get("data")
+    if cached is not None and (now - _trending_cache["at"]) < _TRENDING_TTL:
+        return {"ok": True, "data": cached}
+
     trips = (
         await TripDocument.find({"is_public": True})
         .sort(["-view_count", "-share_count"])
         .limit(limit)
         .to_list()
     )
-    return {"ok": True, "data": {"trips": [_trip_card(t) for t in trips]}}
+    result = {"trips": [_trip_card(t) for t in trips]}
+    _trending_cache["data"] = result
+    _trending_cache["at"] = now
+    return {"ok": True, "data": result}
 
 
 @router.post("/trips/{trip_id}/view")

@@ -3,6 +3,9 @@
  * W5t4: Optimise route toast · W6t4: Day tabs · W7t5: Category chips
  * W8t2: AsyncStorage offline cache · W8t3: Offline banner · W8t4: Chat degradation
  */
+import { useAuth } from "@clerk/clerk-expo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -17,14 +20,12 @@ import {
   ToastAndroid,
   View,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "@clerk/clerk-expo";
+
 import { useTrip, useOptimiseRoute, type Pin, type Trip, type ItineraryDay } from "@/api/client";
-import { PinDetailSheet, type PinDetailSheetRef } from "@/components/PinDetailSheet";
 import ChatDrawer from "@/components/ChatDrawer";
+import { PinDetailSheet, type PinDetailSheetRef } from "@/components/PinDetailSheet";
 
 const CORAL = "#D85A30";
 const SURFACE = "#1a1a18";
@@ -370,14 +371,24 @@ export default function TripMapScreen() {
               title={pin.placeName}
               onPress={() => selectPin(pin, i)}
             >
-              <View
-                style={[
-                  styles.markerWrap,
-                  i === activeIndex && styles.markerWrapActive,
-                  dayColour ? { backgroundColor: dayColour } : undefined,
-                ]}
-              >
-                <Text style={styles.markerText}>{sorted.indexOf(pin) + 1}</Text>
+              <View style={styles.markerContainer}>
+                <View
+                  style={[
+                    styles.markerWrap,
+                    i === activeIndex && styles.markerWrapActive,
+                    dayColour ? { backgroundColor: dayColour } : undefined,
+                  ]}
+                >
+                  <Text style={styles.markerText}>{sorted.indexOf(pin) + 1}</Text>
+                </View>
+                {pin.openNow !== undefined && pin.openNow !== null && (
+                  <View
+                    style={[
+                      styles.openDot,
+                      { backgroundColor: pin.openNow ? "#22c55e" : "#ef4444" },
+                    ]}
+                  />
+                )}
               </View>
             </Marker>
           );
@@ -595,6 +606,20 @@ const styles = StyleSheet.create({
   },
   routeToggleText: { color: MUTED, fontSize: 11, fontWeight: "700" },
 
+  markerContainer: {
+    alignItems: "center",
+    position: "relative",
+  },
+  openDot: {
+    position: "absolute",
+    top: -3,
+    right: -3,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: "#fff",
+  },
   markerWrap: {
     width: 32,
     height: 32,
