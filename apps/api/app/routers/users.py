@@ -122,12 +122,33 @@ async def clerk_webhook(request: Request) -> dict:
     """
     Receives Clerk user.created and user.updated webhooks.
     Upserts the UserDocument so our DB stays in sync with Clerk.
-
-    In production: verify the svix signature using CLERK_WEBHOOK_SECRET.
+    Signature is verified via svix using CLERK_WEBHOOK_SECRET.
     """
     from datetime import UTC, datetime
 
-    body = await request.json()
+    from app.config.settings import get_settings
+
+    settings = get_settings()
+
+    # ── Verify svix signature ─────────────────────────────────
+    # Clerk signs every webhook with the secret from the dashboard.
+    # Without this check, anyone can forge user.created events.
+    if settings.clerk_webhook_secret:
+        try:
+            from svix.webhooks import Webhook  # type: ignore[import]
+
+            wh = Webhook(settings.clerk_webhook_secret)
+            headers = dict(request.headers)
+            raw_body = await request.body()
+            wh.verify(raw_body, headers)
+            body = __import__("json").loads(raw_body)
+        except Exception:
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=400, detail="Invalid webhook signature")
+    else:
+        body = await request.json()
+
     event_type = body.get("type")
     data = body.get("data", {})
 

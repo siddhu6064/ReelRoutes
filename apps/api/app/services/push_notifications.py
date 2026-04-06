@@ -76,6 +76,29 @@ async def send_import_failed(
     )
 
 
+async def send_trip_complete_notification(
+    user_id: str,
+    trip_title: str,
+    trip_id: str,
+    stop_count: int,
+) -> bool:
+    """
+    Notify the user they have visited all stops on a trip.
+    Triggered from GET /api/trips/:id/wrapped when visitRate == 1.0.
+    Returns True if notification was sent.
+    """
+    token = await _get_push_token(user_id)
+    if not token:
+        return False
+
+    return await _send(
+        token=token,
+        title="Trip complete! 🎉",
+        body=f"You visited all {stop_count} stops in {trip_title}. See your stats →",
+        data={"screen": "wrapped", "tripId": trip_id},
+    )
+
+
 async def register_push_token(user_id: str, token: str) -> None:
     """
     Store a push token on the user document.

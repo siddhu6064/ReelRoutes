@@ -4,7 +4,7 @@ app/routers/trips.py — with input validation (schemas.py) and auth guards (Tas
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
 from app.middleware.error_handler import AppError, ForbiddenError
@@ -345,3 +345,45 @@ async def chat_with_trip(trip_id: str, body: ChatRequest) -> dict:
         history=[{"role": m.role, "content": m.content} for m in body.history],
     )
     return {"ok": True, "data": {"reply": reply, "suggestionChips": SUGGESTION_CHIPS}}
+
+
+# ── Unresolved places — "Did we miss anything?" ───────────────
+
+
+@router.get("/{trip_id}/unresolved", summary="Places that could not be geocoded")
+async def get_unresolved_places(
+    trip_id: str,
+    user_id: str | None = Query(None),
+) -> dict:
+    """Return places the AI extracted but failed to geocode.
+
+    Surfaced in the UI as 'Did we miss anything?' so the user can
+    manually add any important stops that the geocoder couldn't resolve.
+    Data comes from JobDocument.unresolved_places set during geocoding.
+    """
+    from app.models.documents import JobDocument
+
+    trip = await TripService.get(trip_id, user_id=user_id)
+
+    unresolved: list[dict] = []
+    if trip.job_id:
+        job = await JobDocument.get(trip.job_id)
+        if job:
+            unresolved = [
+                {
+                    "place_name": p.get("place_name", p.get("name", "Unknown")),
+                    "context_quote": p.get("context_quote", ""),
+                    "confidence": p.get("confidence", 0.0),
+                }
+                for p in (job.unresolved_places or [])
+            ]
+
+    return {
+        "ok": True,
+        "data": {
+            "unresolved": unresolved,
+            "count": len(unresolved),
+            "hint": "These places were mentioned in the video but could not be mapped. "
+            "You can search for them and add them manually.",
+        },
+    }

@@ -39,6 +39,7 @@ structlog = "^24.4.0"
 
 # Utilities
 python-ulid = "^2.7.0"
+svix = "^1.0.0"  # Clerk webhook signature verification
 
 # Platform adapters
 yt-dlp = ">=2024.8.0"

@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Enforce Conventional Commits format:
 # type(optional-scope): description
 # e.g. feat(api): add trip extraction endpoint

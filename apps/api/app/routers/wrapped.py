@@ -12,6 +12,7 @@ from datetime import UTC
 
 from fastapi import APIRouter, Query
 
+from app.services.push_notifications import send_trip_complete_notification
 from app.services.trip_service import TripService
 
 router = APIRouter(prefix="/api/trips", tags=["wrapped"])
@@ -74,6 +75,15 @@ async def get_trip_wrapped(
 
     visit_rate = round(len(visited) / len(pins), 4) if pins else 0.0
     diary_count = sum(1 for p in pins if p.diary_entry)
+
+    # Fire push notification if all stops are now visited
+    if pins and len(visited) == len(pins) and user_id:
+        await send_trip_complete_notification(
+            user_id=user_id,
+            trip_title=trip.title,
+            trip_id=trip_id,
+            stop_count=len(pins),
+        )
 
     return {
         "ok": True,

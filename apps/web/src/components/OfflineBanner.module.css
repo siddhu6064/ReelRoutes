@@ -1,0 +1,21 @@
+.banner {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 1px solid #334155;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: #94a3b8;
+}

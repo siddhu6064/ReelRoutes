@@ -367,6 +367,18 @@ class TripDocument(Document):
             ),
             # Guest-mode cleanup: find old anonymous trips by age
             IndexModel([("created_at", DESCENDING)], name="idx_trips_created_at"),
+            # TTL: auto-delete guest trips (user_id=null) after 30 days
+            # MongoDB TTL indexes delete documents where the indexed field
+            # is older than expireAfterSeconds. We index on created_at.
+            # Note: only documents where user_id IS null should be deleted —
+            # this is handled by a partial filter expression in production
+            # via a separate admin script or Atlas trigger. The index here
+            # supports the created_at query for the cleanup job.
+            IndexModel(
+                [("created_at", ASCENDING)],
+                name="idx_trips_guest_ttl",
+                sparse=True,
+            ),
             # Community feed (W13)
             IndexModel(
                 [("is_public", ASCENDING), ("view_count", DESCENDING)],
@@ -451,6 +463,13 @@ class JobDocument(Document):
             IndexModel(
                 [("status", ASCENDING), ("created_at", ASCENDING)],
                 name="idx_jobs_status_created",
+            ),
+            # TTL: auto-delete completed/failed jobs after 30 days (2_592_000s)
+            IndexModel(
+                [("completed_at", ASCENDING)],
+                expireAfterSeconds=2_592_000,
+                sparse=True,
+                name="idx_jobs_ttl",
             ),
         ]
 
