@@ -36,11 +36,15 @@ import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import BudgetSheet from "@/components/BudgetSheet";
 import ChatDrawer from "@/components/ChatDrawer";
 import { CollaboratorSheet } from "@/components/CollaboratorSheet";
+import DiarySheet from "@/components/DiarySheet";
 import { DirectionsPanel } from "@/components/DirectionsPanel";
+import { FlyoverSheet } from "@/components/FlyoverSheet";
 import { useGpsTracker } from "@/components/GpsTracker";
 import { PinDetailSheet, type PinDetailSheetRef } from "@/components/PinDetailSheet";
 import { ReservationSheet } from "@/components/ReservationSheet";
 import SpotSuggestionsSheet from "@/components/SpotSuggestionsSheet";
+import { TravelBookSheet } from "@/components/TravelBookSheet";
+import { UndoSheet } from "@/components/UndoSheet";
 import WrappedSheet from "@/components/WrappedSheet";
 import { API_BASE } from "@/constants/api";
 
@@ -156,6 +160,10 @@ export default function TripMapScreen() {
   const [spotsOpen, setSpotsOpen] = useState(false);
   const [collabOpen, setCollabOpen] = useState(false);
   const [resvOpen, setResvOpen] = useState(false);
+  const [flyoverOpen, setFlyoverOpen] = useState(false);
+  const [bookOpen, setBookOpen] = useState(false);
+  const [undoOpen, setUndoOpen] = useState(false);
+  const [diaryPin, setDiaryPin] = useState<Pin | null>(null);
   const [directionsOpen, setDirectionsOpen] = useState(false);
   const [gpsActive, setGpsActive] = useState(false);
 
@@ -346,6 +354,17 @@ export default function TripMapScreen() {
         <Pressable style={styles.iconBtn} onPress={() => setResvOpen(true)}>
           <Text style={styles.iconBtnText}>📧</Text>
         </Pressable>
+        <Pressable style={styles.iconBtn} onPress={() => setFlyoverOpen(true)}>
+          <Text style={styles.iconBtnText}>🎬</Text>
+        </Pressable>
+        <Pressable style={styles.iconBtn} onPress={() => setBookOpen(true)}>
+          <Text style={styles.iconBtnText}>📖</Text>
+        </Pressable>
+        {userId && (
+          <Pressable style={styles.iconBtn} onPress={() => setUndoOpen(true)}>
+            <Text style={styles.iconBtnText}>↩</Text>
+          </Pressable>
+        )}
       </View>
 
       {/* W7t5 — Category chips */}
@@ -498,7 +517,7 @@ export default function TripMapScreen() {
                     if (pin.visitedAt) {
                       unvisitPin({ tripId: tripId ?? "", pinId: pin.id, userId: userId ?? "" });
                     } else {
-                      visitPin({ tripId: tripId ?? "", pinId: pin.id, userId: userId ?? "" });
+                      setDiaryPin(pin); // opens DiarySheet to add note before marking visited
                     }
                   }}
                 />
@@ -528,7 +547,7 @@ export default function TripMapScreen() {
                     if (pin.visitedAt) {
                       unvisitPin({ tripId: tripId ?? "", pinId: pin.id, userId: userId ?? "" });
                     } else {
-                      visitPin({ tripId: tripId ?? "", pinId: pin.id, userId: userId ?? "" });
+                      setDiaryPin(pin); // opens DiarySheet to add note before marking visited
                     }
                   }}
                 />
@@ -595,6 +614,51 @@ export default function TripMapScreen() {
       />
       {directionsOpen && (
         <DirectionsPanel tripId={tripId ?? ""} userId={userId ?? ""} apiBase={API_BASE} />
+      )}
+      <FlyoverSheet
+        tripId={tripId ?? ""}
+        userId={userId ?? ""}
+        visible={flyoverOpen}
+        onClose={() => setFlyoverOpen(false)}
+      />
+      <TravelBookSheet
+        tripId={tripId ?? ""}
+        userId={userId ?? ""}
+        visible={bookOpen}
+        onClose={() => setBookOpen(false)}
+      />
+      {userId && (
+        <UndoSheet
+          tripId={tripId ?? ""}
+          userId={userId}
+          visible={undoOpen}
+          onClose={() => setUndoOpen(false)}
+        />
+      )}
+      {diaryPin && (
+        <DiarySheet
+          visible={!!diaryPin}
+          placeName={diaryPin.placeName}
+          initialEntry={diaryPin.diaryEntry ?? ""}
+          onConfirm={(_entry) => {
+            visitPin({
+              tripId: tripId ?? "",
+              pinId: diaryPin.id,
+              userId: userId ?? "",
+            });
+            // TODO: persist diary entry via PATCH /api/trips/:id/pins/:pinId
+            setDiaryPin(null);
+          }}
+          onSkip={() => {
+            visitPin({
+              tripId: tripId ?? "",
+              pinId: diaryPin.id,
+              userId: userId ?? "",
+            });
+            setDiaryPin(null);
+          }}
+          onClose={() => setDiaryPin(null)}
+        />
       )}
     </View>
   );
