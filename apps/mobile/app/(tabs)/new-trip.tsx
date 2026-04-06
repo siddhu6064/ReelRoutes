@@ -13,6 +13,8 @@
  * When a share intent arrives, the URL auto-populates and import begins
  * automatically after 600ms (gives the user a moment to see it).
  */
+import { useAuth } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -24,11 +26,10 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useShareIntentContext } from "expo-share-intent";
-import { useAuth } from "@clerk/clerk-expo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useProcessVideo } from "@/api/client";
+import { useShareIntent, SUPPORTED_PLATFORMS, detectPlatform } from "@/hooks/useShareIntent";
 
 const CORAL = "#D85A30";
 const SURFACE = "#1a1a18";
@@ -38,49 +39,33 @@ const TEXT = "#f0ede8";
 const ERROR = "#e05252";
 const GREEN = "#4ade80";
 
-const SUPPORTED = [
-  { label: "YouTube", pattern: /youtube\.com|youtu\.be/ },
-  { label: "Instagram", pattern: /instagram\.com/ },
-  { label: "TikTok", pattern: /tiktok\.com/ },
-  { label: "Facebook", pattern: /facebook\.com|fb\.watch/ },
-  { label: "X / Twitter", pattern: /twitter\.com|x\.com/ },
-];
-
-function detectPlatform(url: string) {
-  return SUPPORTED.find((p) => p.pattern.test(url))?.label ?? null;
-}
+// Platform detection and SUPPORTED_PLATFORMS live in @/hooks/useShareIntent
 
 export default function NewTripScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { userId } = useAuth();
-  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntentContext();
+  const { incomingUrl, sourceName, hasIntent, clearIntent } = useShareIntent();
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [sharedFrom, setSharedFrom] = useState<string | null>(null);
   const { mutateAsync: processVideo, isPending } = useProcessVideo();
 
   // ── Handle incoming share intent (iOS Share Sheet + Android intent) ──
+  // useShareIntent extracts and normalises the URL from expo-share-intent.
+  // Auto-start fires 600ms after arrival so the user sees the populated field.
   useEffect(() => {
-    if (!hasShareIntent || !shareIntent) return;
+    if (!hasIntent || !incomingUrl) return;
 
-    const sharedUrl = shareIntent.webUrl ?? shareIntent.text ?? "";
+    setUrl(incomingUrl);
+    setSharedFrom(sourceName);
 
-    if (sharedUrl) {
-      const urlMatch = sharedUrl.match(/https?:\/\/[^\s]+/);
-      const extractedUrl = urlMatch ? urlMatch[0] : sharedUrl;
+    const timer = setTimeout(() => {
+      void handleImport(incomingUrl);
+    }, 600);
 
-      setUrl(extractedUrl.trim());
-      setSharedFrom(shareIntent.meta?.title ?? "shared app");
-
-      // Auto-start import after 600ms so user sees the populated field
-      const timer = setTimeout(() => {
-        handleImport(extractedUrl.trim());
-      }, 600);
-
-      return () => clearTimeout(timer);
-    }
-  }, [hasShareIntent, shareIntent]);
+    return () => clearTimeout(timer);
+  }, [hasIntent, incomingUrl]);
 
   const platform = url.trim() ? detectPlatform(url.trim()) : null;
 
@@ -97,7 +82,7 @@ export default function NewTripScreen() {
     setError("");
     try {
       const result = await processVideo({ url: trimmed, ...(userId ? { userId } : {}) });
-      resetShareIntent();
+      clearIntent();
       router.push(`/processing/${result.jobId}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
@@ -184,7 +169,7 @@ export default function NewTripScreen() {
 
         {/* Platform chips */}
         <View style={styles.platforms}>
-          {SUPPORTED.map((p) => (
+          {SUPPORTED_PLATFORMS.map((p) => (
             <View key={p.label} style={[styles.chip, platform === p.label && styles.chipActive]}>
               <Text style={[styles.chipText, platform === p.label && styles.chipTextActive]}>
                 {p.label}

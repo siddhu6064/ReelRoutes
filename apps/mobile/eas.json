@@ -7,22 +7,45 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "simulator": true
+        "simulator": true,
+        "resourceClass": "m-medium"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://localhost:8000"
       }
     },
     "preview": {
       "distribution": "internal",
+      "channel": "preview",
       "ios": {
-        "simulator": false
+        "simulator": false,
+        "resourceClass": "m-medium",
+        "capabilities": {
+          "App Groups": true
+        }
+      },
+      "android": {
+        "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.reelroutes.app"
+        "EXPO_PUBLIC_API_URL": "https://api.reelroutes.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_REPLACE_ME"
       }
     },
     "production": {
       "autoIncrement": true,
+      "channel": "production",
+      "ios": {
+        "resourceClass": "m-medium",
+        "capabilities": {
+          "App Groups": true,
+          "CarPlay": true,
+          "Background Modes": true
+        }
+      },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.reelroutes.app"
+        "EXPO_PUBLIC_API_URL": "https://api.reelroutes.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_REPLACE_ME"
       }
     }
   },

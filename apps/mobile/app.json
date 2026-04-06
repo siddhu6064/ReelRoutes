@@ -13,14 +13,22 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "app.reelroutes.mobile",
       "buildNumber": "1",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "ReelRoutes uses your location to show nearby places on your trip map.",
-        "NSCameraUsageDescription": "ReelRoutes uses your camera to scan QR codes for trip sharing."
+        "NSCameraUsageDescription": "ReelRoutes uses your camera to scan QR codes for trip sharing.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "ReelRoutes tracks your location in the background to auto-mark stops as visited and draw your travel breadcrumb trail.",
+        "NSLocationAlwaysUsageDescription": "ReelRoutes uses background location to auto-visit stops as you walk past them.",
+        "UIBackgroundModes": ["location", "fetch"]
       },
-      "appStoreUrl": "https://apps.apple.com/app/reelroutes/idXXXXXXXXXX"
+      "appStoreUrl": "https://apps.apple.com/app/reelroutes/idXXXXXXXXXX",
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.app.reelroutes.mobile"],
+        "com.apple.developer.carplay-maps": true,
+        "com.apple.developer.carplay-navigation": true
+      }
     },
     "android": {
       "package": "app.reelroutes.mobile",
@@ -33,11 +41,21 @@
         {
           "action": "android.intent.action.SEND",
           "autoVerify": true,
-          "data": [{ "mimeType": "text/plain" }],
+          "data": [
+            {
+              "mimeType": "text/plain"
+            }
+          ],
           "category": ["android.intent.category.DEFAULT"]
         }
       ],
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -47,17 +65,26 @@
         {
           "iosActivationRules": {
             "NSExtensionActivationSupportsWebURLWithMaxCount": 1,
-            "NSExtensionActivationSupportsWebPageWithMaxCount": 1
+            "NSExtensionActivationSupportsWebPageWithMaxCount": 1,
+            "NSExtensionActivationSupportsText": true
           },
+          "iosShareExtensionName": "ReelRoutes Share",
+          "iosAppGroupIdentifier": "group.app.reelroutes.mobile",
           "androidIntentFilters": ["text/*"],
-          "iosShareExtensionName": "ReelRoutes Share"
+          "androidMainActivityAttributes": {
+            "android:launchMode": "singleTask"
+          }
         }
       ],
       [
         "expo-build-properties",
         {
-          "android": { "usesCleartextTraffic": false },
-          "ios": { "deploymentTarget": "15.1" }
+          "android": {
+            "usesCleartextTraffic": false
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
         }
       ],
       [
@@ -68,6 +95,8 @@
       ]
     ],
     "scheme": "reelroutes",
-    "experiments": { "typedRoutes": true }
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }
