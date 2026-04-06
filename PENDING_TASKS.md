@@ -200,3 +200,109 @@ eas build --platform ios --profile preview
 eas build --platform android --profile preview
 # Install APK, test: YouTube → Share → ReelRoutes
 ```
+
+---
+
+## 🌐 Custom Domains — DNS Access Required
+
+**Blocked by:** DNS / domain registrar access
+**Code is:** ✅ complete — Railway and Vercel configs ready
+
+### Steps
+
+1. **API domain:** In Railway → Settings → Domains → add `api.reelroutes.app`
+   Then add CNAME in your DNS: `api.reelroutes.app → <railway-generated>.up.railway.app`
+2. **Web domain:** In Vercel → Settings → Domains → add `reelroutes.app` and `www.reelroutes.app`
+   Then add CNAME/A record in your DNS registrar
+
+---
+
+## 🏪 App Store Assets — Screenshots & Preview Video
+
+**Blocked by:** Working app build on a real device
+**Time needed:** ~2 hours
+
+### Steps
+
+1. Install the EAS preview build on an iPhone (via TestFlight)
+2. Record the share flow: YouTube → Share → ReelRoutes → pins drop on map
+3. Screenshot sequence (6.7" iPhone):
+   - Screenshot 1: Share sheet showing ReelRoutes option
+   - Screenshot 2: Processing screen with progress steps
+   - Screenshot 3: Trip map with pins
+   - Screenshot 4: Day-by-day itinerary
+   - Screenshot 5: Trip Wrapped stats card
+4. Create Google Play feature graphic (1024×500px) using Figma or Canva
+5. Confirm `icon.png` at 1024×1024 is in `apps/mobile/assets/`
+6. Upload screenshots to App Store Connect and Google Play Console
+
+---
+
+## 🏪 App Store Submission
+
+**Blocked by:** Assets + Apple/Google accounts + EAS production build
+**Depends on:** All items above
+
+### iOS
+
+```bash
+eas build --platform ios --profile production
+eas submit --platform ios
+```
+
+Fill App Store Connect from `apps/mobile/store-listings/en.md`
+Set Privacy labels: location (when in use), usage data
+
+### Android
+
+```bash
+eas build --platform android --profile production
+eas submit --platform android
+```
+
+Fill Google Play Console from `apps/mobile/store-listings/en.md`
+Upload all 5 language listings from `store-listings/*.md`
+Complete Data Safety form (location, background processing)
+
+---
+
+## 🗺 Open Now Badge on Map Pins
+
+**Blocked by:** Nothing — pure frontend work, can be done any time
+**Estimated time:** ~30 minutes
+
+### What it needs
+
+- `PinDocument.open_now: bool | null` is already stored from Google Places
+- In `apps/mobile/app/trip/[tripId].tsx` — add a small green/red dot
+  overlay on `<Marker>` when `pin.openNow !== null`
+- In `apps/web/src/components/TripMapPage` (or equivalent) — same badge on web markers
+- Design: small circle (8px), green = open, red = closed, grey = unknown
+
+---
+
+## 🔴 Redis Cache — Trending Feed
+
+**Blocked by:** Redis available in production (Railway plugin)
+**Estimated time:** ~20 minutes
+
+### What it needs
+
+Add a 5-minute in-memory cache to `GET /api/explore/trending`
+(Redis TTL cache is ideal in prod, but a simple `functools.lru_cache`
+with a timestamp works as a fallback for now):
+
+```python
+# In apps/api/app/routers/explore.py
+import time
+_trending_cache: dict = {"data": None, "at": 0.0}
+CACHE_TTL = 300  # 5 minutes
+
+async def get_trending(...):
+    now = time.monotonic()
+    if _trending_cache["data"] and now - _trending_cache["at"] < CACHE_TTL:
+        return {"ok": True, "data": _trending_cache["data"]}
+    # ... fetch from DB ...
+    _trending_cache.update({"data": result, "at": now})
+    return {"ok": True, "data": result}
+```
