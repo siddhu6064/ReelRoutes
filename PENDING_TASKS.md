@@ -118,3 +118,85 @@ shows "Open with…" chooser every time instead of routing directly.
 
 3. Deploy this file to the web server (Vercel — add to `apps/web/public/.well-known/`)
 4. Verify with: `adb shell pm get-app-links app.reelroutes.mobile`
+
+---
+
+## 🚂 Railway — API Deploy
+
+**Blocked by:** Railway account + all API keys ready  
+**Time needed:** ~15 minutes  
+**Code is:** ✅ complete — `Procfile`, `railway.toml`, `.env.example` all done
+
+### Steps
+
+```bash
+npm install -g @railway/cli
+railway login
+cd apps/api
+railway init          # create new project
+railway link          # link repo
+```
+
+1. In Railway dashboard → Service Settings → Source → **Root Directory**: `apps/api`
+2. Add Redis plugin: Railway dashboard → New → Database → Redis
+3. Paste all vars from `apps/api/.env.example` into Railway → Variables
+4. Add second Worker service with start command:
+   `poetry run arq app.workers.job_worker.WorkerSettings`
+5. Add custom domain: `api.reelroutes.app`
+6. Verify: `curl https://api.reelroutes.app/api/health` → 200 OK
+
+---
+
+## ▲ Vercel — Web Deploy
+
+**Blocked by:** Vercel account + Clerk live key + Railway API deployed first  
+**Time needed:** ~5 minutes  
+**Code is:** ✅ complete — `vercel.json`, `.env.example` done
+
+### Steps
+
+```bash
+npm install -g vercel
+cd apps/web
+vercel
+```
+
+Or: Vercel dashboard → New Project → Import from GitHub → Root Directory: `apps/web`
+
+Environment variables to add in Vercel dashboard:
+
+```
+VITE_API_URL=https://api.reelroutes.app
+VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+```
+
+Add custom domains: `reelroutes.app` and `www.reelroutes.app`
+
+---
+
+## 📱 EAS — Preview Build (real device)
+
+**Blocked by:** Apple Developer account + filled eas.json placeholders  
+**Time needed:** ~20 minutes (build takes ~10 min on EAS servers)  
+**Code is:** ✅ complete — `eas.json` profiles ready
+
+### Before running
+
+Fill in `apps/mobile/eas.json`:
+
+```json
+"appleId": "your@email.com"
+"ascAppId": "1234567890"
+"appleTeamId": "ABCDE12345"
+"EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_..."
+```
+
+### Commands
+
+```bash
+cd apps/mobile
+eas build --platform ios --profile preview
+# Install via TestFlight, test: YouTube → Share → ReelRoutes
+eas build --platform android --profile preview
+# Install APK, test: YouTube → Share → ReelRoutes
+```
