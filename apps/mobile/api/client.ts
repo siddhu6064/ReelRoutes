@@ -52,6 +52,8 @@ export interface Pin {
   openingHoursText?: string[];
   website?: string;
   phoneNumber?: string;
+  visitedAt?: string | null;
+  diaryEntry?: string | null;
 }
 
 export interface Trip {
@@ -495,5 +497,226 @@ export function useDeleteReservation() {
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: ["reservations", vars.tripId] });
     },
+  });
+}
+
+// ── Visit tracking ────────────────────────────────────────────────────
+
+export function useVisitPin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tripId, pinId, userId }: { tripId: string; pinId: string; userId: string }) =>
+      apiFetch<null>(`/api/trips/${tripId}/pins/${pinId}/visit?user_id=${userId}`, {
+        method: "POST",
+      }),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: ["trip", vars.tripId] });
+    },
+  });
+}
+
+export function useUnvisitPin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tripId, pinId, userId }: { tripId: string; pinId: string; userId: string }) =>
+      apiFetch<null>(`/api/trips/${tripId}/pins/${pinId}/unvisit?user_id=${userId}`, {
+        method: "POST",
+      }),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: ["trip", vars.tripId] });
+    },
+  });
+}
+
+// ── Trip Wrapped stats ────────────────────────────────────────────────
+
+export interface WrappedStats {
+  tripId: string;
+  title: string;
+  totalPins: number;
+  visitedPins: number;
+  visitRate: number;
+  diaryCount: number;
+  distanceKm: number;
+  daysActive: number;
+  topCategories: { category: string; count: number }[];
+  firstVisit: string | null;
+  lastVisit: string | null;
+}
+
+export function useWrapped(tripId: string | null, userId?: string) {
+  return useQuery({
+    queryKey: ["wrapped", tripId, userId],
+    queryFn: () =>
+      apiFetch<WrappedStats>(
+        `/api/trips/${tripId}/wrapped${userId ? `?user_id=${userId}` : ""}`,
+      ).then((r) => (r as unknown as { data: WrappedStats }).data),
+    enabled: !!tripId,
+  });
+}
+
+// ── Spot suggestions ──────────────────────────────────────────────────
+
+export interface SpotSuggestion {
+  place_name: string;
+  category: string;
+  reason: string;
+  lat: number;
+  lng: number;
+}
+
+export function useSuggestSpots() {
+  return useMutation({
+    mutationFn: ({ tripId, userId }: { tripId: string; userId: string }) =>
+      apiFetch<{ suggestions: SpotSuggestion[] }>(
+        `/api/trips/${tripId}/suggestions?user_id=${userId}`,
+      ),
+  });
+}
+
+export function useAddSuggestedPin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      userId,
+      suggestion,
+    }: {
+      tripId: string;
+      userId: string;
+      suggestion: SpotSuggestion;
+    }) =>
+      apiFetch<null>(`/api/trips/${tripId}/pins?user_id=${userId}`, {
+        method: "POST",
+        body: JSON.stringify({
+          place_name: suggestion.place_name,
+          lat: suggestion.lat,
+          lng: suggestion.lng,
+          category: suggestion.category,
+        }),
+      }),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: ["trip", vars.tripId] });
+    },
+  });
+}
+
+// ── Share trip ────────────────────────────────────────────────────────
+
+export function useShareTrip() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tripId, userId }: { tripId: string; userId: string }) =>
+      apiFetch<{ share_token: string }>(`/api/trips/${tripId}/share?user_id=${userId}`, {
+        method: "POST",
+      }),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: ["trip", vars.tripId] });
+    },
+  });
+}
+
+// ── Expenses ──────────────────────────────────────────────────────────
+
+export interface Expense {
+  id: string;
+  label: string;
+  amount: number;
+  currency: string;
+  category: string;
+  paid_by: string;
+  created_at: string;
+}
+
+export function useExpenses(tripId: string | null, userId?: string) {
+  return useQuery({
+    queryKey: ["expenses", tripId, userId],
+    queryFn: () =>
+      apiFetch<{ expenses: Expense[]; total: number; budget: number | null }>(
+        `/api/trips/${tripId}/expenses${userId ? `?user_id=${userId}` : ""}`,
+      ).then((r) => (r as unknown as { ok: boolean; data: unknown }).data as typeof r),
+    enabled: !!tripId,
+  });
+}
+
+export function useAddExpense() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      userId,
+      label,
+      amount,
+      currency,
+      category,
+    }: {
+      tripId: string;
+      userId: string;
+      label: string;
+      amount: number;
+      currency: string;
+      category: string;
+    }) =>
+      apiFetch<Expense>(`/api/trips/${tripId}/expenses?user_id=${userId}`, {
+        method: "POST",
+        body: JSON.stringify({ label, amount, currency, category, paid_by: userId }),
+      }),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
+    },
+  });
+}
+
+export function useDeleteExpense() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      userId,
+      expenseId,
+    }: {
+      tripId: string;
+      userId: string;
+      expenseId: string;
+    }) =>
+      apiFetch<null>(`/api/trips/${tripId}/expenses/${expenseId}?user_id=${userId}`, {
+        method: "DELETE",
+      }),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
+    },
+  });
+}
+
+export function useSetBudget() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ tripId, userId, budget }: { tripId: string; userId: string; budget: number }) =>
+      apiFetch<null>(`/api/trips/${tripId}/budget?user_id=${userId}`, {
+        method: "POST",
+        body: JSON.stringify({ budget }),
+      }),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
+    },
+  });
+}
+
+// ── Unresolved places ─────────────────────────────────────────────────
+
+export interface UnresolvedPlace {
+  place_name: string;
+  context_quote: string;
+  confidence: number;
+}
+
+export function useUnresolvedPlaces(tripId: string | null, userId?: string) {
+  return useQuery({
+    queryKey: ["unresolved", tripId],
+    queryFn: () =>
+      apiFetch<{ unresolved: UnresolvedPlace[]; count: number; hint: string }>(
+        `/api/trips/${tripId}/unresolved${userId ? `?user_id=${userId}` : ""}`,
+      ).then((r) => (r as unknown as { ok: boolean; data: unknown }).data as typeof r),
+    enabled: !!tripId,
   });
 }

@@ -23,9 +23,26 @@ import {
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useTrip, useOptimiseRoute, type Pin, type Trip, type ItineraryDay } from "@/api/client";
+import {
+  useTrip,
+  useOptimiseRoute,
+  useVisitPin,
+  useUnvisitPin,
+  type Pin,
+  type Trip,
+  type ItineraryDay,
+} from "@/api/client";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import BudgetSheet from "@/components/BudgetSheet";
 import ChatDrawer from "@/components/ChatDrawer";
+import { CollaboratorSheet } from "@/components/CollaboratorSheet";
+import { DirectionsPanel } from "@/components/DirectionsPanel";
+import { useGpsTracker } from "@/components/GpsTracker";
 import { PinDetailSheet, type PinDetailSheetRef } from "@/components/PinDetailSheet";
+import { ReservationSheet } from "@/components/ReservationSheet";
+import SpotSuggestionsSheet from "@/components/SpotSuggestionsSheet";
+import WrappedSheet from "@/components/WrappedSheet";
+import { API_BASE } from "@/constants/api";
 
 const CORAL = "#D85A30";
 const SURFACE = "#1a1a18";
@@ -114,6 +131,18 @@ export default function TripMapScreen() {
   const { userId } = useAuth();
   const { data: liveTrip, isLoading } = useTrip(tripId ?? null);
   const { mutateAsync: optimiseRoute, isPending: optimising } = useOptimiseRoute();
+  const { mutate: visitPin } = useVisitPin();
+  const { mutate: unvisitPin } = useUnvisitPin();
+
+  // GPS tracker — toggles on when user taps the GPS button
+  const { start: startGps, stop: stopGps } = useGpsTracker({
+    tripId: tripId ?? "",
+    userId: userId ?? "",
+    onAutoVisit: () => {
+      // Trigger refresh so auto-visited pins update on map immediately
+      void (trip as { refetch?: () => void })?.refetch?.();
+    },
+  });
 
   const [offlineTrip, setOfflineTrip] = useState<Trip | null>(null);
   const [isOnline, setIsOnline] = useState(true);
@@ -122,6 +151,13 @@ export default function TripMapScreen() {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [activeDay, setActiveDay] = useState<number | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
+  const [budgetOpen, setBudgetOpen] = useState(false);
+  const [wrappedOpen, setWrappedOpen] = useState(false);
+  const [spotsOpen, setSpotsOpen] = useState(false);
+  const [collabOpen, setCollabOpen] = useState(false);
+  const [resvOpen, setResvOpen] = useState(false);
+  const [directionsOpen, setDirectionsOpen] = useState(false);
+  const [gpsActive, setGpsActive] = useState(false);
 
   const mapRef = useRef<MapView>(null);
   const listRef = useRef<FlatList<Pin>>(null);
@@ -278,6 +314,38 @@ export default function TripMapScreen() {
         >
           <Text style={styles.iconBtnText}>💬</Text>
         </Pressable>
+        <Pressable
+          style={[styles.iconBtn, gpsActive && styles.iconBtnActive]}
+          onPress={() => {
+            if (gpsActive) {
+              stopGps();
+              setGpsActive(false);
+            } else {
+              void startGps();
+              setGpsActive(true);
+            }
+          }}
+        >
+          <Text style={styles.iconBtnText}>📍</Text>
+        </Pressable>
+        <Pressable style={styles.iconBtn} onPress={() => setDirectionsOpen((v) => !v)}>
+          <Text style={styles.iconBtnText}>🧭</Text>
+        </Pressable>
+        <Pressable style={styles.iconBtn} onPress={() => setSpotsOpen(true)}>
+          <Text style={styles.iconBtnText}>✨</Text>
+        </Pressable>
+        <Pressable style={styles.iconBtn} onPress={() => setBudgetOpen(true)}>
+          <Text style={styles.iconBtnText}>💰</Text>
+        </Pressable>
+        <Pressable style={styles.iconBtn} onPress={() => setWrappedOpen(true)}>
+          <Text style={styles.iconBtnText}>🎬</Text>
+        </Pressable>
+        <Pressable style={styles.iconBtn} onPress={() => setCollabOpen(true)}>
+          <Text style={styles.iconBtnText}>👥</Text>
+        </Pressable>
+        <Pressable style={styles.iconBtn} onPress={() => setResvOpen(true)}>
+          <Text style={styles.iconBtnText}>📧</Text>
+        </Pressable>
       </View>
 
       {/* W7t5 — Category chips */}
@@ -426,6 +494,13 @@ export default function TripMapScreen() {
                     ? { dayColour: pinDayColour.get(pin.id) as string }
                     : {})}
                   onPress={() => selectPin(pin, idx)}
+                  onVisitToggle={() => {
+                    if (pin.visitedAt) {
+                      unvisitPin({ tripId: tripId ?? "", pinId: pin.id, userId: userId ?? "" });
+                    } else {
+                      visitPin({ tripId: tripId ?? "", pinId: pin.id, userId: userId ?? "" });
+                    }
+                  }}
                 />
               );
             }}
@@ -449,6 +524,13 @@ export default function TripMapScreen() {
                     ? { dayColour: pinDayColour.get(pin.id) as string }
                     : {})}
                   onPress={() => selectPin(pin, idx)}
+                  onVisitToggle={() => {
+                    if (pin.visitedAt) {
+                      unvisitPin({ tripId: tripId ?? "", pinId: pin.id, userId: userId ?? "" });
+                    } else {
+                      visitPin({ tripId: tripId ?? "", pinId: pin.id, userId: userId ?? "" });
+                    }
+                  }}
                 />
               );
             }}
@@ -456,10 +538,63 @@ export default function TripMapScreen() {
         )}
       </View>
 
+      {/* GPS breadcrumb trail overlay on the map */}
+      {gpsActive && (
+        <BreadcrumbTrail tripId={tripId ?? ""} userId={userId ?? ""} apiBase={API_BASE} />
+      )}
+
       <PinDetailSheet ref={sheetRef} />
 
       {chatOpen && isOnline && (
         <ChatDrawer tripId={tripId ?? ""} onClose={() => setChatOpen(false)} />
+      )}
+
+      {/* Feature sheets — rendered as modals over the map */}
+      <BudgetSheet
+        tripId={tripId ?? ""}
+        userId={userId ?? ""}
+        visible={budgetOpen}
+        onClose={() => setBudgetOpen(false)}
+      />
+      <WrappedSheet
+        tripId={tripId ?? ""}
+        userId={userId ?? ""}
+        visible={wrappedOpen}
+        onClose={() => setWrappedOpen(false)}
+      />
+      <SpotSuggestionsSheet
+        tripId={tripId ?? ""}
+        userId={userId ?? ""}
+        visible={spotsOpen}
+        onClose={() => setSpotsOpen(false)}
+        onAddPin={async (spot) => {
+          await fetch(`${API_BASE}/api/trips/${tripId ?? ""}/pins?user_id=${userId ?? ""}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              place_name: spot.name,
+              lat: spot.lat,
+              lng: spot.lng,
+              category: spot.category,
+            }),
+          });
+        }}
+      />
+      <CollaboratorSheet
+        tripId={tripId ?? ""}
+        userId={userId ?? ""}
+        isOwner={trip?.userId === userId}
+        visible={collabOpen}
+        onClose={() => setCollabOpen(false)}
+      />
+      <ReservationSheet
+        tripId={tripId ?? ""}
+        userId={userId ?? ""}
+        visible={resvOpen}
+        onClose={() => setResvOpen(false)}
+      />
+      {directionsOpen && (
+        <DirectionsPanel tripId={tripId ?? ""} userId={userId ?? ""} apiBase={API_BASE} />
       )}
     </View>
   );
@@ -471,26 +606,34 @@ function StopCard({
   isActive,
   dayColour,
   onPress,
+  onVisitToggle,
 }: {
   pin: Pin;
   index: number;
   isActive: boolean;
   dayColour?: string;
   onPress: () => void;
+  onVisitToggle?: () => void;
 }) {
+  const visited = !!pin.visitedAt;
   return (
     <Pressable style={[styles.stopCard, isActive && styles.stopCardActive]} onPress={onPress}>
       <View
         style={[
           styles.stopNum,
           isActive && styles.stopNumActive,
+          visited && styles.stopNumVisited,
           dayColour ? { backgroundColor: dayColour, borderColor: dayColour } : undefined,
         ]}
       >
-        <Text style={styles.stopNumText}>{index + 1}</Text>
+        {visited ? (
+          <Text style={styles.stopNumText}>✓</Text>
+        ) : (
+          <Text style={styles.stopNumText}>{index + 1}</Text>
+        )}
       </View>
       <View style={styles.stopInfo}>
-        <Text style={styles.stopName} numberOfLines={1}>
+        <Text style={[styles.stopName, visited && styles.stopNameVisited]} numberOfLines={1}>
           {pin.placeName}
         </Text>
         <View style={styles.stopMeta}>
@@ -513,6 +656,18 @@ function StopCard({
           ) : null}
         </View>
       </View>
+      {onVisitToggle && (
+        <Pressable
+          style={[styles.visitBtn, visited && styles.visitBtnDone]}
+          onPress={(e) => {
+            e.stopPropagation?.();
+            onVisitToggle();
+          }}
+          hitSlop={8}
+        >
+          <Text style={styles.visitBtnText}>{visited ? "✓" : "○"}</Text>
+        </Pressable>
+      )}
     </Pressable>
   );
 }
@@ -655,6 +810,23 @@ const styles = StyleSheet.create({
   },
   sectionCount: { color: MUTED, fontSize: 10 },
 
+  visitBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: BORDER,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  visitBtnDone: {
+    borderColor: GREEN,
+    backgroundColor: GREEN + "22",
+  },
+  visitBtnText: { color: MUTED, fontSize: 13, fontWeight: "700" },
+  stopNumVisited: { backgroundColor: GREEN, borderColor: GREEN },
+  stopNameVisited: { color: MUTED, textDecorationLine: "line-through" },
   stopCard: {
     flexDirection: "row",
     alignItems: "center",

@@ -18,6 +18,7 @@ const MUTED = "#6b6b62";
 function TabIcon({ name, focused }: { name: string; focused: boolean }) {
   const icons: Record<string, string> = {
     index: "🗺",
+    explore: "🔭",
     "new-trip": "+",
     profile: "◉",
   };
@@ -65,6 +66,14 @@ export default function TabsLayout() {
           title: "My Trips",
           tabBarIcon: ({ focused }) => <TabIcon name="index" focused={focused} />,
           tabBarLabel: ({ focused }) => <TabLabel label="My Trips" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: "Explore",
+          tabBarIcon: ({ focused }) => <TabIcon name="explore" focused={focused} />,
+          tabBarLabel: ({ focused }) => <TabLabel label="Explore" focused={focused} />,
         }}
       />
       <Tabs.Screen
