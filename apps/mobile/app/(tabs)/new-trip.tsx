@@ -15,6 +15,7 @@
  */
 import { useAuth } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
+import { useRouter as usePlanRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -178,6 +179,21 @@ export default function NewTripScreen() {
           ))}
         </View>
 
+
+        {/* Plan from Scratch */}
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+        <Pressable
+          style={styles.planBtn}
+          onPress={() => router.push("/plan-wizard")}
+        >
+          <Text style={styles.planBtnText}>✨  Plan from scratch with AI</Text>
+          <Text style={styles.planBtnSub}>Tell us where you're going — AI builds the itinerary</Text>
+        </Pressable>
+
         {/* Native share tip */}
         <View style={styles.tipBox}>
           <Text style={styles.tipTitle}>💡 Use the native Share button</Text>
@@ -253,6 +269,20 @@ const styles = StyleSheet.create({
   chipText: { color: MUTED, fontSize: 12, fontWeight: "600" },
   chipTextActive: { color: CORAL },
 
+
+  divider: { flexDirection: "row", alignItems: "center", gap: 10 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: BORDER },
+  dividerText: { color: MUTED, fontSize: 12, fontWeight: "600" },
+  planBtn: {
+    backgroundColor: SURFACE,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#3a3a38",
+    padding: 18,
+    gap: 4,
+  },
+  planBtnText: { color: TEXT, fontWeight: "800", fontSize: 16 },
+  planBtnSub: { color: MUTED, fontSize: 13, lineHeight: 18 },
   tipBox: {
     backgroundColor: SURFACE,
     borderRadius: 12,

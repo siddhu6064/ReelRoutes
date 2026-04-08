@@ -266,6 +266,18 @@ class PinDocument(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
+    # Plan-from-Scratch fields (added in plan-from-scratch feature)
+    pin_type: str = "activity"           # "activity" | "food"
+    meal: str | None = None              # "breakfast" | "lunch" | "dinner"
+    famous_for: str | None = None
+    best_time: str | None = None
+    local_tip: str | None = None
+    opening_hours: str | None = None
+    website_url: str | None = None       # renamed from website to avoid collision
+    phone: str | None = None
+    price_level: int | None = None       # 0–4 (Google Places scale)
+    day: int | None = None               # 1-indexed day number in itinerary
+
 
 # ── Document: User ────────────────────────────────────────────
 
@@ -346,6 +358,15 @@ class TripDocument(Document):
 
     # Reservations (W16) — parsed from confirmation emails
     reservations: list[ReservationDocument] = Field(default_factory=list)
+
+
+    # Plan-from-Scratch fields (added in plan-from-scratch feature)
+    source: str = "video"               # "video" | "scratch"
+    starting_point: str | None = None
+    destination_text: str | None = None  # renamed to avoid conflict
+    trip_days: int | None = None         # requested number of days
+    travel_mode: str | None = None       # "driving" | "walking" | "transit" | "cycling"
+    trip_preferences: list[str] = Field(default_factory=list)  # ["food", "history", …]
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
