@@ -58,7 +58,7 @@ reelroutes/
 
 | Layer | Tech | Notes |
 | --- | --- | --- |
-| API | FastAPI + Uvicorn | Async, 898 tests, 79% coverage |
+| API | FastAPI + Uvicorn | Async, 990 tests · 83% coverage |
 | Database | MongoDB Atlas + Beanie ODM | Embedded pins, TTL indexes |
 | Job queue | ARQ + Redis | Async video processing pipeline |
 | AI | GPT-4o + Whisper | Extraction, planning, chat, suggestions |
@@ -215,7 +215,7 @@ Full reference: `apps/api/.env.example` and `apps/web/.env.example`
 ```bash
 cd apps/api
 poetry run pytest tests/ -q --tb=short --cov=app
-# 898 tests · 79% coverage
+# 990 tests · 83% coverage
 ```
 
 Test breakdown:
