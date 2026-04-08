@@ -29,6 +29,7 @@ Phase 4 improvements over the Phase 1 stub
 from __future__ import annotations
 
 import logging
+import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
@@ -158,20 +159,18 @@ class TripBuilderService:
             for stop in day_plan.activity_stops:
                 pins.append(
                     PinDocument(
-                        name=stop.name,
+                        id=str(uuid.uuid4()),
+                        place_name=stop.name,
                         lat=stop.lat,
                         lng=stop.lng,
-                        place_id=stop.place_id or "",
-                        address=stop.address or "",
+                        place_id=stop.place_id or None,
+                        address=stop.address or None,
                         day=day_plan.day,
                         order=order,
                         pin_type="activity",
-                        # GPT-4o / Places enrichment
-                        famous_for=stop.famous_for or "",
+                        famous_for=stop.famous_for or None,
                         best_time=stop.best_time,
                         local_tip=stop.local_tip,
-                        photo_url=stop.photo_url,
-                        # Phase 3 Places Details enrichment
                         opening_hours=getattr(stop, "opening_hours", None),
                         website=getattr(stop, "website", None),
                         phone=getattr(stop, "phone", None),
@@ -185,17 +184,17 @@ class TripBuilderService:
             for food in day_plan.food_stops:
                 pins.append(
                     PinDocument(
-                        name=food.name,
+                        id=str(uuid.uuid4()),
+                        place_name=food.name,
                         lat=food.lat,
                         lng=food.lng,
-                        place_id=food.place_id or "",
-                        address=food.address or "",
+                        place_id=food.place_id or None,
+                        address=food.address or None,
                         day=day_plan.day,
                         order=order,
                         pin_type="food",
                         meal=food.meal,
-                        famous_for=food.known_for or "",
-                        photo_url=getattr(food, "photo_url", None),
+                        famous_for=food.known_for or None,
                         rating=getattr(food, "rating", None),
                         price_level=getattr(food, "price_level", None),
                     )

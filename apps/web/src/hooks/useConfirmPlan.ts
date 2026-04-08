@@ -11,7 +11,7 @@ import type {
   TripPreference,
 } from '../types/scratchPlan'
 
-const API_BASE = (import.meta as Record<string, unknown> & { env?: Record<string, string> }).env?.VITE_API_URL ?? 'http://localhost:8000'
+const API_BASE = (import.meta.env as Record<string, string | undefined>)['VITE_API_URL'] ?? 'http://localhost:8000'
 
 async function postConfirmPlan(req: PlanConfirmRequest): Promise<PlanConfirmResponse> {
   const res = await fetch(`${API_BASE}/trips/plan/confirm`, {

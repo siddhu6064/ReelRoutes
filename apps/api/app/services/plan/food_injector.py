@@ -94,7 +94,7 @@ class FoodInjectorService:
         self._api_key = api_key
         self._http = http_client or httpx.AsyncClient(timeout=TIMEOUT_S)
 
-    async def inject(self, days: list[DayPlan], _destination: str) -> list[DayPlan]:
+    async def inject(self, days: list[DayPlan], destination: str) -> list[DayPlan]:  # noqa: ARG002
         day_semaphore = asyncio.Semaphore(MAX_CONCURRENT_DAYS)
         results = await asyncio.gather(
             *[self._inject_day(day, day_semaphore) for day in days],

@@ -5,6 +5,8 @@ All HTTP calls are mocked via httpx.MockTransport.
 
 from __future__ import annotations
 
+from urllib.parse import unquote
+
 import httpx
 import pytest
 import respx
@@ -156,4 +158,5 @@ class TestPlanGeocoderService:
         await service.aclose()
 
         assert len(captured_urls) == 1
-        assert "Cafe+Du+Monde" in captured_urls[0] or "Cafe Du Monde" in captured_urls[0]
+        decoded = unquote(captured_urls[0])
+        assert "Cafe Du Monde" in decoded

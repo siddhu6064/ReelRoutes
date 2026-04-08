@@ -5,7 +5,7 @@ import type { TripPreference } from '../../../types/scratchPlan'
 interface Props {
   onBack: () => void
   onGenerate: () => void
-  error?: string
+  error?: string | undefined
 }
 
 const PREFERENCES: Array<{ value: TripPreference; label: string; emoji: string; desc: string }> = [

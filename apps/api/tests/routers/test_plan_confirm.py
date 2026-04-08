@@ -93,7 +93,7 @@ def mock_builder_success(
 ):
     result = BuildResult(trip_id=trip_id, pin_count=pin_count, day_count=day_count)
     return patch(
-        "apps.api.routers.plan.TripBuilderService.build_from_plan",
+        "app.services.plan.trip_builder.TripBuilderService.build_from_plan",
         new=AsyncMock(return_value=result),
     )
 
@@ -235,7 +235,7 @@ class TestConfirmPlanPydanticValidation:
 class TestConfirmPlanBusinessErrors:
     def test_builder_validation_error_returns_409(self):
         with patch(
-            "apps.api.routers.plan.TripBuilderService.build_from_plan",
+            "app.services.plan.trip_builder.TripBuilderService.build_from_plan",
             new=AsyncMock(side_effect=TripBuildValidationError("No usable stops")),
         ):
             resp = client.post(CONFIRM_URL, json=confirm_body())
@@ -243,7 +243,7 @@ class TestConfirmPlanBusinessErrors:
 
     def test_409_body_contains_detail(self):
         with patch(
-            "apps.api.routers.plan.TripBuilderService.build_from_plan",
+            "app.services.plan.trip_builder.TripBuilderService.build_from_plan",
             new=AsyncMock(side_effect=TripBuildValidationError("No usable stops")),
         ):
             resp = client.post(CONFIRM_URL, json=confirm_body())
@@ -258,7 +258,7 @@ class TestConfirmPlanBusinessErrors:
 class TestConfirmPlanDatabaseErrors:
     def test_db_error_returns_503(self):
         with patch(
-            "apps.api.routers.plan.TripBuilderService.build_from_plan",
+            "app.services.plan.trip_builder.TripBuilderService.build_from_plan",
             new=AsyncMock(side_effect=TripBuildDatabaseError("Connection refused")),
         ):
             resp = client.post(CONFIRM_URL, json=confirm_body())
@@ -266,7 +266,7 @@ class TestConfirmPlanDatabaseErrors:
 
     def test_503_body_suggests_retry(self):
         with patch(
-            "apps.api.routers.plan.TripBuilderService.build_from_plan",
+            "app.services.plan.trip_builder.TripBuilderService.build_from_plan",
             new=AsyncMock(side_effect=TripBuildDatabaseError("Timeout")),
         ):
             resp = client.post(CONFIRM_URL, json=confirm_body())
@@ -281,7 +281,7 @@ class TestConfirmPlanDatabaseErrors:
 class TestConfirmPlanUnexpectedErrors:
     def test_unexpected_exception_returns_500(self):
         with patch(
-            "apps.api.routers.plan.TripBuilderService.build_from_plan",
+            "app.services.plan.trip_builder.TripBuilderService.build_from_plan",
             new=AsyncMock(side_effect=RuntimeError("Completely unexpected")),
         ):
             resp = client.post(CONFIRM_URL, json=confirm_body())

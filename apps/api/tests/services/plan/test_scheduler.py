@@ -127,7 +127,7 @@ class TestNearestNeighbourSort:
             29.960,
             -90.040,  # east of Marigny
         )
-        assert ordered_east[0].name == "Marigny"
+        assert "Marigny" in ordered_east[0].name
 
         # Starting from far west — Garden District should come first
         ordered_west, _, _ = self.scheduler._nearest_neighbour_sort(

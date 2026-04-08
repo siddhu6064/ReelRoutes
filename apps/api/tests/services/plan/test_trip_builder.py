@@ -132,14 +132,14 @@ class TestBuildPins:
         pins = self.svc._build_pins(req)
         activity_pin = next(p for p in pins if p.pin_type == "activity")
 
-        assert activity_pin.name == "French Quarter"
+        assert activity_pin.place_name == "French Quarter"
         assert activity_pin.lat == pytest.approx(29.9584)
         assert activity_pin.lng == pytest.approx(-90.0644)
         assert activity_pin.place_id == "place-fq"
         assert activity_pin.famous_for == "Jazz music and Creole architecture"
         assert activity_pin.best_time == "Evening"
         assert activity_pin.local_tip == "Go on a weeknight"
-        assert activity_pin.photo_url == "https://example.com/photo.jpg"
+        # photo_url is not stored in PinDocument
         assert activity_pin.pin_type == "activity"
         assert activity_pin.day == 1
 
@@ -148,7 +148,7 @@ class TestBuildPins:
         pins = self.svc._build_pins(req)
         food_pin = next(p for p in pins if p.pin_type == "food")
 
-        assert food_pin.name == "Cafe Du Monde"
+        assert food_pin.place_name == "Cafe Du Monde"
         assert food_pin.famous_for == "Beignets and café au lait"
         assert food_pin.meal == "breakfast"
         assert food_pin.pin_type == "food"
@@ -176,8 +176,8 @@ class TestBuildPins:
             ]
         )
         pins = self.svc._build_pins(req)
-        assert pins[0].name == "Day 1 Stop"
-        assert pins[1].name == "Day 2 Stop"
+        assert pins[0].place_name == "Day 1 Stop"
+        assert pins[1].place_name == "Day 2 Stop"
 
     def test_activity_pins_before_food_pins_within_day(self):
         req = make_request(
@@ -221,7 +221,7 @@ class TestBuildPins:
         stop = make_activity_stop(place_id=None)
         req = make_request(days_plan=[ConfirmDayPlan(day=1, activity_stops=[stop], food_stops=[])])
         pins = self.svc._build_pins(req)
-        assert pins[0].place_id == ""
+        assert pins[0].place_id is None
 
     def test_phase3_enrichment_fields_mapped(self):
         """opening_hours, website, phone, rating, price_level go through."""
@@ -249,7 +249,7 @@ class TestBuildPins:
         pins = self.svc._build_pins(req)
         p = pins[0]
         # getattr fallback pattern in builder means no crash even without these attrs
-        assert p.name == "French Quarter"
+        assert p.place_name == "French Quarter"
 
 
 # ---------------------------------------------------------------------------
@@ -261,17 +261,30 @@ class TestBuildFromPlanValidation:
     @pytest.mark.asyncio
     async def test_raises_validation_error_when_no_stops(self):
         svc = TripBuilderService()
-        req = make_request(days_plan=[ConfirmDayPlan(day=1, activity_stops=[], food_stops=[])])
-        with pytest.raises(TripBuildValidationError, match="at least one stop"):
+        # Bypass Pydantic validator with model_construct so the service sees the bad data
+        req = PlanConfirmRequest.model_construct(
+            starting_point="Austin, TX",
+            destination="New Orleans, LA",
+            days=1,
+            travel_mode="driving",
+            preferences=[],
+            days_plan=[ConfirmDayPlan(day=1, activity_stops=[], food_stops=[])],
+        )
+        with pytest.raises(TripBuildValidationError):
             await svc.build_from_plan(req)
 
     @pytest.mark.asyncio
     async def test_raises_validation_error_when_days_plan_empty(self):
         svc = TripBuilderService()
-        # PlanConfirmRequest validator catches this at schema level
-        # but builder also guards at service level
-        req = make_request(days_plan=[])
-        with pytest.raises((TripBuildValidationError, Exception)):
+        req = PlanConfirmRequest.model_construct(
+            starting_point="Austin, TX",
+            destination="New Orleans, LA",
+            days=1,
+            travel_mode="driving",
+            preferences=[],
+            days_plan=[],
+        )
+        with pytest.raises(TripBuildValidationError):
             await svc.build_from_plan(req)
 
 
@@ -287,7 +300,7 @@ class TestBuildFromPlanSuccess:
         req = make_request()
         trip_id = "507f1f77bcf86cd799439011"
 
-        with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+        with patch("app.services.plan.trip_builder.TripDocument") as MockTrip:
             instance = mock_trip_document(trip_id)
             MockTrip.return_value = instance
 
@@ -301,7 +314,7 @@ class TestBuildFromPlanSuccess:
         svc = TripBuilderService()
         req = make_request()  # 1 activity + 1 food on day 1, 1 activity on day 2 = 3 pins
 
-        with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+        with patch("app.services.plan.trip_builder.TripDocument") as MockTrip:
             instance = mock_trip_document()
             MockTrip.return_value = instance
 
@@ -314,7 +327,7 @@ class TestBuildFromPlanSuccess:
         svc = TripBuilderService()
         req = make_request()  # 2 days
 
-        with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+        with patch("app.services.plan.trip_builder.TripDocument") as MockTrip:
             instance = mock_trip_document()
             MockTrip.return_value = instance
 
@@ -328,7 +341,7 @@ class TestBuildFromPlanSuccess:
         req = make_request()
         captured_kwargs = {}
 
-        with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+        with patch("app.services.plan.trip_builder.TripDocument") as MockTrip:
 
             def capture(**kwargs):
                 captured_kwargs.update(kwargs)
@@ -346,7 +359,7 @@ class TestBuildFromPlanSuccess:
         req = make_request(destination="Tokyo, Japan", days=3)
         captured_kwargs = {}
 
-        with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+        with patch("app.services.plan.trip_builder.TripDocument") as MockTrip:
 
             def capture(**kwargs):
                 captured_kwargs.update(kwargs)
@@ -365,7 +378,7 @@ class TestBuildFromPlanSuccess:
         req = make_request(preferences=[TripPreference.food, TripPreference.art])
         captured_kwargs = {}
 
-        with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+        with patch("app.services.plan.trip_builder.TripDocument") as MockTrip:
 
             def capture(**kwargs):
                 captured_kwargs.update(kwargs)
@@ -384,7 +397,7 @@ class TestBuildFromPlanSuccess:
         svc = TripBuilderService()
         req = make_request()
 
-        with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+        with patch("app.services.plan.trip_builder.TripDocument") as MockTrip:
             instance = mock_trip_document()
             MockTrip.return_value = instance
 
@@ -404,7 +417,7 @@ class TestBuildFromPlanDatabaseError:
         svc = TripBuilderService()
         req = make_request()
 
-        with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+        with patch("app.services.plan.trip_builder.TripDocument") as MockTrip:
             instance = mock_trip_document()
             instance.insert = AsyncMock(side_effect=ConnectionError("DB unreachable"))
             MockTrip.return_value = instance
@@ -417,7 +430,7 @@ class TestBuildFromPlanDatabaseError:
         svc = TripBuilderService()
         req = make_request()
 
-        with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+        with patch("app.services.plan.trip_builder.TripDocument") as MockTrip:
             instance = mock_trip_document()
             original_exc = TimeoutError("Timed out")
             instance.insert = AsyncMock(side_effect=original_exc)

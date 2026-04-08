@@ -174,9 +174,10 @@ class TestCoordKey:
         assert key == "29.958,-90.064"
 
     def test_same_rounded_coords_produce_same_key(self):
+        # 29.9584 and 29.9583 both round to 29.958 at 3dp
         k1 = FoodInjectorService._coord_key(29.9584, -90.0644)
-        k2 = FoodInjectorService._coord_key(29.9585, -90.0644)
-        assert k1 == k2  # round to 3 dp → same
+        k2 = FoodInjectorService._coord_key(29.9583, -90.0644)
+        assert k1 == k2  # both round to 29.958,-90.064
 
 
 # ---------------------------------------------------------------------------
