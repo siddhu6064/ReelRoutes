@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 
 import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
-
 const STAGES = [
   { pct: 15, label: 'Asking AI for the best spots…' },
   { pct: 35, label: 'Geocoding locations…' },

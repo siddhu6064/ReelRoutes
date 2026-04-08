@@ -115,7 +115,7 @@ export default function PlanWizardScreen() {
           <StepPreferences
             onBack={() => setStep('days')}
             onGenerate={handleGenerate}
-            error={planError?.message}
+            {...(planError?.message !== undefined && { error: planError.message })}
           />
         )}
         {step === 'loading' && <StepLoading />}

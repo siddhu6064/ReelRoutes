@@ -1,5 +1,4 @@
 import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
-
 interface Props {
   onBack: () => void
   onNext: () => void

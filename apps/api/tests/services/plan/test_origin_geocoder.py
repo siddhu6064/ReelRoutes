@@ -30,9 +30,7 @@ class TestOriginGeocoderService:
     @pytest.mark.asyncio
     @respx.mock
     async def test_resolve_returns_lat_lng(self):
-        respx.get(PLACES_URL).mock(
-            return_value=httpx.Response(200, json=places_response())
-        )
+        respx.get(PLACES_URL).mock(return_value=httpx.Response(200, json=places_response()))
         service = OriginGeocoderService(api_key="test-key")
         result = await service.resolve("Austin, TX")
         await service.aclose()
@@ -88,9 +86,7 @@ class TestOriginGeocoderService:
             "results": [{"name": "Austin", "geometry": {"location": {}}}],
             "status": "OK",
         }
-        respx.get(PLACES_URL).mock(
-            return_value=httpx.Response(200, json=bad_response)
-        )
+        respx.get(PLACES_URL).mock(return_value=httpx.Response(200, json=bad_response))
         service = OriginGeocoderService(api_key="test-key")
         result = await service.resolve("Austin, TX")
         await service.aclose()

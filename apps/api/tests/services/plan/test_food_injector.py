@@ -37,10 +37,14 @@ NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 def make_stop(name: str, lat: float, lng: float) -> ActivityStop:
     return ActivityStop(
-        name=name, lat=lat, lng=lng,
-        place_id=f"id-{name}", address=f"{name} St",
+        name=name,
+        lat=lat,
+        lng=lng,
+        place_id=f"id-{name}",
+        address=f"{name} St",
         famous_for=f"{name} is great",
     )
 
@@ -78,6 +82,7 @@ STOPS_2 = [make_stop("X", 29.958, -90.064), make_stop("Y", 29.930, -90.086)]
 # ---------------------------------------------------------------------------
 # Unit tests: _build_meal_anchors
 # ---------------------------------------------------------------------------
+
 
 class TestBuildMealAnchors:
     def setup_method(self):
@@ -130,6 +135,7 @@ class TestBuildMealAnchors:
 # Unit tests: _deduplicate_anchors
 # ---------------------------------------------------------------------------
 
+
 class TestDeduplicateAnchors:
     def setup_method(self):
         self.svc = FoodInjectorService(api_key="test-key")
@@ -137,8 +143,8 @@ class TestDeduplicateAnchors:
     def test_deduplicates_identical_coords(self):
         anchors = [
             MealAnchor(meal="breakfast", lat=1.0, lng=2.0, anchor_key="1.0,2.0"),
-            MealAnchor(meal="lunch",     lat=1.0, lng=2.0, anchor_key="1.0,2.0"),
-            MealAnchor(meal="dinner",    lat=3.0, lng=4.0, anchor_key="3.0,4.0"),
+            MealAnchor(meal="lunch", lat=1.0, lng=2.0, anchor_key="1.0,2.0"),
+            MealAnchor(meal="dinner", lat=3.0, lng=4.0, anchor_key="3.0,4.0"),
         ]
         unique = self.svc._deduplicate_anchors(anchors)
         assert len(unique) == 2
@@ -146,8 +152,8 @@ class TestDeduplicateAnchors:
     def test_keeps_all_distinct_coords(self):
         anchors = [
             MealAnchor(meal="breakfast", lat=1.0, lng=2.0, anchor_key="1.0,2.0"),
-            MealAnchor(meal="lunch",     lat=3.0, lng=4.0, anchor_key="3.0,4.0"),
-            MealAnchor(meal="dinner",    lat=5.0, lng=6.0, anchor_key="5.0,6.0"),
+            MealAnchor(meal="lunch", lat=3.0, lng=4.0, anchor_key="3.0,4.0"),
+            MealAnchor(meal="dinner", lat=5.0, lng=6.0, anchor_key="5.0,6.0"),
         ]
         unique = self.svc._deduplicate_anchors(anchors)
         assert len(unique) == 3
@@ -155,7 +161,7 @@ class TestDeduplicateAnchors:
     def test_preserves_first_occurrence(self):
         anchors = [
             MealAnchor(meal="breakfast", lat=1.0, lng=2.0, anchor_key="1.0,2.0"),
-            MealAnchor(meal="lunch",     lat=1.0, lng=2.0, anchor_key="1.0,2.0"),
+            MealAnchor(meal="lunch", lat=1.0, lng=2.0, anchor_key="1.0,2.0"),
         ]
         unique = self.svc._deduplicate_anchors(anchors)
         assert unique[0].meal == "breakfast"
@@ -165,6 +171,7 @@ class TestDeduplicateAnchors:
 # Unit tests: _coord_key
 # ---------------------------------------------------------------------------
 
+
 class TestCoordKey:
     def test_rounds_to_3_decimal_places(self):
         key = FoodInjectorService._coord_key(29.95849, -90.06441)
@@ -173,12 +180,13 @@ class TestCoordKey:
     def test_same_rounded_coords_produce_same_key(self):
         k1 = FoodInjectorService._coord_key(29.9584, -90.0644)
         k2 = FoodInjectorService._coord_key(29.9585, -90.0644)
-        assert k1 == k2   # round to 3 dp → same
+        assert k1 == k2  # round to 3 dp → same
 
 
 # ---------------------------------------------------------------------------
 # Unit tests: _interleave
 # ---------------------------------------------------------------------------
+
 
 class TestInterleave:
     def setup_method(self):
@@ -197,13 +205,13 @@ class TestInterleave:
         result = self.svc._interleave(stops, food)
         types = [s.type if isinstance(s, ActivityStop) else s.type for s in result]
         # breakfast, activity, activity, lunch, activity, activity, dinner
-        assert result[0].type == "food"   # breakfast
+        assert result[0].type == "food"  # breakfast
         assert result[-1].type == "food"  # dinner
         food_indices = [i for i, s in enumerate(result) if s.type == "food"]
         assert len(food_indices) == 3
 
     def test_lunch_is_between_morning_and_afternoon_stops(self):
-        stops = STOPS_4   # 4 stops, split=2
+        stops = STOPS_4  # 4 stops, split=2
         food = {"lunch": self._make_food("lunch")}
         result = self.svc._interleave(stops, food)
         lunch_idx = next(i for i, s in enumerate(result) if s.type == "food")
@@ -232,6 +240,7 @@ class TestInterleave:
 # ---------------------------------------------------------------------------
 # Unit tests: _to_restaurant_option
 # ---------------------------------------------------------------------------
+
 
 class TestToRestaurantOption:
     def setup_method(self):
@@ -291,6 +300,7 @@ class TestToRestaurantOption:
 # Integration tests: _search_nearby Places API params
 # ---------------------------------------------------------------------------
 
+
 class TestSearchNearbyParams:
     @pytest.mark.asyncio
     @respx.mock
@@ -343,6 +353,7 @@ class TestSearchNearbyParams:
 # Integration tests: _fetch_with_fallback radius expansion
 # ---------------------------------------------------------------------------
 
+
 class TestFetchWithFallback:
     @pytest.mark.asyncio
     @respx.mock
@@ -382,7 +393,7 @@ class TestFetchWithFallback:
         result = await svc._fetch_with_fallback(29.95, -90.06, "lunch", semaphore)
         await svc.aclose()
 
-        assert call_count == 2   # initial + one expansion
+        assert call_count == 2  # initial + one expansion
         assert len(result.options) == 2
 
     @pytest.mark.asyncio
@@ -401,6 +412,7 @@ class TestFetchWithFallback:
 # ---------------------------------------------------------------------------
 # Integration tests: full inject
 # ---------------------------------------------------------------------------
+
 
 class TestInjectFull:
     @pytest.mark.asyncio

@@ -7,7 +7,6 @@ import StepDays from './steps/StepDays'
 import StepLoading from './steps/StepLoading'
 import StepOrigin from './steps/StepOrigin'
 import StepPreferences from './steps/StepPreferences'
-
 /**
  * PlanFromScratch
  * ---------------

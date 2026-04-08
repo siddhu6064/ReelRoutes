@@ -38,6 +38,7 @@ from app.services.plan.trip_builder import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 def make_activity_stop(**kwargs) -> ConfirmActivityStop:
     defaults = dict(
         name="French Quarter",
@@ -104,6 +105,7 @@ def mock_trip_document(trip_id: str = "507f1f77bcf86cd799439011"):
 # Tests: _build_title
 # ---------------------------------------------------------------------------
 
+
 class TestBuildTitle:
     def setup_method(self):
         self.svc = TripBuilderService()
@@ -120,6 +122,7 @@ class TestBuildTitle:
 # ---------------------------------------------------------------------------
 # Tests: _build_pins
 # ---------------------------------------------------------------------------
+
 
 class TestBuildPins:
     def setup_method(self):
@@ -217,9 +220,7 @@ class TestBuildPins:
 
     def test_missing_place_id_stored_as_empty_string(self):
         stop = make_activity_stop(place_id=None)
-        req = make_request(
-            days_plan=[ConfirmDayPlan(day=1, activity_stops=[stop], food_stops=[])]
-        )
+        req = make_request(days_plan=[ConfirmDayPlan(day=1, activity_stops=[stop], food_stops=[])])
         pins = self.svc._build_pins(req)
         assert pins[0].place_id == ""
 
@@ -256,15 +257,12 @@ class TestBuildPins:
 # Tests: build_from_plan — validation errors
 # ---------------------------------------------------------------------------
 
+
 class TestBuildFromPlanValidation:
     @pytest.mark.asyncio
     async def test_raises_validation_error_when_no_stops(self):
         svc = TripBuilderService()
-        req = make_request(
-            days_plan=[
-                ConfirmDayPlan(day=1, activity_stops=[], food_stops=[])
-            ]
-        )
+        req = make_request(days_plan=[ConfirmDayPlan(day=1, activity_stops=[], food_stops=[])])
         with pytest.raises(TripBuildValidationError, match="at least one stop"):
             await svc.build_from_plan(req)
 
@@ -281,6 +279,7 @@ class TestBuildFromPlanValidation:
 # ---------------------------------------------------------------------------
 # Tests: build_from_plan — successful insert
 # ---------------------------------------------------------------------------
+
 
 class TestBuildFromPlanSuccess:
     @pytest.mark.asyncio
@@ -301,7 +300,7 @@ class TestBuildFromPlanSuccess:
     @pytest.mark.asyncio
     async def test_result_pin_count_correct(self):
         svc = TripBuilderService()
-        req = make_request()   # 1 activity + 1 food on day 1, 1 activity on day 2 = 3 pins
+        req = make_request()  # 1 activity + 1 food on day 1, 1 activity on day 2 = 3 pins
 
         with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
             instance = mock_trip_document()
@@ -314,7 +313,7 @@ class TestBuildFromPlanSuccess:
     @pytest.mark.asyncio
     async def test_result_day_count_correct(self):
         svc = TripBuilderService()
-        req = make_request()   # 2 days
+        req = make_request()  # 2 days
 
         with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
             instance = mock_trip_document()
@@ -331,9 +330,11 @@ class TestBuildFromPlanSuccess:
         captured_kwargs = {}
 
         with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+
             def capture(**kwargs):
                 captured_kwargs.update(kwargs)
                 return mock_trip_document()
+
             MockTrip.side_effect = capture
 
             await svc.build_from_plan(req)
@@ -347,9 +348,11 @@ class TestBuildFromPlanSuccess:
         captured_kwargs = {}
 
         with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+
             def capture(**kwargs):
                 captured_kwargs.update(kwargs)
                 return mock_trip_document()
+
             MockTrip.side_effect = capture
 
             await svc.build_from_plan(req)
@@ -364,9 +367,11 @@ class TestBuildFromPlanSuccess:
         captured_kwargs = {}
 
         with patch("apps.api.services.trip_builder.TripDocument") as MockTrip:
+
             def capture(**kwargs):
                 captured_kwargs.update(kwargs)
                 return mock_trip_document()
+
             MockTrip.side_effect = capture
 
             await svc.build_from_plan(req)
@@ -392,6 +397,7 @@ class TestBuildFromPlanSuccess:
 # ---------------------------------------------------------------------------
 # Tests: build_from_plan — database error
 # ---------------------------------------------------------------------------
+
 
 class TestBuildFromPlanDatabaseError:
     @pytest.mark.asyncio

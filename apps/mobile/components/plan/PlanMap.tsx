@@ -26,7 +26,6 @@ export default function PlanMap({ style }: Props) {
   const mapRef        = useRef<MapView>(null)
   const activityPins  = useScratchPlanStore(selectAllActivityPins)
   const foodPins      = useScratchPlanStore(selectChosenFoodPins)
-  const destination   = useScratchPlanStore((s) => s.destination)
 
   const allPins = [
     ...activityPins.map((p) => ({ lat: p.lat, lng: p.lng })),

@@ -57,14 +57,14 @@ MealSlot = Literal["breakfast", "lunch", "dinner"]
 
 MEAL_KEYWORDS: dict[str, str] = {
     "breakfast": "breakfast brunch cafe",
-    "lunch":     "lunch bistro casual dining",
-    "dinner":    "dinner restaurant fine dining",
+    "lunch": "lunch bistro casual dining",
+    "dinner": "dinner restaurant fine dining",
 }
 
 MEAL_TYPES: dict[str, str] = {
     "breakfast": "cafe",
-    "lunch":     "restaurant",
-    "dinner":    "restaurant",
+    "lunch": "restaurant",
+    "dinner": "restaurant",
 }
 
 
@@ -139,7 +139,9 @@ class FoodInjectorService:
                 if isinstance(result, FoodStop):
                     food_by_key[key] = result
                 else:
-                    logger.warning("Day %d food fetch failed for key '%s': %s", day.day, key, result)
+                    logger.warning(
+                        "Day %d food fetch failed for key '%s': %s", day.day, key, result
+                    )
 
             food_stops: dict[MealSlot, FoodStop] = {}
             for anchor in anchors:
@@ -159,10 +161,14 @@ class FoodInjectorService:
 
         # Breakfast: first stop
         b_lat, b_lng = stops[0].lat, stops[0].lng
-        anchors.append(MealAnchor(
-            meal="breakfast", lat=b_lat, lng=b_lng,
-            anchor_key=self._coord_key(b_lat, b_lng),
-        ))
+        anchors.append(
+            MealAnchor(
+                meal="breakfast",
+                lat=b_lat,
+                lng=b_lng,
+                anchor_key=self._coord_key(b_lat, b_lng),
+            )
+        )
 
         # Lunch: true geographic midpoint between morning/afternoon split
         split = max(1, n // 2)
@@ -171,17 +177,25 @@ class FoodInjectorService:
             l_lng = (stops[split - 1].lng + stops[split].lng) / 2
         else:
             l_lat, l_lng = stops[split - 1].lat, stops[split - 1].lng
-        anchors.append(MealAnchor(
-            meal="lunch", lat=l_lat, lng=l_lng,
-            anchor_key=self._coord_key(l_lat, l_lng),
-        ))
+        anchors.append(
+            MealAnchor(
+                meal="lunch",
+                lat=l_lat,
+                lng=l_lng,
+                anchor_key=self._coord_key(l_lat, l_lng),
+            )
+        )
 
         # Dinner: last stop
         d_lat, d_lng = stops[-1].lat, stops[-1].lng
-        anchors.append(MealAnchor(
-            meal="dinner", lat=d_lat, lng=d_lng,
-            anchor_key=self._coord_key(d_lat, d_lng),
-        ))
+        anchors.append(
+            MealAnchor(
+                meal="dinner",
+                lat=d_lat,
+                lng=d_lng,
+                anchor_key=self._coord_key(d_lat, d_lng),
+            )
+        )
 
         return anchors
 
@@ -218,17 +232,27 @@ class FoodInjectorService:
                 radius = min(radius * RADIUS_EXPANSION_FACTOR, MAX_RADIUS_M)
                 logger.info(
                     "Expanding food search to %dm for %s at (%.4f, %.4f)",
-                    radius, meal, lat, lng,
+                    radius,
+                    meal,
+                    lat,
+                    lng,
                 )
 
         logger.warning(
             "Only %d result(s) for %s at (%.4f, %.4f) after expansion",
-            len(last_options), meal, lat, lng,
+            len(last_options),
+            meal,
+            lat,
+            lng,
         )
         return FoodStop(meal=meal, options=last_options[:MAX_FOOD_OPTIONS])
 
     async def _search_nearby(
-        self, lat: float, lng: float, meal: MealSlot, radius: int,
+        self,
+        lat: float,
+        lng: float,
+        meal: MealSlot,
+        radius: int,
         semaphore: asyncio.Semaphore,
     ) -> list[RestaurantOption]:
         """

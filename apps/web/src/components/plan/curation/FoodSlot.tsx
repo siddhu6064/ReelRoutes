@@ -1,6 +1,5 @@
-import RestaurantCard from './RestaurantCard'
 import type { CuratedFoodChoice, FoodStop, MealSlot, RestaurantOption } from '../../../types/scratchPlan'
-
+import RestaurantCard from './RestaurantCard'
 interface Props {
   slot: FoodStop
   choice: CuratedFoodChoice | undefined

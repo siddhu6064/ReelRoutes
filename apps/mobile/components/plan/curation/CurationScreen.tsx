@@ -13,7 +13,7 @@ import DraggableFlatList, {
   ScaleDecorator,
 } from 'react-native-draggable-flatlist'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { useNavigation } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
 import {
   useScratchPlanStore,
   selectTotalStops,
@@ -27,7 +27,7 @@ import type { ActivityStop, CuratedDay, MealSlot, RestaurantOption } from '@/typ
 import { Colors, Spacing, Radius, FontSize, FontWeight } from '../tokens'
 
 export default function CurationScreen() {
-  const navigation = useNavigation<any>()
+  const router = useRouter()
 
   // Zustand
   const curatedDays      = useScratchPlanStore((s) => s.curatedDays)
@@ -98,7 +98,7 @@ export default function CurationScreen() {
           style: 'destructive',
           onPress: () => {
             reset()
-            navigation.goBack()
+            router.back()
           },
         },
       ]
@@ -240,7 +240,7 @@ function DaySectionContent({
   onSkipFood,
 }: DaySectionProps) {
   const renderItem = useCallback(
-    ({ item, drag, isActive, getIndex }: RenderItemParams<ActivityStop>) => {
+    ({ item, drag, isActive, getIndex }: import('react-native-draggable-flatlist').RenderItemParams<ActivityStop>) => {
       const index = getIndex() ?? 0
       return (
         <ScaleDecorator>
@@ -268,7 +268,7 @@ function DaySectionContent({
         data={curatedDay.activityStops}
         keyExtractor={(item) => item.place_id ?? item.name}
         renderItem={renderItem}
-        onDragEnd={({ from, to }) => onReorder(from, to)}
+        onDragEnd={({ from, to }: { from: number; to: number; data: ActivityStop[] }) => onReorder(from, to)}
         scrollEnabled={false}
         activationDistance={10}
       />

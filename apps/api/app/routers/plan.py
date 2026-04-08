@@ -40,6 +40,7 @@ router = APIRouter(prefix="/trips", tags=["plan"])
 # Dependency factories
 # ---------------------------------------------------------------------------
 
+
 def get_openai_client() -> AsyncOpenAI:
     api_key = os.environ.get("OPENAI_API_KEY", "")
     return AsyncOpenAI(api_key=api_key)
@@ -58,6 +59,7 @@ def get_google_api_key() -> str:
 # ---------------------------------------------------------------------------
 # POST /trips/plan
 # ---------------------------------------------------------------------------
+
 
 @router.post(
     "/plan",
@@ -117,10 +119,7 @@ async def plan_trip(
 
     # ── Step 3b: Enrich activity stops with Places Details ────────────────
     all_activity_stops = [
-        stop
-        for day in scheduled_days
-        for stop in day.stops
-        if hasattr(stop, "place_id")
+        stop for day in scheduled_days for stop in day.stops if hasattr(stop, "place_id")
     ]
     enricher = ActivityEnricherService(api_key=google_api_key)
     try:
@@ -131,6 +130,7 @@ async def plan_trip(
     # Rebuild day plans with enriched stops (food stops not yet added)
     stop_iter = iter(enriched_stops)
     from app.schemas.plan import DayPlan as _DayPlan
+
     scheduled_days = [
         _DayPlan(
             day=day.day,
@@ -162,6 +162,7 @@ async def plan_trip(
 # ---------------------------------------------------------------------------
 # POST /trips/plan/confirm
 # ---------------------------------------------------------------------------
+
 
 @router.post(
     "/plan/confirm",

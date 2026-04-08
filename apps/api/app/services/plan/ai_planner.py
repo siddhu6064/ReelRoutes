@@ -20,12 +20,13 @@ logger = logging.getLogger(__name__)
 # Internal model for a raw place returned by GPT-4o
 # ---------------------------------------------------------------------------
 
+
 class RawPlace:
     """Lightweight container for a GPT-4o suggested place before geocoding."""
 
     def __init__(self, data: dict[str, Any]) -> None:
         self.name: str = data.get("name", "").strip()
-        self.area: str = data.get("area", "").strip()       # neighbourhood / district hint for geocoding
+        self.area: str = data.get("area", "").strip()  # neighbourhood / district hint for geocoding
         self.famous_for: str = data.get("famous_for", "").strip()
         self.best_time: str | None = data.get("best_time")
         self.local_tip: str | None = data.get("local_tip")
@@ -47,6 +48,7 @@ class RawPlace:
 # Prompt builder
 # ---------------------------------------------------------------------------
 
+
 def _build_system_prompt() -> str:
     return (
         "You are an expert travel planner. "
@@ -64,9 +66,7 @@ def _build_system_prompt() -> str:
 
 def _build_user_prompt(req: PlanRequest) -> str:
     prefs = (
-        ", ".join(p.value for p in req.preferences)
-        if req.preferences
-        else "general sightseeing"
+        ", ".join(p.value for p in req.preferences) if req.preferences else "general sightseeing"
     )
 
     # Target place count: 3–4 activities per day + 1 food per day as a seed
@@ -98,6 +98,7 @@ def _build_user_prompt(req: PlanRequest) -> str:
 # ---------------------------------------------------------------------------
 # Service
 # ---------------------------------------------------------------------------
+
 
 class AIPlannerService:
     """

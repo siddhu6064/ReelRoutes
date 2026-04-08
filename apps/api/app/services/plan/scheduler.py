@@ -118,9 +118,7 @@ class ProximityScheduler:
         for place in places:
             nearest_seed_idx = min(
                 range(days),
-                key=lambda i: haversine_km(
-                    place.lat, place.lng, seeds[i][0], seeds[i][1]
-                ),
+                key=lambda i: haversine_km(place.lat, place.lng, seeds[i][0], seeds[i][1]),
             )
             buckets[nearest_seed_idx].append(place)
 
@@ -154,8 +152,7 @@ class ProximityScheduler:
             farthest_idx = max(
                 remaining,
                 key=lambda i: min(
-                    haversine_km(coords[i][0], coords[i][1], s[0], s[1])
-                    for s in seeds
+                    haversine_km(coords[i][0], coords[i][1], s[0], s[1]) for s in seeds
                 ),
             )
             seeds.append(coords[farthest_idx])
@@ -163,9 +160,7 @@ class ProximityScheduler:
 
         return seeds
 
-    def _rebalance_buckets(
-        self, buckets: list[list[GeocodedPlace]]
-    ) -> list[list[GeocodedPlace]]:
+    def _rebalance_buckets(self, buckets: list[list[GeocodedPlace]]) -> list[list[GeocodedPlace]]:
         """
         Ensure no bucket is empty by pulling the last place from the
         largest bucket into each empty one.  Prevents zero-activity days.
@@ -195,6 +190,7 @@ class ProximityScheduler:
         Sort buckets so Day 1 centroid is nearest to the trip origin.
         Empty buckets are pushed to the end.
         """
+
         def bucket_distance(bucket: list[GeocodedPlace]) -> float:
             if not bucket:
                 return float("inf")
@@ -224,9 +220,7 @@ class ProximityScheduler:
                 day_plans.append(DayPlan(day=day_idx + 1))
                 continue
 
-            ordered, cur_lat, cur_lng = self._nearest_neighbour_sort(
-                bucket, cur_lat, cur_lng
-            )
+            ordered, cur_lat, cur_lng = self._nearest_neighbour_sort(bucket, cur_lat, cur_lng)
             stops = self._to_activity_stops(ordered)
             day_plans.append(DayPlan(day=day_idx + 1, stops=stops))
 
@@ -286,9 +280,7 @@ class ProximityScheduler:
         )
         return centroid([(p.lat, p.lng) for p in places])
 
-    def _to_activity_stops(
-        self, places: list[GeocodedPlace]
-    ) -> list[ActivityStop]:
+    def _to_activity_stops(self, places: list[GeocodedPlace]) -> list[ActivityStop]:
         """Convert ordered GeocodedPlace list → ActivityStop list with distances."""
         stops: list[ActivityStop] = []
         prev_lat: float | None = None
@@ -297,9 +289,7 @@ class ProximityScheduler:
         for place in places:
             dist: float | None = None
             if prev_lat is not None and prev_lng is not None:
-                dist = round(
-                    haversine_km(prev_lat, prev_lng, place.lat, place.lng), 2
-                )
+                dist = round(haversine_km(prev_lat, prev_lng, place.lat, place.lng), 2)
             stops.append(
                 ActivityStop(
                     name=place.name,

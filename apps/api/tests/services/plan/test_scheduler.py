@@ -33,6 +33,7 @@ from app.services.plan.scheduler import ProximityScheduler
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def make_place(
     name: str,
     lat: float,
@@ -53,27 +54,34 @@ def make_place(
 
 
 # New Orleans area places (realistic lat/lng)
-FRENCH_QUARTER  = make_place("French Quarter",   29.9584, -90.0644)
-GARDEN_DISTRICT = make_place("Garden District",  29.9259, -90.0866)
-CITY_PARK       = make_place("City Park",        29.9849, -90.0900)
-WAREHOUSE_DIST  = make_place("Warehouse District", 29.9444, -90.0693)
-MARIGNY         = make_place("Faubourg Marigny", 29.9610, -90.0530)
-BYWATER         = make_place("Bywater",          29.9572, -90.0430)
-MID_CITY        = make_place("Mid-City",         29.9748, -90.0934)
-UPTOWN          = make_place("Uptown",           29.9300, -90.1100)
+FRENCH_QUARTER = make_place("French Quarter", 29.9584, -90.0644)
+GARDEN_DISTRICT = make_place("Garden District", 29.9259, -90.0866)
+CITY_PARK = make_place("City Park", 29.9849, -90.0900)
+WAREHOUSE_DIST = make_place("Warehouse District", 29.9444, -90.0693)
+MARIGNY = make_place("Faubourg Marigny", 29.9610, -90.0530)
+BYWATER = make_place("Bywater", 29.9572, -90.0430)
+MID_CITY = make_place("Mid-City", 29.9748, -90.0934)
+UPTOWN = make_place("Uptown", 29.9300, -90.1100)
 
 ALL_PLACES = [
-    FRENCH_QUARTER, GARDEN_DISTRICT, CITY_PARK,
-    WAREHOUSE_DIST, MARIGNY, BYWATER, MID_CITY, UPTOWN,
+    FRENCH_QUARTER,
+    GARDEN_DISTRICT,
+    CITY_PARK,
+    WAREHOUSE_DIST,
+    MARIGNY,
+    BYWATER,
+    MID_CITY,
+    UPTOWN,
 ]
 
-ORIGIN_AUSTIN = (30.2672, -97.7431)   # Austin, TX
-ORIGIN_NOLA   = (29.9511, -90.0715)   # New Orleans city centre
+ORIGIN_AUSTIN = (30.2672, -97.7431)  # Austin, TX
+ORIGIN_NOLA = (29.9511, -90.0715)  # New Orleans city centre
 
 
 # ---------------------------------------------------------------------------
 # Unit tests: _nearest_neighbour_sort
 # ---------------------------------------------------------------------------
+
 
 class TestNearestNeighbourSort:
     def setup_method(self):
@@ -118,13 +126,17 @@ class TestNearestNeighbourSort:
 
         # Starting from far east — Marigny should come first
         ordered_east, _, _ = self.scheduler._nearest_neighbour_sort(
-            places, 29.960, -90.040  # east of Marigny
+            places,
+            29.960,
+            -90.040,  # east of Marigny
         )
         assert ordered_east[0].name == "Marigny"
 
         # Starting from far west — Garden District should come first
         ordered_west, _, _ = self.scheduler._nearest_neighbour_sort(
-            places, 29.930, -90.120  # west of Garden District
+            places,
+            29.930,
+            -90.120,  # west of Garden District
         )
         assert ordered_west[0].name == "Garden District"
 
@@ -140,6 +152,7 @@ class TestNearestNeighbourSort:
 # ---------------------------------------------------------------------------
 # Unit tests: _farthest_first_seeds
 # ---------------------------------------------------------------------------
+
 
 class TestFarthestFirstSeeds:
     def setup_method(self):
@@ -174,6 +187,7 @@ class TestFarthestFirstSeeds:
 # ---------------------------------------------------------------------------
 # Unit tests: _geographic_cluster
 # ---------------------------------------------------------------------------
+
 
 class TestGeographicCluster:
     def setup_method(self):
@@ -218,6 +232,7 @@ class TestGeographicCluster:
 # Unit tests: _rebalance_buckets
 # ---------------------------------------------------------------------------
 
+
 class TestRebalanceBuckets:
     def setup_method(self):
         self.scheduler = ProximityScheduler()
@@ -252,6 +267,7 @@ class TestRebalanceBuckets:
 # Unit tests: _order_buckets_by_proximity
 # ---------------------------------------------------------------------------
 
+
 class TestOrderBucketsByProximity:
     def setup_method(self):
         self.scheduler = ProximityScheduler()
@@ -262,9 +278,7 @@ class TestOrderBucketsByProximity:
         # Far bucket: Uptown (south-west)
         far = [UPTOWN, GARDEN_DISTRICT]
 
-        ordered = self.scheduler._order_buckets_by_proximity(
-            [far, near], ORIGIN_NOLA
-        )
+        ordered = self.scheduler._order_buckets_by_proximity([far, near], ORIGIN_NOLA)
         assert ordered[0] == near
 
     def test_empty_buckets_pushed_to_end(self):
@@ -281,6 +295,7 @@ class TestOrderBucketsByProximity:
 # ---------------------------------------------------------------------------
 # Unit tests: _sort_buckets_with_carryover
 # ---------------------------------------------------------------------------
+
 
 class TestSortBucketsWithCarryover:
     def setup_method(self):
@@ -344,13 +359,12 @@ class TestSortBucketsWithCarryover:
 # Integration test: full schedule flow with mocked origin geocoding
 # ---------------------------------------------------------------------------
 
+
 class TestScheduleIntegration:
     @pytest.mark.asyncio
     async def test_full_schedule_returns_correct_day_count(self):
         scheduler = ProximityScheduler()
-        with patch.object(
-            scheduler, "_resolve_origin", new=AsyncMock(return_value=ORIGIN_NOLA)
-        ):
+        with patch.object(scheduler, "_resolve_origin", new=AsyncMock(return_value=ORIGIN_NOLA)):
             plans = await scheduler.schedule(
                 places=ALL_PLACES,
                 days=3,
@@ -362,9 +376,7 @@ class TestScheduleIntegration:
     @pytest.mark.asyncio
     async def test_full_schedule_all_places_present(self):
         scheduler = ProximityScheduler()
-        with patch.object(
-            scheduler, "_resolve_origin", new=AsyncMock(return_value=ORIGIN_NOLA)
-        ):
+        with patch.object(scheduler, "_resolve_origin", new=AsyncMock(return_value=ORIGIN_NOLA)):
             plans = await scheduler.schedule(
                 places=ALL_PLACES,
                 days=3,
@@ -389,9 +401,7 @@ class TestScheduleIntegration:
     @pytest.mark.asyncio
     async def test_full_schedule_single_day(self):
         scheduler = ProximityScheduler()
-        with patch.object(
-            scheduler, "_resolve_origin", new=AsyncMock(return_value=ORIGIN_NOLA)
-        ):
+        with patch.object(scheduler, "_resolve_origin", new=AsyncMock(return_value=ORIGIN_NOLA)):
             plans = await scheduler.schedule(
                 places=ALL_PLACES,
                 days=1,
@@ -422,9 +432,7 @@ class TestScheduleIntegration:
     async def test_day1_stops_closer_to_origin_than_later_days(self):
         """Day 1 stops should have a lower avg distance to origin than Day 3."""
         scheduler = ProximityScheduler()
-        with patch.object(
-            scheduler, "_resolve_origin", new=AsyncMock(return_value=ORIGIN_AUSTIN)
-        ):
+        with patch.object(scheduler, "_resolve_origin", new=AsyncMock(return_value=ORIGIN_AUSTIN)):
             plans = await scheduler.schedule(
                 places=ALL_PLACES,
                 days=3,

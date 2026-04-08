@@ -46,16 +46,12 @@ class OriginGeocoderService:
             response.raise_for_status()
             data = response.json()
         except Exception as exc:
-            logger.warning(
-                "Origin geocoding failed for '%s': %s", starting_point, exc
-            )
+            logger.warning("Origin geocoding failed for '%s': %s", starting_point, exc)
             return None
 
         results = data.get("results", [])
         if not results:
-            logger.warning(
-                "No geocoding results for starting point '%s'", starting_point
-            )
+            logger.warning("No geocoding results for starting point '%s'", starting_point)
             return None
 
         location = results[0].get("geometry", {}).get("location", {})
@@ -66,9 +62,7 @@ class OriginGeocoderService:
             logger.warning("Missing coordinates for starting point '%s'", starting_point)
             return None
 
-        logger.info(
-            "Resolved starting point '%s' → (%.4f, %.4f)", starting_point, lat, lng
-        )
+        logger.info("Resolved starting point '%s' → (%.4f, %.4f)", starting_point, lat, lng)
         return float(lat), float(lng)
 
     async def aclose(self) -> None:

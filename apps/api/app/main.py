@@ -154,9 +154,9 @@ def create_app() -> FastAPI:
     app.include_router(undo_router)
     app.include_router(reservations_router)
 
-
     # Plan from Scratch feature
     from app.routers.plan import router as plan_router
+
     app.include_router(plan_router)
 
     return app

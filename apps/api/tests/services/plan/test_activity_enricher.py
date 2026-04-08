@@ -20,8 +20,11 @@ def make_stop(
     famous_for: str = "Jazz music",
 ) -> ActivityStop:
     return ActivityStop(
-        name=name, lat=29.958, lng=-90.064,
-        place_id=place_id, famous_for=famous_for,
+        name=name,
+        lat=29.958,
+        lng=-90.064,
+        place_id=place_id,
+        famous_for=famous_for,
     )
 
 
@@ -47,13 +50,10 @@ def details_response(
 
 
 class TestActivityEnricherService:
-
     @pytest.mark.asyncio
     @respx.mock
     async def test_enriches_website_and_phone(self):
-        respx.get(DETAILS_URL).mock(
-            return_value=httpx.Response(200, json=details_response())
-        )
+        respx.get(DETAILS_URL).mock(return_value=httpx.Response(200, json=details_response()))
         svc = ActivityEnricherService(api_key="test-key")
         enriched = await svc.enrich([make_stop()])
         await svc.aclose()
@@ -64,9 +64,7 @@ class TestActivityEnricherService:
     @pytest.mark.asyncio
     @respx.mock
     async def test_enriches_rating_and_price_level(self):
-        respx.get(DETAILS_URL).mock(
-            return_value=httpx.Response(200, json=details_response())
-        )
+        respx.get(DETAILS_URL).mock(return_value=httpx.Response(200, json=details_response()))
         svc = ActivityEnricherService(api_key="test-key")
         enriched = await svc.enrich([make_stop()])
         await svc.aclose()
@@ -77,12 +75,14 @@ class TestActivityEnricherService:
     @pytest.mark.asyncio
     @respx.mock
     async def test_editorial_summary_overrides_short_famous_for(self):
-        long_editorial = "A vibrant historic district famous for jazz, Creole cuisine, and stunning architecture"
+        long_editorial = (
+            "A vibrant historic district famous for jazz, Creole cuisine, and stunning architecture"
+        )
         respx.get(DETAILS_URL).mock(
             return_value=httpx.Response(200, json=details_response(editorial=long_editorial))
         )
         svc = ActivityEnricherService(api_key="test-key")
-        stop = make_stop(famous_for="Jazz music")   # shorter than editorial
+        stop = make_stop(famous_for="Jazz music")  # shorter than editorial
         enriched = await svc.enrich([stop])
         await svc.aclose()
 
@@ -144,9 +144,7 @@ class TestActivityEnricherService:
     @pytest.mark.asyncio
     @respx.mock
     async def test_enriches_multiple_stops_concurrently(self):
-        respx.get(DETAILS_URL).mock(
-            return_value=httpx.Response(200, json=details_response())
-        )
+        respx.get(DETAILS_URL).mock(return_value=httpx.Response(200, json=details_response()))
         svc = ActivityEnricherService(api_key="test-key")
         stops = [make_stop(f"Stop {i}", place_id=f"pid-{i}") for i in range(5)]
         enriched = await svc.enrich(stops)

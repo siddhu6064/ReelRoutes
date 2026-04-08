@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field, field_validator
 # Enums
 # ---------------------------------------------------------------------------
 
+
 class TravelMode(str, Enum):
     driving = "driving"
     walking = "walking"
@@ -34,6 +35,7 @@ class TripPreference(str, Enum):
 # ---------------------------------------------------------------------------
 # Request
 # ---------------------------------------------------------------------------
+
 
 class PlanRequest(BaseModel):
     starting_point: str = Field(
@@ -79,42 +81,46 @@ class PlanRequest(BaseModel):
 # Draft itinerary response
 # ---------------------------------------------------------------------------
 
+
 class ActivityStop(BaseModel):
     """A sightseeing / activity location returned in the draft."""
+
     type: Literal["activity"] = "activity"
     name: str
     address: str | None = None
     lat: float
     lng: float
-    place_id: str | None = None          # Google Places ID
-    famous_for: str = ""                    # e.g. "Jazz music, Creole cuisine"
-    best_time: str | None = None         # e.g. "Evening"
-    local_tip: str | None = None         # e.g. "Go on a weeknight"
+    place_id: str | None = None  # Google Places ID
+    famous_for: str = ""  # e.g. "Jazz music, Creole cuisine"
+    best_time: str | None = None  # e.g. "Evening"
+    local_tip: str | None = None  # e.g. "Go on a weeknight"
     photo_url: str | None = None
     distance_from_prev_km: float | None = None
     # Phase 3 enrichment fields (from Places Details API)
-    opening_hours: str | None = None     # e.g. "Mon–Fri: 9 AM–5 PM | Sat: 10 AM–4 PM"
+    opening_hours: str | None = None  # e.g. "Mon–Fri: 9 AM–5 PM | Sat: 10 AM–4 PM"
     website: str | None = None
     phone: str | None = None
-    price_level: int | None = None       # 0–4 (Google Places scale)
+    price_level: int | None = None  # 0–4 (Google Places scale)
     rating: float | None = None
 
 
 class RestaurantOption(BaseModel):
     """One restaurant choice inside a food slot."""
+
     name: str
     address: str | None = None
     lat: float
     lng: float
     place_id: str | None = None
-    known_for: str | None = None         # e.g. "Beignets and café au lait"
+    known_for: str | None = None  # e.g. "Beignets and café au lait"
     photo_url: str | None = None
-    price_level: int | None = None       # 0–4 (Google Places scale)
+    price_level: int | None = None  # 0–4 (Google Places scale)
     rating: float | None = None
 
 
 class FoodStop(BaseModel):
     """A meal slot with up to 3 selectable restaurant options."""
+
     type: Literal["food"] = "food"
     meal: Literal["breakfast", "lunch", "dinner"]
     options: list[RestaurantOption] = Field(default_factory=list, max_length=3)
@@ -122,12 +128,14 @@ class FoodStop(BaseModel):
 
 class DayPlan(BaseModel):
     """All stops (activity + food) for a single day."""
+
     day: int = Field(..., ge=1)
     stops: list[ActivityStop | FoodStop] = Field(default_factory=list)
 
 
 class DraftItinerary(BaseModel):
     """Full draft returned by POST /trips/plan — not yet persisted."""
+
     draft: Literal[True] = True
     starting_point: str
     destination: str
@@ -140,8 +148,10 @@ class DraftItinerary(BaseModel):
 # Confirm request  (POST /trips/plan/confirm)
 # ---------------------------------------------------------------------------
 
+
 class ConfirmActivityStop(BaseModel):
     """Curated activity stop sent back by the client."""
+
     name: str
     lat: float
     lng: float
@@ -155,6 +165,7 @@ class ConfirmActivityStop(BaseModel):
 
 class ConfirmFoodStop(BaseModel):
     """Single chosen restaurant for a meal slot."""
+
     name: str
     lat: float
     lng: float
@@ -180,16 +191,10 @@ class PlanConfirmRequest(BaseModel):
 
     @field_validator("days_plan")
     @classmethod
-    def must_have_at_least_one_stop(
-        cls, v: list[ConfirmDayPlan]
-    ) -> list[ConfirmDayPlan]:
-        total_stops = sum(
-            len(day.activity_stops) + len(day.food_stops) for day in v
-        )
+    def must_have_at_least_one_stop(cls, v: list[ConfirmDayPlan]) -> list[ConfirmDayPlan]:
+        total_stops = sum(len(day.activity_stops) + len(day.food_stops) for day in v)
         if total_stops == 0:
-            raise ValueError(
-                "Confirmed itinerary must contain at least one stop"
-            )
+            raise ValueError("Confirmed itinerary must contain at least one stop")
         return v
 
     @field_validator("days_plan")

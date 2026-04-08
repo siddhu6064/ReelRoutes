@@ -40,14 +40,16 @@ logger = logging.getLogger(__name__)
 
 PLACES_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
 
-DETAILS_FIELDS = ",".join([
-    "editorial_summary",
-    "opening_hours",
-    "formatted_phone_number",
-    "website",
-    "price_level",
-    "rating",
-])
+DETAILS_FIELDS = ",".join(
+    [
+        "editorial_summary",
+        "opening_hours",
+        "formatted_phone_number",
+        "website",
+        "price_level",
+        "rating",
+    ]
+)
 
 MAX_CONCURRENT = 5
 TIMEOUT_S = 10.0
@@ -83,7 +85,7 @@ class ActivityEnricherService:
                 enriched.append(result)
             else:
                 logger.warning("Enrichment failed for '%s': %s", stop.name, result)
-                enriched.append(stop)   # Return original on failure
+                enriched.append(stop)  # Return original on failure
 
         return enriched
 
@@ -94,9 +96,7 @@ class ActivityEnricherService:
     # Private
     # ------------------------------------------------------------------
 
-    async def _enrich_one(
-        self, stop: ActivityStop, semaphore: asyncio.Semaphore
-    ) -> ActivityStop:
+    async def _enrich_one(self, stop: ActivityStop, semaphore: asyncio.Semaphore) -> ActivityStop:
         if not stop.place_id:
             return stop
 
@@ -135,9 +135,7 @@ class ActivityEnricherService:
         if editorial and len(editorial) > len(famous_for or ""):
             famous_for = editorial
 
-        opening_hours_text = self._format_opening_hours(
-            details.get("opening_hours", {})
-        )
+        opening_hours_text = self._format_opening_hours(details.get("opening_hours", {}))
 
         return ActivityStop(
             # Core fields — unchanged

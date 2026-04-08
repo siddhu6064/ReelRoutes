@@ -16,13 +16,14 @@ markers =
 import os
 import pytest
 
+
 @pytest.fixture(autouse=True)
 def set_test_env_vars():
     """
     Inject test API keys so FastAPI dependency functions don't
     raise 503 for missing environment variables during E2E tests.
     """
-    os.environ.setdefault("OPENAI_API_KEY",      "sk-test-fake-key-for-tests")
-    os.environ.setdefault("GOOGLE_MAPS_API_KEY",  "fake-google-key-for-tests")
+    os.environ.setdefault("OPENAI_API_KEY", "sk-test-fake-key-for-tests")
+    os.environ.setdefault("GOOGLE_MAPS_API_KEY", "fake-google-key-for-tests")
     yield
     # No teardown needed — os.environ changes don't persist across processes

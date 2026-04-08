@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-import { useScratchPlanStore, selectAllActivityPins, selectChosenFoodPins } from '../../../stores/scratchPlanStore'
+import { selectAllActivityPins, selectChosenFoodPins, useScratchPlanStore } from '../../../stores/scratchPlanStore'
 /**
  * CurationMap
  * -----------

@@ -18,6 +18,7 @@ from app.services.plan.ai_planner import AIPlannerService, RawPlace
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 def make_request(**kwargs) -> PlanRequest:
     defaults = dict(
         starting_point="Austin, TX",
@@ -43,48 +44,53 @@ def make_mock_client(response_content: str) -> AsyncMock:
     return client
 
 
-VALID_PLACES_JSON = json.dumps([
-    {
-        "name": "French Quarter",
-        "area": "New Orleans",
-        "famous_for": "Jazz music and Creole architecture",
-        "best_time": "Evening",
-        "local_tip": "Visit on a weeknight to avoid weekend crowds",
-        "category": "activity",
-    },
-    {
-        "name": "Cafe Du Monde",
-        "area": "French Quarter",
-        "famous_for": "Beignets and café au lait",
-        "best_time": "Morning",
-        "local_tip": "Go early to avoid queues",
-        "category": "food",
-    },
-    {
-        "name": "Garden District",
-        "area": "Uptown",
-        "famous_for": "Antebellum mansions and oak-lined streets",
-        "best_time": "Morning",
-        "local_tip": "Walk Magazine Street for local shops",
-        "category": "activity",
-    },
-])
+VALID_PLACES_JSON = json.dumps(
+    [
+        {
+            "name": "French Quarter",
+            "area": "New Orleans",
+            "famous_for": "Jazz music and Creole architecture",
+            "best_time": "Evening",
+            "local_tip": "Visit on a weeknight to avoid weekend crowds",
+            "category": "activity",
+        },
+        {
+            "name": "Cafe Du Monde",
+            "area": "French Quarter",
+            "famous_for": "Beignets and café au lait",
+            "best_time": "Morning",
+            "local_tip": "Go early to avoid queues",
+            "category": "food",
+        },
+        {
+            "name": "Garden District",
+            "area": "Uptown",
+            "famous_for": "Antebellum mansions and oak-lined streets",
+            "best_time": "Morning",
+            "local_tip": "Walk Magazine Street for local shops",
+            "category": "activity",
+        },
+    ]
+)
 
 
 # ---------------------------------------------------------------------------
 # RawPlace unit tests
 # ---------------------------------------------------------------------------
 
+
 class TestRawPlace:
     def test_valid_place(self):
-        place = RawPlace({
-            "name": "French Quarter",
-            "area": "New Orleans",
-            "famous_for": "Jazz music",
-            "best_time": "Evening",
-            "local_tip": "Go on weeknights",
-            "category": "activity",
-        })
+        place = RawPlace(
+            {
+                "name": "French Quarter",
+                "area": "New Orleans",
+                "famous_for": "Jazz music",
+                "best_time": "Evening",
+                "local_tip": "Go on weeknights",
+                "category": "activity",
+            }
+        )
         assert place.is_valid()
         assert place.name == "French Quarter"
         assert place.category == "activity"
@@ -119,6 +125,7 @@ class TestRawPlace:
 # ---------------------------------------------------------------------------
 # AIPlannerService unit tests
 # ---------------------------------------------------------------------------
+
 
 class TestAIPlannerService:
     @pytest.mark.asyncio
@@ -155,13 +162,13 @@ class TestAIPlannerService:
     @pytest.mark.asyncio
     async def test_generate_places_skips_invalid_entries(self):
         data = json.loads(VALID_PLACES_JSON)
-        data.append({"name": "", "area": "nowhere"})     # invalid — empty name
-        data.append("not a dict")                         # invalid — wrong type
+        data.append({"name": "", "area": "nowhere"})  # invalid — empty name
+        data.append("not a dict")  # invalid — wrong type
         client = make_mock_client(json.dumps(data))
         service = AIPlannerService(client=client)
 
         places = await service.generate_places(make_request())
-        assert len(places) == 3                           # 2 invalid entries dropped
+        assert len(places) == 3  # 2 invalid entries dropped
 
     @pytest.mark.asyncio
     async def test_generate_places_raises_on_invalid_json(self):

@@ -4,14 +4,10 @@ import {
   Text,
   StyleSheet,
   Image,
-  ScrollView,
   TouchableOpacity,
   Linking,
 } from 'react-native'
-import BottomSheet, {
-  BottomSheetView,
-  BottomSheetScrollView,
-} from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import type { ActivityStop } from '@/types/scratchPlan'
 import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
 

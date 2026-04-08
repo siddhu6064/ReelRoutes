@@ -163,7 +163,7 @@ export const useScratchPlanStore = create<ScratchPlanState>()(
               if (di !== dayIndex) return d
               const stops = [...d.activityStops]
               const [moved] = stops.splice(fromIndex, 1)
-              stops.splice(toIndex, 0, moved)
+              if (moved) stops.splice(toIndex, 0, moved)
               return { ...d, activityStops: stops }
             })
             return { curatedDays: days }

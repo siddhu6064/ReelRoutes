@@ -1,5 +1,6 @@
+import { useState } from 'react'
 
-
+import PlanFromScratch from '../components/plan/PlanFromScratch'
 /**
  * NewTripScreen
  * -------------
@@ -15,9 +16,6 @@
  * The existing video import flow is untouched — this wraps around it.
  */
 
-import { useState } from 'react'
-import PlanFromScratch from '../components/plan/PlanFromScratch'
-import '../components/plan/planStyles.css'
 // import VideoImport from './VideoImport'  ← your existing component
 
 type CreationMode = 'choose' | 'video' | 'scratch'

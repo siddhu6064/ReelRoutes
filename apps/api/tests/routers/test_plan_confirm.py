@@ -44,6 +44,7 @@ CONFIRM_URL = "/trips/plan/confirm"
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def confirm_body(**overrides) -> dict:
     """Build a minimal valid confirm request body."""
     base = {
@@ -101,6 +102,7 @@ def mock_builder_success(
 # Success cases
 # ---------------------------------------------------------------------------
 
+
 class TestConfirmPlanSuccess:
     def test_returns_201(self):
         with mock_builder_success():
@@ -133,8 +135,11 @@ class TestConfirmPlanSuccess:
         body["days_plan"][0]["activity_stops"] = []
         body["days_plan"][0]["food_stops"] = [
             {
-                "name": "Cafe Du Monde", "lat": 29.9575, "lng": -90.0614,
-                "meal": "breakfast", "known_for": "Beignets",
+                "name": "Cafe Du Monde",
+                "lat": 29.9575,
+                "lng": -90.0614,
+                "meal": "breakfast",
+                "known_for": "Beignets",
             }
         ]
         with mock_builder_success():
@@ -145,6 +150,7 @@ class TestConfirmPlanSuccess:
 # ---------------------------------------------------------------------------
 # Pydantic validation failures → 422
 # ---------------------------------------------------------------------------
+
 
 class TestConfirmPlanPydanticValidation:
     def test_missing_starting_point_returns_422(self):
@@ -181,9 +187,7 @@ class TestConfirmPlanPydanticValidation:
         assert resp.status_code == 422
 
     def test_days_plan_with_all_empty_stops_returns_422(self):
-        body = confirm_body(days_plan=[
-            {"day": 1, "activity_stops": [], "food_stops": []}
-        ])
+        body = confirm_body(days_plan=[{"day": 1, "activity_stops": [], "food_stops": []}])
         resp = client.post(CONFIRM_URL, json=body)
         assert resp.status_code == 422
 
@@ -192,16 +196,12 @@ class TestConfirmPlanPydanticValidation:
         body["days_plan"] = [
             {
                 "day": 1,
-                "activity_stops": [
-                    {"name": "A", "lat": 1.0, "lng": 1.0}
-                ],
+                "activity_stops": [{"name": "A", "lat": 1.0, "lng": 1.0}],
                 "food_stops": [],
             },
             {
-                "day": 1,   # duplicate
-                "activity_stops": [
-                    {"name": "B", "lat": 2.0, "lng": 2.0}
-                ],
+                "day": 1,  # duplicate
+                "activity_stops": [{"name": "B", "lat": 2.0, "lng": 2.0}],
                 "food_stops": [],
             },
         ]
@@ -231,6 +231,7 @@ class TestConfirmPlanPydanticValidation:
 # Business-logic errors → 409
 # ---------------------------------------------------------------------------
 
+
 class TestConfirmPlanBusinessErrors:
     def test_builder_validation_error_returns_409(self):
         with patch(
@@ -252,6 +253,7 @@ class TestConfirmPlanBusinessErrors:
 # ---------------------------------------------------------------------------
 # Database errors → 503
 # ---------------------------------------------------------------------------
+
 
 class TestConfirmPlanDatabaseErrors:
     def test_db_error_returns_503(self):
@@ -275,6 +277,7 @@ class TestConfirmPlanDatabaseErrors:
 # Unexpected errors → 500
 # ---------------------------------------------------------------------------
 
+
 class TestConfirmPlanUnexpectedErrors:
     def test_unexpected_exception_returns_500(self):
         with patch(
@@ -289,9 +292,11 @@ class TestConfirmPlanUnexpectedErrors:
 # Schema validator unit tests
 # ---------------------------------------------------------------------------
 
+
 class TestPlanConfirmRequestValidators:
     def test_valid_request_passes(self):
         from app.schemas.plan import PlanConfirmRequest, ConfirmDayPlan, ConfirmActivityStop
+
         req = PlanConfirmRequest(
             starting_point="Austin, TX",
             destination="New Orleans, LA",
@@ -311,6 +316,7 @@ class TestPlanConfirmRequestValidators:
     def test_no_stops_raises(self):
         from pydantic import ValidationError
         from app.schemas.plan import PlanConfirmRequest, ConfirmDayPlan
+
         with pytest.raises(ValidationError, match="at least one stop"):
             PlanConfirmRequest(
                 starting_point="Austin, TX",
@@ -321,9 +327,8 @@ class TestPlanConfirmRequestValidators:
 
     def test_duplicate_days_raises(self):
         from pydantic import ValidationError
-        from app.schemas.plan import (
-            PlanConfirmRequest, ConfirmDayPlan, ConfirmActivityStop
-        )
+        from app.schemas.plan import PlanConfirmRequest, ConfirmDayPlan, ConfirmActivityStop
+
         stop = ConfirmActivityStop(name="X", lat=1.0, lng=1.0)
         with pytest.raises(ValidationError, match="Duplicate day"):
             PlanConfirmRequest(

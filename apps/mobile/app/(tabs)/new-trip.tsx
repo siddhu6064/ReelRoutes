@@ -15,7 +15,6 @@
  */
 import { useAuth } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
-import { useRouter as usePlanRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,

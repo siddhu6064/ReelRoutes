@@ -22,13 +22,14 @@ from app.services.plan.ai_planner import RawPlace
 logger = logging.getLogger(__name__)
 
 PLACES_API_URL = "https://maps.googleapis.com/maps/api/place"
-MAX_CONCURRENT_GEOCODE = 5          # Stay within Places API rate limits
+MAX_CONCURRENT_GEOCODE = 5  # Stay within Places API rate limits
 GEOCODE_TIMEOUT_S = 8.0
 
 
 @dataclass
 class GeocodedPlace:
     """A RawPlace enriched with coordinates and Places metadata."""
+
     name: str
     lat: float
     lng: float
@@ -37,7 +38,7 @@ class GeocodedPlace:
     famous_for: str
     best_time: str | None
     local_tip: str | None
-    category: str                   # "activity" | "food"
+    category: str  # "activity" | "food"
     photo_url: str | None = None
     area: str = ""
     raw_query: str = ""
@@ -53,31 +54,23 @@ class PlanGeocoderService:
         self._api_key = api_key
         self._http = http_client or httpx.AsyncClient(timeout=GEOCODE_TIMEOUT_S)
 
-    async def geocode_places(
-        self, places: list[RawPlace], destination: str
-    ) -> list[GeocodedPlace]:
+    async def geocode_places(self, places: list[RawPlace], destination: str) -> list[GeocodedPlace]:
         """
         Geocode all places concurrently (up to MAX_CONCURRENT_GEOCODE at once).
         Places that fail geocoding are silently skipped with a warning log.
         """
         semaphore = asyncio.Semaphore(MAX_CONCURRENT_GEOCODE)
-        tasks = [
-            self._geocode_one(place, destination, semaphore) for place in places
-        ]
+        tasks = [self._geocode_one(place, destination, semaphore) for place in places]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         geocoded: list[GeocodedPlace] = []
         for place, result in zip(places, results, strict=False):
             if isinstance(result, Exception):
-                logger.warning(
-                    "Failed to geocode '%s': %s", place.name, result
-                )
+                logger.warning("Failed to geocode '%s': %s", place.name, result)
             elif result is not None:
                 geocoded.append(result)
 
-        logger.info(
-            "Geocoded %d / %d places successfully", len(geocoded), len(places)
-        )
+        logger.info("Geocoded %d / %d places successfully", len(geocoded), len(places))
         return geocoded
 
     # ------------------------------------------------------------------

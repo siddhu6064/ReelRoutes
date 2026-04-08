@@ -42,6 +42,7 @@ logger = logging.getLogger(__name__)
 # Result dataclass
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class BuildResult:
     trip_id: str
@@ -52,6 +53,7 @@ class BuildResult:
 # ---------------------------------------------------------------------------
 # Custom exceptions
 # ---------------------------------------------------------------------------
+
 
 class TripBuildValidationError(ValueError):
     """Raised when the confirm request fails business-logic validation."""
@@ -64,6 +66,7 @@ class TripBuildDatabaseError(RuntimeError):
 # ---------------------------------------------------------------------------
 # Service
 # ---------------------------------------------------------------------------
+
 
 class TripBuilderService:
     """
@@ -109,16 +112,19 @@ class TripBuilderService:
         except Exception as exc:
             logger.error(
                 "Database insert failed for planned trip to '%s': %s",
-                req.destination, exc, exc_info=True,
+                req.destination,
+                exc,
+                exc_info=True,
             )
-            raise TripBuildDatabaseError(
-                f"Failed to persist trip to database: {exc}"
-            ) from exc
+            raise TripBuildDatabaseError(f"Failed to persist trip to database: {exc}") from exc
 
         trip_id = str(trip.id)
         logger.info(
             "Saved scratch trip %s → '%s' (%d pins across %d days)",
-            trip_id, trip.title, len(pins), len(req.days_plan),
+            trip_id,
+            trip.title,
+            len(pins),
+            len(req.days_plan),
         )
         return BuildResult(
             trip_id=trip_id,
@@ -150,46 +156,50 @@ class TripBuilderService:
         for day_plan in sorted_days:
             # Activity stops
             for stop in day_plan.activity_stops:
-                pins.append(PinDocument(
-                    name=stop.name,
-                    lat=stop.lat,
-                    lng=stop.lng,
-                    place_id=stop.place_id or "",
-                    address=stop.address or "",
-                    day=day_plan.day,
-                    order=order,
-                    pin_type="activity",
-                    # GPT-4o / Places enrichment
-                    famous_for=stop.famous_for or "",
-                    best_time=stop.best_time,
-                    local_tip=stop.local_tip,
-                    photo_url=stop.photo_url,
-                    # Phase 3 Places Details enrichment
-                    opening_hours=getattr(stop, "opening_hours", None),
-                    website=getattr(stop, "website", None),
-                    phone=getattr(stop, "phone", None),
-                    rating=getattr(stop, "rating", None),
-                    price_level=getattr(stop, "price_level", None),
-                ))
+                pins.append(
+                    PinDocument(
+                        name=stop.name,
+                        lat=stop.lat,
+                        lng=stop.lng,
+                        place_id=stop.place_id or "",
+                        address=stop.address or "",
+                        day=day_plan.day,
+                        order=order,
+                        pin_type="activity",
+                        # GPT-4o / Places enrichment
+                        famous_for=stop.famous_for or "",
+                        best_time=stop.best_time,
+                        local_tip=stop.local_tip,
+                        photo_url=stop.photo_url,
+                        # Phase 3 Places Details enrichment
+                        opening_hours=getattr(stop, "opening_hours", None),
+                        website=getattr(stop, "website", None),
+                        phone=getattr(stop, "phone", None),
+                        rating=getattr(stop, "rating", None),
+                        price_level=getattr(stop, "price_level", None),
+                    )
+                )
                 order += 1
 
             # Food stops
             for food in day_plan.food_stops:
-                pins.append(PinDocument(
-                    name=food.name,
-                    lat=food.lat,
-                    lng=food.lng,
-                    place_id=food.place_id or "",
-                    address=food.address or "",
-                    day=day_plan.day,
-                    order=order,
-                    pin_type="food",
-                    meal=food.meal,
-                    famous_for=food.known_for or "",
-                    photo_url=getattr(food, "photo_url", None),
-                    rating=getattr(food, "rating", None),
-                    price_level=getattr(food, "price_level", None),
-                ))
+                pins.append(
+                    PinDocument(
+                        name=food.name,
+                        lat=food.lat,
+                        lng=food.lng,
+                        place_id=food.place_id or "",
+                        address=food.address or "",
+                        day=day_plan.day,
+                        order=order,
+                        pin_type="food",
+                        meal=food.meal,
+                        famous_for=food.known_for or "",
+                        photo_url=getattr(food, "photo_url", None),
+                        rating=getattr(food, "rating", None),
+                        price_level=getattr(food, "price_level", None),
+                    )
+                )
                 order += 1
 
         return pins

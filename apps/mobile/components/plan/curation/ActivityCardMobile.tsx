@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.gray300 ?? Colors.gray200,
+    backgroundColor:  Colors.gray200,
   },
   photo: {
     width: 72,

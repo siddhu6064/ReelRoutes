@@ -12,7 +12,7 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import { useScratchPlanStore } from '@/stores/scratchPlanStore'
 import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
 
-const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
+const GOOGLE_API_KEY = (process.env['EXPO_PUBLIC_GOOGLE_MAPS_API_KEY']) ?? ''
 
 interface Props {
   onNext: () => void
@@ -79,8 +79,8 @@ export default function StepOrigin({ onNext }: Props) {
             <GooglePlacesAutocomplete
               ref={originRef}
               placeholder="e.g. Austin, TX"
-              onPress={(data) => setStartingPoint(data.description)}
-              onFail={(err) => console.warn('Origin AC error', err)}
+              onPress={(data: { description: string }) => setStartingPoint(data.description)}
+              onFail={(_err: unknown) => console.warn('Origin AC error')}
               textInputProps={{
                 onChangeText: setStartingPoint,
                 clearButtonMode: 'while-editing',
@@ -101,8 +101,8 @@ export default function StepOrigin({ onNext }: Props) {
             <GooglePlacesAutocomplete
               ref={destRef}
               placeholder="e.g. New Orleans, LA"
-              onPress={(data) => setDestination(data.description)}
-              onFail={(err) => console.warn('Destination AC error', err)}
+              onPress={(data: { description: string }) => setDestination(data.description)}
+              onFail={(_err: unknown) => console.warn('Destination AC error')}
               textInputProps={{
                 onChangeText: setDestination,
                 clearButtonMode: 'while-editing',

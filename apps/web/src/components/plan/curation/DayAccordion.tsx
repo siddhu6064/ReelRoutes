@@ -1,14 +1,13 @@
 import type { DragEndEvent } from '@dnd-kit/core'
-import { CSS } from '@dnd-kit/utilities'
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { type ReactElement } from 'react'
+import { CSS } from '@dnd-kit/utilities'
+import React from 'react'
 
+import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
+import type { ActivityStop, CuratedDay, FoodStop, MealSlot, RestaurantOption } from '../../../types/scratchPlan'
 import ActivityCard from './ActivityCard'
 import FoodSlot from './FoodSlot'
-import type { CuratedDay, MealSlot, RestaurantOption } from '../../../types/scratchPlan'
-import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
-
 interface Props {
   curatedDay: CuratedDay
   dayIndex: number

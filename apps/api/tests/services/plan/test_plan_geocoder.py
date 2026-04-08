@@ -19,14 +19,16 @@ PLACES_TEXT_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/
 
 
 def make_raw_place(name="French Quarter", area="New Orleans", category="activity") -> RawPlace:
-    return RawPlace({
-        "name": name,
-        "area": area,
-        "famous_for": "Jazz music",
-        "best_time": "Evening",
-        "local_tip": "Go on weeknights",
-        "category": category,
-    })
+    return RawPlace(
+        {
+            "name": name,
+            "area": area,
+            "famous_for": "Jazz music",
+            "best_time": "Evening",
+            "local_tip": "Go on weeknights",
+            "category": category,
+        }
+    )
 
 
 def places_response(lat=29.9584, lng=-90.0644, name="French Quarter") -> dict:
@@ -45,7 +47,6 @@ def places_response(lat=29.9584, lng=-90.0644, name="French Quarter") -> dict:
 
 
 class TestPlanGeocoderService:
-
     @pytest.mark.asyncio
     @respx.mock
     async def test_geocode_single_place_success(self):
@@ -135,9 +136,7 @@ class TestPlanGeocoderService:
     async def test_geocode_handles_missing_photo(self):
         response = places_response()
         response["results"][0].pop("photos")
-        respx.get(PLACES_TEXT_SEARCH_URL).mock(
-            return_value=httpx.Response(200, json=response)
-        )
+        respx.get(PLACES_TEXT_SEARCH_URL).mock(return_value=httpx.Response(200, json=response))
         service = PlanGeocoderService(api_key="test-key")
         result = await service.geocode_places([make_raw_place()], "New Orleans, LA")
         await service.aclose()
