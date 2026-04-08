@@ -29,10 +29,9 @@ from app.schemas.plan import (
 from app.services.plan.trip_builder import (
     BuildResult,
     TripBuildDatabaseError,
-    TripBuildValidationError,
     TripBuilderService,
+    TripBuildValidationError,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -40,43 +39,43 @@ from app.services.plan.trip_builder import (
 
 
 def make_activity_stop(**kwargs) -> ConfirmActivityStop:
-    defaults = dict(
-        name="French Quarter",
-        lat=29.9584,
-        lng=-90.0644,
-        place_id="place-fq",
-        address="French Quarter, New Orleans, LA",
-        famous_for="Jazz music and Creole architecture",
-        best_time="Evening",
-        local_tip="Go on a weeknight",
-        photo_url="https://example.com/photo.jpg",
-    )
+    defaults = {
+        "name": "French Quarter",
+        "lat": 29.9584,
+        "lng": -90.0644,
+        "place_id": "place-fq",
+        "address": "French Quarter, New Orleans, LA",
+        "famous_for": "Jazz music and Creole architecture",
+        "best_time": "Evening",
+        "local_tip": "Go on a weeknight",
+        "photo_url": "https://example.com/photo.jpg",
+    }
     defaults.update(kwargs)
     return ConfirmActivityStop(**defaults)
 
 
 def make_food_stop(**kwargs) -> ConfirmFoodStop:
-    defaults = dict(
-        name="Cafe Du Monde",
-        lat=29.9575,
-        lng=-90.0614,
-        place_id="place-cdm",
-        address="800 Decatur St",
-        known_for="Beignets and café au lait",
-        meal="breakfast",
-    )
+    defaults = {
+        "name": "Cafe Du Monde",
+        "lat": 29.9575,
+        "lng": -90.0614,
+        "place_id": "place-cdm",
+        "address": "800 Decatur St",
+        "known_for": "Beignets and café au lait",
+        "meal": "breakfast",
+    }
     defaults.update(kwargs)
     return ConfirmFoodStop(**defaults)
 
 
 def make_request(**kwargs) -> PlanConfirmRequest:
-    defaults = dict(
-        starting_point="Austin, TX",
-        destination="New Orleans, LA",
-        days=2,
-        travel_mode=TravelMode.driving,
-        preferences=[TripPreference.food, TripPreference.history],
-        days_plan=[
+    defaults = {
+        "starting_point": "Austin, TX",
+        "destination": "New Orleans, LA",
+        "days": 2,
+        "travel_mode": TravelMode.driving,
+        "preferences": [TripPreference.food, TripPreference.history],
+        "days_plan": [
             ConfirmDayPlan(
                 day=1,
                 activity_stops=[make_activity_stop()],
@@ -88,7 +87,7 @@ def make_request(**kwargs) -> PlanConfirmRequest:
                 food_stops=[],
             ),
         ],
-    )
+    }
     defaults.update(kwargs)
     return PlanConfirmRequest(**defaults)
 

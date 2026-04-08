@@ -1,8 +1,10 @@
 import { useState } from 'react'
 
-import type { PlacePrediction } from '../../../hooks/usePlacesAutocomplete'
 import { usePlacesAutocomplete } from '../../../hooks/usePlacesAutocomplete'
 import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
+
+import type { PlacePrediction } from '../../../hooks/usePlacesAutocomplete'
+
 interface Props {
   onNext: () => void
 }

@@ -244,7 +244,7 @@ class TestCollaborators:
 
     async def test_invalid_token_raises(self, beanie_init) -> None:
         trip = await SeedFactory.trip(user_id="clerk_owner")
-        with pytest.raises(Exception):  # noqa: B017 — service raises generic AppError subclass
+        with pytest.raises(Exception):
             await accept_invite(trip, "invalid-token", "clerk_intruder")
 
     async def test_pending_collab_cannot_edit(self, beanie_init) -> None:

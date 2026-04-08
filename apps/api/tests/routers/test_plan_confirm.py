@@ -295,7 +295,7 @@ class TestConfirmPlanUnexpectedErrors:
 
 class TestPlanConfirmRequestValidators:
     def test_valid_request_passes(self):
-        from app.schemas.plan import PlanConfirmRequest, ConfirmDayPlan, ConfirmActivityStop
+        from app.schemas.plan import ConfirmActivityStop, ConfirmDayPlan, PlanConfirmRequest
 
         req = PlanConfirmRequest(
             starting_point="Austin, TX",
@@ -315,7 +315,8 @@ class TestPlanConfirmRequestValidators:
 
     def test_no_stops_raises(self):
         from pydantic import ValidationError
-        from app.schemas.plan import PlanConfirmRequest, ConfirmDayPlan
+
+        from app.schemas.plan import ConfirmDayPlan, PlanConfirmRequest
 
         with pytest.raises(ValidationError, match="at least one stop"):
             PlanConfirmRequest(
@@ -327,7 +328,8 @@ class TestPlanConfirmRequestValidators:
 
     def test_duplicate_days_raises(self):
         from pydantic import ValidationError
-        from app.schemas.plan import PlanConfirmRequest, ConfirmDayPlan, ConfirmActivityStop
+
+        from app.schemas.plan import ConfirmActivityStop, ConfirmDayPlan, PlanConfirmRequest
 
         stop = ConfirmActivityStop(name="X", lat=1.0, lng=1.0)
         with pytest.raises(ValidationError, match="Duplicate day"):

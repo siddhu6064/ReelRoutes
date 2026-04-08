@@ -9,7 +9,6 @@ import {
   Alert,
 } from 'react-native'
 import DraggableFlatList, {
-  RenderItemParams,
   ScaleDecorator,
 } from 'react-native-draggable-flatlist'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -75,7 +74,7 @@ export default function CurationScreen() {
     confirmPlan(req, {
       onSuccess: (res) => {
         reset()
-        navigation.replace('TripDetail', { tripId: res.trip_id })
+        router.replace('TripDetail', { tripId: res.trip_id })
       },
       onError: (err) => {
         Alert.alert(

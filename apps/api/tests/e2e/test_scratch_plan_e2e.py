@@ -27,19 +27,15 @@ Run with:
 from __future__ import annotations
 
 import json
-from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
-import pytest
-import pytest_asyncio
 import respx
 from fastapi.testclient import TestClient
 
 # ── App under test ────────────────────────────────────────────────────────────
 # Adjust this import to match your FastAPI app entry point
-from app.main import app  # noqa: E402  (adjust path as needed)
-from app.routers.plan import router as plan_router
+from app.main import app
 
 # ── External API base URLs ───────────────────────────────────────────────────
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
@@ -733,8 +729,6 @@ class TestFullScratchPlanFlow:
 # ─────────────────────────────────────────────────────────────────────────────
 # HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
-
-from unittest.mock import MagicMock
 
 
 def _mock_trip_doc(trip_id: str = "507f1f77bcf86cd799439011"):

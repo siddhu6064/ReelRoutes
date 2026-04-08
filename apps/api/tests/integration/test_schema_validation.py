@@ -122,18 +122,18 @@ class TestFieldValueValidation:
 class TestIndexEnforcement:
     async def test_unique_clerk_id_prevents_duplicate_users(self) -> None:
         await SeedFactory.user(clerk_id="clerk_unique_test")
-        with pytest.raises(Exception):  # noqa: B017 — mongomock raises generic DuplicateKeyError
+        with pytest.raises(Exception):
             await SeedFactory.user(clerk_id="clerk_unique_test")
 
     async def test_same_clerk_id_different_emails_rejected(self) -> None:
         await SeedFactory.user(clerk_id="clerk_same", email="first@test.com")
-        with pytest.raises(Exception):  # noqa: B017 — mongomock raises generic DuplicateKeyError
+        with pytest.raises(Exception):
             await SeedFactory.user(clerk_id="clerk_same", email="second@test.com")
 
     async def test_share_token_unique_across_trips(self) -> None:
         token = "unique_share_token_abc"
         await SeedFactory.shared_trip(share_token=token)
-        with pytest.raises(Exception):  # noqa: B017 — mongomock raises generic DuplicateKeyError
+        with pytest.raises(Exception):
             await SeedFactory.shared_trip(share_token=token)
 
     async def test_multiple_trips_without_share_token_allowed(self) -> None:

@@ -29,8 +29,8 @@ def make_stop(
 
 
 def details_response(
-    editorial: str = None,
-    opening_hours: list = None,
+    editorial: str | None = None,
+    opening_hours: list | None = None,
     website: str = "https://example.com",
     phone: str = "+1 555-0100",
     rating: float = 4.5,

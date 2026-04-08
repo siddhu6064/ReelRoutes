@@ -17,8 +17,6 @@ _resolve_origin are in a separate file.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import List, Optional, Tuple
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -27,7 +25,6 @@ from app.schemas.plan import ActivityStop, DayPlan
 from app.services.plan.haversine import haversine_km
 from app.services.plan.plan_geocoder import GeocodedPlace
 from app.services.plan.scheduler import ProximityScheduler
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -100,7 +97,7 @@ class TestNearestNeighbourSort:
             ALL_PLACES, ORIGIN_NOLA[0], ORIGIN_NOLA[1]
         )
         assert len(ordered) == len(ALL_PLACES)
-        assert set(p.name for p in ordered) == set(p.name for p in ALL_PLACES)
+        assert {p.name for p in ordered} == {p.name for p in ALL_PLACES}
 
     def test_first_stop_is_nearest_to_origin(self):
         ordered, _, _ = self.scheduler._nearest_neighbour_sort(

@@ -48,27 +48,6 @@ declare module 'react-native-draggable-flatlist' {
   export function ScaleDecorator(props: { children: React.ReactNode }): React.ReactElement
 }
 
-declare module '@gorhom/bottom-sheet' {
-  import type { ViewStyle } from 'react-native'
-  export interface BottomSheetProps {
-    ref?: React.Ref<BottomSheet>
-    index?: number
-    snapPoints: (string | number)[]
-    enablePanDownToClose?: boolean
-    onChange?: (index: number) => void
-    handleIndicatorStyle?: ViewStyle
-    backgroundStyle?: ViewStyle
-    children?: React.ReactNode
-  }
-  export default class BottomSheet extends React.Component<BottomSheetProps> {
-    expand(): void
-    close(): void
-    snapToIndex(index: number): void
-  }
-  export function BottomSheetScrollView(props: { children?: React.ReactNode; contentContainerStyle?: ViewStyle }): React.ReactElement
-  export function BottomSheetView(props: { children?: React.ReactNode; style?: ViewStyle }): React.ReactElement
-}
-
 declare module 'expo-haptics' {
   export enum ImpactFeedbackStyle { Light = 'impactLight', Medium = 'impactMedium', Heavy = 'impactHeavy' }
   export enum NotificationFeedbackType { Success = 'notificationSuccess', Warning = 'notificationWarning', Error = 'notificationError' }

@@ -6,13 +6,12 @@ All OpenAI calls are mocked; no real API calls are made.
 from __future__ import annotations
 
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from app.schemas.plan import PlanRequest, TravelMode, TripPreference
 from app.services.plan.ai_planner import AIPlannerService, RawPlace
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -20,13 +19,13 @@ from app.services.plan.ai_planner import AIPlannerService, RawPlace
 
 
 def make_request(**kwargs) -> PlanRequest:
-    defaults = dict(
-        starting_point="Austin, TX",
-        destination="New Orleans, LA",
-        days=3,
-        preferences=[TripPreference.food, TripPreference.history],
-        travel_mode=TravelMode.driving,
-    )
+    defaults = {
+        "starting_point": "Austin, TX",
+        "destination": "New Orleans, LA",
+        "days": 3,
+        "preferences": [TripPreference.food, TripPreference.history],
+        "travel_mode": TravelMode.driving,
+    }
     defaults.update(kwargs)
     return PlanRequest(**defaults)
 

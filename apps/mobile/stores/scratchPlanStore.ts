@@ -7,7 +7,6 @@ import type {
   DraftItinerary,
   FoodStop,
   MealSlot,
-  PlanRequest,
   RestaurantOption,
   TravelMode,
   TripPreference,

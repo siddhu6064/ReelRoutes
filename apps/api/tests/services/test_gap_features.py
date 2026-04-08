@@ -161,7 +161,7 @@ class TestGenerateItinerary:
 
     async def test_raises_on_invalid_days(self, beanie_init):
         trip = await SeedFactory.trip(pins=[make_pin(order=0)])
-        with pytest.raises(Exception):  # noqa: B017 — AppError subclass, validated by message check
+        with pytest.raises(Exception):
             await generate_itinerary(trip, 0)
 
     async def test_all_pins_assigned(self, beanie_init):

@@ -14,20 +14,16 @@ Covers:
 
 from __future__ import annotations
 
-import json
-from typing import List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import httpx
 import pytest
 import respx
 
-from app.schemas.plan import ActivityStop, DayPlan, FoodStop, RestaurantOption
+from app.schemas.plan import ActivityStop, DayPlan, FoodStop
 from app.services.plan.food_injector import (
-    FoodInjectorService,
-    MealAnchor,
     INITIAL_RADIUS_M,
     MAX_FOOD_OPTIONS,
+    FoodInjectorService,
+    MealAnchor,
 )
 
 NEARBY_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
@@ -203,7 +199,7 @@ class TestInterleave:
             "dinner": self._make_food("dinner"),
         }
         result = self.svc._interleave(stops, food)
-        types = [s.type if isinstance(s, ActivityStop) else s.type for s in result]
+        [s.type if isinstance(s, ActivityStop) else s.type for s in result]
         # breakfast, activity, activity, lunch, activity, activity, dinner
         assert result[0].type == "food"  # breakfast
         assert result[-1].type == "food"  # dinner

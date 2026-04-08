@@ -4,7 +4,6 @@ Tests for haversine utility functions.
 
 from __future__ import annotations
 
-import math
 import pytest
 
 from app.services.plan.haversine import centroid, haversine_km, nearest

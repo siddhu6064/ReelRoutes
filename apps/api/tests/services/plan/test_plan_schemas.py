@@ -8,7 +8,6 @@ import pytest
 from pydantic import ValidationError
 
 from app.schemas.plan import (
-    PlanConfirmRequest,
     PlanRequest,
     TravelMode,
     TripPreference,
@@ -17,13 +16,13 @@ from app.schemas.plan import (
 
 class TestPlanRequest:
     def _make(self, **kwargs) -> PlanRequest:
-        defaults = dict(
-            starting_point="Austin, TX",
-            destination="New Orleans, LA",
-            days=4,
-            preferences=["food", "history"],
-            travel_mode="driving",
-        )
+        defaults = {
+            "starting_point": "Austin, TX",
+            "destination": "New Orleans, LA",
+            "days": 4,
+            "preferences": ["food", "history"],
+            "travel_mode": "driving",
+        }
         defaults.update(kwargs)
         return PlanRequest(**defaults)
 
