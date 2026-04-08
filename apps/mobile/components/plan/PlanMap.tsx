@@ -1,15 +1,15 @@
-import React, { useEffect, useRef } from 'react'
-import { StyleSheet, View, Text } from 'react-native'
-import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps'
+import React, { useEffect, useRef } from "react";
+import { StyleSheet, View, Text } from "react-native";
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import {
   useScratchPlanStore,
   selectAllActivityPins,
   selectChosenFoodPins,
-} from '@/stores/scratchPlanStore'
-import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
+} from "@/stores/scratchPlanStore";
+import { Colors, Spacing, Radius, FontSize, FontWeight } from "@/components/plan/tokens";
 
 interface Props {
-  style?: object
+  style?: object;
 }
 
 /**
@@ -23,27 +23,27 @@ interface Props {
  * Tapping a marker shows a callout with the stop name.
  */
 export default function PlanMap({ style }: Props) {
-  const mapRef        = useRef<MapView>(null)
-  const activityPins  = useScratchPlanStore(selectAllActivityPins)
-  const foodPins      = useScratchPlanStore(selectChosenFoodPins)
+  const mapRef = useRef<MapView>(null);
+  const activityPins = useScratchPlanStore(selectAllActivityPins);
+  const foodPins = useScratchPlanStore(selectChosenFoodPins);
 
   const allPins = [
     ...activityPins.map((p) => ({ lat: p.lat, lng: p.lng })),
-    ...foodPins.map((p)    => ({ lat: p.lat, lng: p.lng })),
-  ]
+    ...foodPins.map((p) => ({ lat: p.lat, lng: p.lng })),
+  ];
 
   // Fit map to all visible pins whenever they change
   useEffect(() => {
-    if (!mapRef.current || allPins.length === 0) return
+    if (!mapRef.current || allPins.length === 0) return;
 
     mapRef.current.fitToCoordinates(
       allPins.map((p) => ({ latitude: p.lat, longitude: p.lng })),
       {
         edgePadding: { top: 60, right: 40, bottom: 60, left: 40 },
         animated: true,
-      }
-    )
-  }, [activityPins.length, foodPins.length])
+      },
+    );
+  }, [activityPins.length, foodPins.length]);
 
   return (
     <View style={[styles.wrapper, style]}>
@@ -118,19 +118,19 @@ export default function PlanMap({ style }: Props) {
         ))}
       </MapView>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   wrapper: {
     borderRadius: Radius.lg,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
     borderColor: Colors.gray200,
   },
   legend: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.sm,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
@@ -156,9 +156,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.blue,
     borderWidth: 2,
     borderColor: Colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -176,9 +176,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.orange,
     borderWidth: 2,
     borderColor: Colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     padding: Spacing.md,
     maxWidth: 180,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 6,
@@ -206,4 +206,4 @@ const styles = StyleSheet.create({
     color: Colors.gray500,
     marginTop: 2,
   },
-})
+});

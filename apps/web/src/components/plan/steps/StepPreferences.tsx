@@ -1,45 +1,50 @@
-import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
+import { useScratchPlanStore } from "../../../stores/scratchPlanStore";
 
-import type { TripPreference } from '../../../types/scratchPlan'
+import type { TripPreference } from "../../../types/scratchPlan";
 
 interface Props {
-  onBack: () => void
-  onGenerate: () => void
-  error?: string | undefined
+  onBack: () => void;
+  onGenerate: () => void;
+  error?: string | undefined;
 }
 
 const PREFERENCES: Array<{ value: TripPreference; label: string; emoji: string; desc: string }> = [
-  { value: 'food',      label: 'Food & Drink', emoji: '🍜', desc: 'Local cuisine, cafes, restaurants' },
-  { value: 'history',  label: 'History',      emoji: '🏛',  desc: 'Museums, landmarks, heritage sites' },
-  { value: 'nature',   label: 'Nature',       emoji: '🌿', desc: 'Parks, hikes, scenic spots' },
-  { value: 'art',      label: 'Art & Culture',emoji: '🎨', desc: 'Galleries, street art, live music' },
-  { value: 'adventure',label: 'Adventure',    emoji: '🧗', desc: 'Outdoor activities, thrills' },
-  { value: 'shopping', label: 'Shopping',     emoji: '🛍',  desc: 'Markets, boutiques, local crafts' },
-  { value: 'nightlife',label: 'Nightlife',    emoji: '🌙', desc: 'Bars, clubs, evening entertainment' },
-]
+  { value: "food", label: "Food & Drink", emoji: "🍜", desc: "Local cuisine, cafes, restaurants" },
+  { value: "history", label: "History", emoji: "🏛", desc: "Museums, landmarks, heritage sites" },
+  { value: "nature", label: "Nature", emoji: "🌿", desc: "Parks, hikes, scenic spots" },
+  { value: "art", label: "Art & Culture", emoji: "🎨", desc: "Galleries, street art, live music" },
+  { value: "adventure", label: "Adventure", emoji: "🧗", desc: "Outdoor activities, thrills" },
+  { value: "shopping", label: "Shopping", emoji: "🛍", desc: "Markets, boutiques, local crafts" },
+  {
+    value: "nightlife",
+    label: "Nightlife",
+    emoji: "🌙",
+    desc: "Bars, clubs, evening entertainment",
+  },
+];
 
 export default function StepPreferences({ onBack, onGenerate, error }: Props) {
-  const preferences = useScratchPlanStore((s) => s.preferences)
-  const togglePreference = useScratchPlanStore((s) => s.togglePreference)
-  const destination = useScratchPlanStore((s) => s.destination)
+  const preferences = useScratchPlanStore((s) => s.preferences);
+  const togglePreference = useScratchPlanStore((s) => s.togglePreference);
+  const destination = useScratchPlanStore((s) => s.destination);
 
   return (
     <div className="step-container">
       <div className="step-header">
         <h2 className="step-title">What's your vibe?</h2>
         <p className="step-subtitle">
-          Select what matters to you in {destination || 'your destination'}.
-          Skip this to get a balanced mix.
+          Select what matters to you in {destination || "your destination"}. Skip this to get a
+          balanced mix.
         </p>
       </div>
 
       <div className="preference-grid">
         {PREFERENCES.map((pref) => {
-          const selected = preferences.includes(pref.value)
+          const selected = preferences.includes(pref.value);
           return (
             <button
               key={pref.value}
-              className={`preference-chip ${selected ? 'selected' : ''}`}
+              className={`preference-chip ${selected ? "selected" : ""}`}
               onClick={() => togglePreference(pref.value)}
               aria-pressed={selected}
             >
@@ -48,13 +53,13 @@ export default function StepPreferences({ onBack, onGenerate, error }: Props) {
               <span className="pref-desc">{pref.desc}</span>
               {selected && <span className="pref-check">✓</span>}
             </button>
-          )
+          );
         })}
       </div>
 
       {preferences.length > 0 && (
         <p className="pref-count">
-          {preferences.length} interest{preferences.length !== 1 ? 's' : ''} selected
+          {preferences.length} interest{preferences.length !== 1 ? "s" : ""} selected
         </p>
       )}
 
@@ -75,5 +80,5 @@ export default function StepPreferences({ onBack, onGenerate, error }: Props) {
         </button>
       </div>
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState } from "react";
 
-import PlanFromScratch from '../components/plan/PlanFromScratch'
+import PlanFromScratch from "../components/plan/PlanFromScratch";
 /**
  * NewTripScreen
  * -------------
@@ -18,13 +18,13 @@ import PlanFromScratch from '../components/plan/PlanFromScratch'
 
 // import VideoImport from './VideoImport'  ← your existing component
 
-type CreationMode = 'choose' | 'video' | 'scratch'
+type CreationMode = "choose" | "video" | "scratch";
 
 export default function NewTripScreen() {
-  const [mode, setMode] = useState<CreationMode>('choose')
+  const [mode, setMode] = useState<CreationMode>("choose");
 
   // ── Mode selector ─────────────────────────────────────────────────────────
-  if (mode === 'choose') {
+  if (mode === "choose") {
     return (
       <div className="new-trip-screen">
         <div className="new-trip-header">
@@ -36,16 +36,13 @@ export default function NewTripScreen() {
 
         <div className="new-trip-options">
           {/* Option 1: Import from video */}
-          <button
-            className="trip-option-card"
-            onClick={() => setMode('video')}
-          >
+          <button className="trip-option-card" onClick={() => setMode("video")}>
             <div className="option-icon">🎬</div>
             <div className="option-content">
               <h2 className="option-title">Import from video</h2>
               <p className="option-desc">
-                Paste a YouTube, Instagram, TikTok, or Facebook URL.
-                We'll extract every location automatically.
+                Paste a YouTube, Instagram, TikTok, or Facebook URL. We'll extract every location
+                automatically.
               </p>
             </div>
             <span className="option-arrow">→</span>
@@ -54,14 +51,14 @@ export default function NewTripScreen() {
           {/* Option 2: Plan from scratch */}
           <button
             className="trip-option-card trip-option-card--featured"
-            onClick={() => setMode('scratch')}
+            onClick={() => setMode("scratch")}
           >
             <div className="option-icon">✨</div>
             <div className="option-content">
               <h2 className="option-title">Plan from scratch</h2>
               <p className="option-desc">
-                Tell us where you're going and for how long.
-                Our AI builds a day-by-day itinerary, with restaurants on the way.
+                Tell us where you're going and for how long. Our AI builds a day-by-day itinerary,
+                with restaurants on the way.
               </p>
             </div>
             <span className="option-arrow">→</span>
@@ -145,21 +142,21 @@ export default function NewTripScreen() {
           }
         `}</style>
       </div>
-    )
+    );
   }
 
   // ── Plan from scratch ─────────────────────────────────────────────────────
-  if (mode === 'scratch') {
-    return <PlanFromScratch />
+  if (mode === "scratch") {
+    return <PlanFromScratch />;
   }
 
   // ── Video import (existing flow) ──────────────────────────────────────────
   // return <VideoImport onBack={() => setMode('choose')} />
   return (
-    <div style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>
+    <div style={{ padding: "2rem", textAlign: "center", color: "#6B7280" }}>
       {/* Replace this with your existing VideoImport component */}
       <p>← Video import flow goes here</p>
-      <button onClick={() => setMode('choose')}>Back</button>
+      <button onClick={() => setMode("choose")}>Back</button>
     </div>
-  )
+  );
 }

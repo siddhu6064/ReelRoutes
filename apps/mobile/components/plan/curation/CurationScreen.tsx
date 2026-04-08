@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,59 +7,52 @@ import {
   SectionList,
   ActivityIndicator,
   Alert,
-} from 'react-native'
-import DraggableFlatList, {
-  ScaleDecorator,
-} from 'react-native-draggable-flatlist'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import { useRouter } from 'expo-router'
-import {
-  useScratchPlanStore,
-  selectTotalStops,
-} from '@/stores/scratchPlanStore'
-import { useConfirmPlan, buildConfirmRequest } from '@/hooks/useConfirmPlan'
-import ActivityCardMobile from '@/components/plan/curation/ActivityCardMobile'
-import FoodSlotMobile from '@/components/plan/curation/FoodSlotMobile'
-import PlaceDetailSheet from '@/components/plan/curation/PlaceDetailSheet'
-import PlanMap from '@/components/plan/PlanMap'
-import type { ActivityStop, CuratedDay, MealSlot, RestaurantOption } from '@/types/scratchPlan'
-import { Colors, Spacing, Radius, FontSize, FontWeight } from '../tokens'
+} from "react-native";
+import DraggableFlatList, { ScaleDecorator } from "react-native-draggable-flatlist";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useRouter } from "expo-router";
+import { useScratchPlanStore, selectTotalStops } from "@/stores/scratchPlanStore";
+import { useConfirmPlan, buildConfirmRequest } from "@/hooks/useConfirmPlan";
+import ActivityCardMobile from "@/components/plan/curation/ActivityCardMobile";
+import FoodSlotMobile from "@/components/plan/curation/FoodSlotMobile";
+import PlaceDetailSheet from "@/components/plan/curation/PlaceDetailSheet";
+import PlanMap from "@/components/plan/PlanMap";
+import type { ActivityStop, CuratedDay, MealSlot, RestaurantOption } from "@/types/scratchPlan";
+import { Colors, Spacing, Radius, FontSize, FontWeight } from "../tokens";
 
 export default function CurationScreen() {
-  const router = useRouter()
+  const router = useRouter();
 
   // Zustand
-  const curatedDays      = useScratchPlanStore((s) => s.curatedDays)
-  const startingPoint    = useScratchPlanStore((s) => s.startingPoint)
-  const destination      = useScratchPlanStore((s) => s.destination)
-  const days             = useScratchPlanStore((s) => s.days)
-  const travelMode       = useScratchPlanStore((s) => s.travelMode)
-  const preferences      = useScratchPlanStore((s) => s.preferences)
-  const totalStops       = useScratchPlanStore(selectTotalStops)
-  const reset            = useScratchPlanStore((s) => s.reset)
-  const removeActivityStop    = useScratchPlanStore((s) => s.removeActivityStop)
-  const reorderActivityStops  = useScratchPlanStore((s) => s.reorderActivityStops)
-  const chooseFoodOption      = useScratchPlanStore((s) => s.chooseFoodOption)
-  const skipFoodSlot          = useScratchPlanStore((s) => s.skipFoodSlot)
+  const curatedDays = useScratchPlanStore((s) => s.curatedDays);
+  const startingPoint = useScratchPlanStore((s) => s.startingPoint);
+  const destination = useScratchPlanStore((s) => s.destination);
+  const days = useScratchPlanStore((s) => s.days);
+  const travelMode = useScratchPlanStore((s) => s.travelMode);
+  const preferences = useScratchPlanStore((s) => s.preferences);
+  const totalStops = useScratchPlanStore(selectTotalStops);
+  const reset = useScratchPlanStore((s) => s.reset);
+  const removeActivityStop = useScratchPlanStore((s) => s.removeActivityStop);
+  const reorderActivityStops = useScratchPlanStore((s) => s.reorderActivityStops);
+  const chooseFoodOption = useScratchPlanStore((s) => s.chooseFoodOption);
+  const skipFoodSlot = useScratchPlanStore((s) => s.skipFoodSlot);
 
   // Bottom sheet state
   const [selectedStop, setSelectedStop] = useState<{
-    stop: ActivityStop
-    dayIndex: number
-    stopIndex: number
-  } | null>(null)
+    stop: ActivityStop;
+    dayIndex: number;
+    stopIndex: number;
+  } | null>(null);
 
   // Confirm mutation
-  const { mutate: confirmPlan, isPending } = useConfirmPlan()
+  const { mutate: confirmPlan, isPending } = useConfirmPlan();
 
   const handleSave = () => {
     if (totalStops === 0) {
-      Alert.alert(
-        'No stops',
-        "You've removed all stops. Add some back or start over.",
-        [{ text: 'OK' }]
-      )
-      return
+      Alert.alert("No stops", "You've removed all stops. Add some back or start over.", [
+        { text: "OK" },
+      ]);
+      return;
     }
 
     const req = buildConfirmRequest({
@@ -69,49 +62,43 @@ export default function CurationScreen() {
       travelMode,
       preferences,
       curatedDays,
-    })
+    });
 
     confirmPlan(req, {
       onSuccess: (res) => {
-        reset()
-        router.replace(`/trip/${res.trip_id}` as never)
+        reset();
+        router.replace(`/trip/${res.trip_id}` as never);
       },
       onError: (err) => {
-        Alert.alert(
-          'Could not save trip',
-          err.message ?? 'Please try again.',
-          [{ text: 'OK' }]
-        )
+        Alert.alert("Could not save trip", err.message ?? "Please try again.", [{ text: "OK" }]);
       },
-    })
-  }
+    });
+  };
 
   const handleStartOver = () => {
-    Alert.alert(
-      'Start over?',
-      'Your current itinerary will be discarded.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Start over',
-          style: 'destructive',
-          onPress: () => {
-            reset()
-            router.back()
-          },
+    Alert.alert("Start over?", "Your current itinerary will be discarded.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Start over",
+        style: "destructive",
+        onPress: () => {
+          reset();
+          router.back();
         },
-      ]
-    )
-  }
+      },
+    ]);
+  };
 
   return (
     <GestureHandlerRootView style={styles.root}>
       {/* ── Sticky header ─────────────────────────────────────────── */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle} numberOfLines={1}>{destination}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {destination}
+          </Text>
           <Text style={styles.headerMeta}>
-            {days} day{days !== 1 ? 's' : ''} · {totalStops} stop{totalStops !== 1 ? 's' : ''}
+            {days} day{days !== 1 ? "s" : ""} · {totalStops} stop{totalStops !== 1 ? "s" : ""}
           </Text>
         </View>
         <TouchableOpacity
@@ -128,18 +115,18 @@ export default function CurationScreen() {
         style={styles.list}
         contentContainerStyle={styles.listContent}
         sections={[
-          { title: 'map', data: ['map'] },
-          { title: 'hint', data: ['hint'] },
+          { title: "map", data: ["map"] },
+          { title: "hint", data: ["hint"] },
           ...curatedDays.map((d, i) => ({
             title: `Day ${d.day}`,
             dayIndex: i,
-            data: ['day'],
+            data: ["day"],
           })),
         ]}
         keyExtractor={(item, i) => `${item}-${i}`}
         stickySectionHeadersEnabled={false}
         renderSectionHeader={({ section }) => {
-          if (section.title === 'map' || section.title === 'hint') return null
+          if (section.title === "map" || section.title === "hint") return null;
           return (
             <View style={styles.dayHeader}>
               <View style={styles.dayBadge}>
@@ -149,24 +136,24 @@ export default function CurationScreen() {
                 {curatedDays[(section as any).dayIndex]?.activityStops.length} stops
               </Text>
             </View>
-          )
+          );
         }}
         renderItem={({ item, section }) => {
-          if (item === 'map') {
-            return <PlanMap style={styles.map} />
+          if (item === "map") {
+            return <PlanMap style={styles.map} />;
           }
 
-          if (item === 'hint') {
+          if (item === "hint") {
             return (
               <Text style={styles.hint}>
                 Long press a stop to drag and reorder. Tap for full details.
               </Text>
-            )
+            );
           }
 
-          const dayIndex = (section as any).dayIndex
-          const curatedDay = curatedDays[dayIndex]
-          if (!curatedDay) return null
+          const dayIndex = (section as any).dayIndex;
+          const curatedDay = curatedDays[dayIndex];
+          if (!curatedDay) return null;
 
           return (
             <DaySectionContent
@@ -175,13 +162,11 @@ export default function CurationScreen() {
               curatedDay={curatedDay}
               onReorder={(from, to) => reorderActivityStops(dayIndex, from, to)}
               onRemove={(stopIndex) => removeActivityStop(dayIndex, stopIndex)}
-              onPressStop={(stop, stopIndex) =>
-                setSelectedStop({ stop, dayIndex, stopIndex })
-              }
+              onPressStop={(stop, stopIndex) => setSelectedStop({ stop, dayIndex, stopIndex })}
               onChooseFood={(meal, option) => chooseFoodOption(dayIndex, meal, option)}
               onSkipFood={(meal) => skipFoodSlot(dayIndex, meal)}
             />
-          )
+          );
         }}
         ListFooterComponent={<View style={{ height: 120 }} />}
       />
@@ -197,7 +182,7 @@ export default function CurationScreen() {
           {isPending ? (
             <ActivityIndicator color={Colors.white} size="small" />
           ) : (
-            <Text style={styles.saveBtnText}>💾  Save trip</Text>
+            <Text style={styles.saveBtnText}>💾 Save trip</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -208,25 +193,25 @@ export default function CurationScreen() {
         onClose={() => setSelectedStop(null)}
         onRemove={() => {
           if (selectedStop) {
-            removeActivityStop(selectedStop.dayIndex, selectedStop.stopIndex)
-            setSelectedStop(null)
+            removeActivityStop(selectedStop.dayIndex, selectedStop.stopIndex);
+            setSelectedStop(null);
           }
         }}
       />
     </GestureHandlerRootView>
-  )
+  );
 }
 
 // ─── Per-day draggable section ────────────────────────────────────────────────
 
 interface DaySectionProps {
-  dayIndex: number
-  curatedDay: CuratedDay
-  onReorder: (from: number, to: number) => void
-  onRemove: (stopIndex: number) => void
-  onPressStop: (stop: ActivityStop, stopIndex: number) => void
-  onChooseFood: (meal: MealSlot, option: RestaurantOption) => void
-  onSkipFood: (meal: MealSlot) => void
+  dayIndex: number;
+  curatedDay: CuratedDay;
+  onReorder: (from: number, to: number) => void;
+  onRemove: (stopIndex: number) => void;
+  onPressStop: (stop: ActivityStop, stopIndex: number) => void;
+  onChooseFood: (meal: MealSlot, option: RestaurantOption) => void;
+  onSkipFood: (meal: MealSlot) => void;
 }
 
 function DaySectionContent({
@@ -239,8 +224,13 @@ function DaySectionContent({
   onSkipFood,
 }: DaySectionProps) {
   const renderItem = useCallback(
-    ({ item, drag, isActive, getIndex }: import('react-native-draggable-flatlist').RenderItemParams<ActivityStop>) => {
-      const index = getIndex() ?? 0
+    ({
+      item,
+      drag,
+      isActive,
+      getIndex,
+    }: import("react-native-draggable-flatlist").RenderItemParams<ActivityStop>) => {
+      const index = getIndex() ?? 0;
       return (
         <ScaleDecorator>
           <ActivityCardMobile
@@ -252,10 +242,10 @@ function DaySectionContent({
             isActive={isActive}
           />
         </ScaleDecorator>
-      )
+      );
     },
-    [onRemove, onPressStop]
-  )
+    [onRemove, onPressStop],
+  );
 
   return (
     <View style={styles.daySection}>
@@ -267,14 +257,16 @@ function DaySectionContent({
         data={curatedDay.activityStops}
         keyExtractor={(item) => item.place_id ?? item.name}
         renderItem={renderItem}
-        onDragEnd={({ from, to }: { from: number; to: number; data: ActivityStop[] }) => onReorder(from, to)}
+        onDragEnd={({ from, to }: { from: number; to: number; data: ActivityStop[] }) =>
+          onReorder(from, to)
+        }
         scrollEnabled={false}
         activationDistance={10}
       />
 
       {/* Food slots */}
       {curatedDay.foodSlots.map((slot) => {
-        const choice = curatedDay.foodChoices.find((fc) => fc.meal === slot.meal)
+        const choice = curatedDay.foodChoices.find((fc) => fc.meal === slot.meal);
         return (
           <FoodSlotMobile
             key={slot.meal}
@@ -284,10 +276,10 @@ function DaySectionContent({
             onChoose={onChooseFood}
             onSkip={onSkipFood}
           />
-        )
+        );
       })}
     </View>
-  )
+  );
 }
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
@@ -295,9 +287,9 @@ function DaySectionContent({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.gray50 },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.lg,
     backgroundColor: Colors.white,
@@ -330,12 +322,12 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: FontSize.sm,
     color: Colors.gray400,
-    textAlign: 'center',
+    textAlign: "center",
     paddingVertical: Spacing.sm,
   },
   dayHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.md,
     paddingVertical: Spacing.sm,
     marginTop: Spacing.sm,
@@ -356,11 +348,11 @@ const styles = StyleSheet.create({
   emptyDay: {
     fontSize: FontSize.sm,
     color: Colors.gray400,
-    textAlign: 'center',
+    textAlign: "center",
     padding: Spacing.lg,
   },
   saveFab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 32,
     left: Spacing.xl,
     right: Spacing.xl,
@@ -369,7 +361,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.blue,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
     shadowColor: Colors.blue,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
@@ -382,4 +374,4 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.bold,
     color: Colors.white,
   },
-})
+});

@@ -1,29 +1,27 @@
-import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
+import { useScratchPlanStore } from "../../../stores/scratchPlanStore";
 interface Props {
-  onBack: () => void
-  onNext: () => void
+  onBack: () => void;
+  onNext: () => void;
 }
 
-const MIN_DAYS = 1
-const MAX_DAYS = 14
+const MIN_DAYS = 1;
+const MAX_DAYS = 14;
 
 export default function StepDays({ onBack, onNext }: Props) {
-  const days = useScratchPlanStore((s) => s.days)
-  const setDays = useScratchPlanStore((s) => s.setDays)
+  const days = useScratchPlanStore((s) => s.days);
+  const setDays = useScratchPlanStore((s) => s.setDays);
 
-  const decrement = () => setDays(Math.max(MIN_DAYS, days - 1))
-  const increment = () => setDays(Math.min(MAX_DAYS, days + 1))
+  const decrement = () => setDays(Math.max(MIN_DAYS, days - 1));
+  const increment = () => setDays(Math.min(MAX_DAYS, days + 1));
 
   // Quick select presets
-  const PRESETS = [3, 5, 7, 10, 14]
+  const PRESETS = [3, 5, 7, 10, 14];
 
   return (
     <div className="step-container">
       <div className="step-header">
         <h2 className="step-title">How long is your trip?</h2>
-        <p className="step-subtitle">
-          We'll plan the right number of stops per day.
-        </p>
+        <p className="step-subtitle">We'll plan the right number of stops per day.</p>
       </div>
 
       <div className="days-stepper">
@@ -38,9 +36,7 @@ export default function StepDays({ onBack, onNext }: Props) {
 
         <div className="stepper-display">
           <span className="stepper-number">{days}</span>
-          <span className="stepper-unit">
-            {days === 1 ? 'day' : 'days'}
-          </span>
+          <span className="stepper-unit">{days === 1 ? "day" : "days"}</span>
         </div>
 
         <button
@@ -58,7 +54,7 @@ export default function StepDays({ onBack, onNext }: Props) {
         {PRESETS.map((n) => (
           <button
             key={n}
-            className={`preset-chip ${days === n ? 'selected' : ''}`}
+            className={`preset-chip ${days === n ? "selected" : ""}`}
             onClick={() => setDays(n)}
           >
             {n}d
@@ -80,5 +76,5 @@ export default function StepDays({ onBack, onNext }: Props) {
         </button>
       </div>
     </div>
-  )
+  );
 }

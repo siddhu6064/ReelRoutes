@@ -1,51 +1,37 @@
-import React from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-} from 'react-native'
-import * as Haptics from 'expo-haptics'
-import type {
-  CuratedFoodChoice,
-  FoodStop,
-  MealSlot,
-  RestaurantOption,
-} from '@/types/scratchPlan'
-import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
+import React from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
+import * as Haptics from "expo-haptics";
+import type { CuratedFoodChoice, FoodStop, MealSlot, RestaurantOption } from "@/types/scratchPlan";
+import { Colors, Spacing, Radius, FontSize, FontWeight } from "@/components/plan/tokens";
 
 interface Props {
-  slot: FoodStop
-  choice: CuratedFoodChoice | undefined
-  dayIndex: number
-  onChoose: (meal: MealSlot, option: RestaurantOption) => void
-  onSkip: (meal: MealSlot) => void
+  slot: FoodStop;
+  choice: CuratedFoodChoice | undefined;
+  dayIndex: number;
+  onChoose: (meal: MealSlot, option: RestaurantOption) => void;
+  onSkip: (meal: MealSlot) => void;
 }
 
 const MEAL_META: Record<MealSlot, { icon: string; label: string }> = {
-  breakfast: { icon: '☕', label: 'Breakfast' },
-  lunch:     { icon: '🥗', label: 'Lunch' },
-  dinner:    { icon: '🌆', label: 'Dinner' },
-}
+  breakfast: { icon: "☕", label: "Breakfast" },
+  lunch: { icon: "🥗", label: "Lunch" },
+  dinner: { icon: "🌆", label: "Dinner" },
+};
 
-export default function FoodSlotMobile({
-  slot, choice, onChoose, onSkip,
-}: Props) {
-  const { icon, label } = MEAL_META[slot.meal]
-  const isSkipped  = choice?.chosen === null
-  const hasOptions = slot.options.length > 0
+export default function FoodSlotMobile({ slot, choice, onChoose, onSkip }: Props) {
+  const { icon, label } = MEAL_META[slot.meal];
+  const isSkipped = choice?.chosen === null;
+  const hasOptions = slot.options.length > 0;
 
   const handleChoose = (option: RestaurantOption) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-    onChoose(slot.meal, option)
-  }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onChoose(slot.meal, option);
+  };
 
   const handleSkip = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-    onSkip(slot.meal)
-  }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onSkip(slot.meal);
+  };
 
   return (
     <View style={[styles.slot, isSkipped && styles.slotSkipped]}>
@@ -69,7 +55,7 @@ export default function FoodSlotMobile({
           onPress={handleSkip}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.skipText}>{isSkipped ? 'Undo' : 'Skip'}</Text>
+          <Text style={styles.skipText}>{isSkipped ? "Undo" : "Skip"}</Text>
         </TouchableOpacity>
       </View>
 
@@ -82,7 +68,7 @@ export default function FoodSlotMobile({
           keyboardShouldPersistTaps="handled"
         >
           {slot.options.map((option, i) => {
-            const selected = choice?.chosen?.place_id === option.place_id
+            const selected = choice?.chosen?.place_id === option.place_id;
             return (
               <RestaurantCardMini
                 key={option.place_id ?? `${slot.meal}-${i}`}
@@ -90,7 +76,7 @@ export default function FoodSlotMobile({
                 selected={selected}
                 onSelect={() => handleChoose(option)}
               />
-            )
+            );
           })}
         </ScrollView>
       )}
@@ -99,7 +85,7 @@ export default function FoodSlotMobile({
         <Text style={styles.emptyNote}>No restaurants found nearby.</Text>
       )}
     </View>
-  )
+  );
 }
 
 // ─── Inline mini restaurant card ─────────────────────────────────────────────
@@ -109,13 +95,14 @@ function RestaurantCardMini({
   selected,
   onSelect,
 }: {
-  option: RestaurantOption
-  selected: boolean
-  onSelect: () => void
+  option: RestaurantOption;
+  selected: boolean;
+  onSelect: () => void;
 }) {
-  const priceLabel = option.price_level != null
-    ? ['Free', '$', '$$', '$$$', '$$$$'][option.price_level] ?? ''
-    : null
+  const priceLabel =
+    option.price_level != null
+      ? (["Free", "$", "$$", "$$$", "$$$$"][option.price_level] ?? "")
+      : null;
 
   return (
     <TouchableOpacity
@@ -130,11 +117,7 @@ function RestaurantCardMini({
       )}
 
       {option.photo_url ? (
-        <Image
-          source={{ uri: option.photo_url }}
-          style={styles.cardPhoto}
-          resizeMode="cover"
-        />
+        <Image source={{ uri: option.photo_url }} style={styles.cardPhoto} resizeMode="cover" />
       ) : (
         <View style={styles.cardPhotoPlaceholder}>
           <Text style={{ fontSize: 24 }}>🍽</Text>
@@ -142,30 +125,32 @@ function RestaurantCardMini({
       )}
 
       <View style={styles.cardBody}>
-        <Text style={styles.cardName} numberOfLines={2}>{option.name}</Text>
+        <Text style={styles.cardName} numberOfLines={2}>
+          {option.name}
+        </Text>
         {option.known_for ? (
-          <Text style={styles.cardKnown} numberOfLines={2}>{option.known_for}</Text>
+          <Text style={styles.cardKnown} numberOfLines={2}>
+            {option.known_for}
+          </Text>
         ) : null}
         <View style={styles.cardMeta}>
           {option.rating != null && (
             <Text style={styles.cardMetaText}>★ {option.rating.toFixed(1)}</Text>
           )}
-          {priceLabel && (
-            <Text style={styles.cardMetaText}>{priceLabel}</Text>
-          )}
+          {priceLabel && <Text style={styles.cardMetaText}>{priceLabel}</Text>}
         </View>
       </View>
     </TouchableOpacity>
-  )
+  );
 }
 
-const CARD_W = 160
+const CARD_W = 160;
 
 const styles = StyleSheet.create({
   slot: {
     borderWidth: 1.5,
     borderColor: Colors.amberBorder,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     borderRadius: Radius.lg,
     padding: Spacing.md,
     backgroundColor: Colors.amberSoft,
@@ -174,8 +159,8 @@ const styles = StyleSheet.create({
   },
   slotSkipped: { opacity: 0.5 },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.sm,
   },
   icon: { fontSize: 18 },
@@ -193,7 +178,7 @@ const styles = StyleSheet.create({
   },
   chosenText: {
     fontSize: FontSize.xs,
-    color: '#065F46',
+    color: "#065F46",
     fontWeight: FontWeight.semibold,
   },
   skippedBadge: {
@@ -227,7 +212,7 @@ const styles = StyleSheet.create({
   emptyNote: {
     fontSize: FontSize.xs,
     color: Colors.gray400,
-    textAlign: 'center',
+    textAlign: "center",
     paddingVertical: Spacing.sm,
   },
   // Mini card
@@ -237,8 +222,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray200,
     borderRadius: Radius.lg,
     backgroundColor: Colors.white,
-    overflow: 'hidden',
-    position: 'relative',
+    overflow: "hidden",
+    position: "relative",
   },
   cardSelected: {
     borderColor: Colors.blue,
@@ -249,7 +234,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardCheck: {
-    position: 'absolute',
+    position: "absolute",
     top: Spacing.sm,
     right: Spacing.sm,
     zIndex: 2,
@@ -257,8 +242,8 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: Radius.full,
     backgroundColor: Colors.blue,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   cardCheckText: {
     fontSize: 12,
@@ -270,8 +255,8 @@ const styles = StyleSheet.create({
     width: CARD_W,
     height: 90,
     backgroundColor: Colors.gray100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   cardBody: {
     padding: Spacing.sm,
@@ -288,10 +273,10 @@ const styles = StyleSheet.create({
     color: Colors.gray500,
     lineHeight: 16,
   },
-  cardMeta: { flexDirection: 'row', gap: Spacing.sm, marginTop: 2 },
+  cardMeta: { flexDirection: "row", gap: Spacing.sm, marginTop: 2 },
   cardMetaText: {
     fontSize: FontSize.xs,
     color: Colors.gray700,
     fontWeight: FontWeight.medium,
   },
-})
+});

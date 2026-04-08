@@ -1,64 +1,57 @@
-import { useState } from 'react'
+import { useState } from "react";
 
-import { usePlacesAutocomplete } from '../../../hooks/usePlacesAutocomplete'
-import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
+import { usePlacesAutocomplete } from "../../../hooks/usePlacesAutocomplete";
+import { useScratchPlanStore } from "../../../stores/scratchPlanStore";
 
-import type { PlacePrediction } from '../../../hooks/usePlacesAutocomplete'
+import type { PlacePrediction } from "../../../hooks/usePlacesAutocomplete";
 
 interface Props {
-  onNext: () => void
+  onNext: () => void;
 }
 
 export default function StepOrigin({ onNext }: Props) {
-  const startingPoint = useScratchPlanStore((s) => s.startingPoint)
-  const destination = useScratchPlanStore((s) => s.destination)
-  const setStartingPoint = useScratchPlanStore((s) => s.setStartingPoint)
-  const setDestination = useScratchPlanStore((s) => s.setDestination)
+  const startingPoint = useScratchPlanStore((s) => s.startingPoint);
+  const destination = useScratchPlanStore((s) => s.destination);
+  const setStartingPoint = useScratchPlanStore((s) => s.setStartingPoint);
+  const setDestination = useScratchPlanStore((s) => s.setDestination);
 
-  const [originInput, setOriginInput] = useState(startingPoint)
-  const [destInput, setDestInput] = useState(destination)
-  const [activeField, setActiveField] = useState<'origin' | 'dest' | null>(null)
+  const [originInput, setOriginInput] = useState(startingPoint);
+  const [destInput, setDestInput] = useState(destination);
+  const [activeField, setActiveField] = useState<"origin" | "dest" | null>(null);
 
-  const originAC = usePlacesAutocomplete(
-    activeField === 'origin' ? originInput : ''
-  )
-  const destAC = usePlacesAutocomplete(
-    activeField === 'dest' ? destInput : ''
-  )
+  const originAC = usePlacesAutocomplete(activeField === "origin" ? originInput : "");
+  const destAC = usePlacesAutocomplete(activeField === "dest" ? destInput : "");
 
   const selectOrigin = (p: PlacePrediction) => {
-    setOriginInput(p.description)
-    setStartingPoint(p.description)
-    originAC.clear()
-    setActiveField(null)
-  }
+    setOriginInput(p.description);
+    setStartingPoint(p.description);
+    originAC.clear();
+    setActiveField(null);
+  };
 
   const selectDest = (p: PlacePrediction) => {
-    setDestInput(p.description)
-    setDestination(p.description)
-    destAC.clear()
-    setActiveField(null)
-  }
+    setDestInput(p.description);
+    setDestination(p.description);
+    destAC.clear();
+    setActiveField(null);
+  };
 
-  const canContinue =
-    startingPoint.trim().length >= 2 && destination.trim().length >= 2
+  const canContinue = startingPoint.trim().length >= 2 && destination.trim().length >= 2;
 
   const handleOriginBlur = () => {
     // Allow click on suggestion before clearing
-    setTimeout(() => setActiveField(null), 150)
-  }
+    setTimeout(() => setActiveField(null), 150);
+  };
 
   const handleDestBlur = () => {
-    setTimeout(() => setActiveField(null), 150)
-  }
+    setTimeout(() => setActiveField(null), 150);
+  };
 
   return (
     <div className="step-container">
       <div className="step-header">
         <h2 className="step-title">Where are you going?</h2>
-        <p className="step-subtitle">
-          Tell us your starting point and destination.
-        </p>
+        <p className="step-subtitle">Tell us your starting point and destination.</p>
       </div>
 
       <div className="step-fields">
@@ -73,10 +66,10 @@ export default function StepOrigin({ onNext }: Props) {
               placeholder="e.g. Austin, TX"
               value={originInput}
               onChange={(e) => {
-                setOriginInput(e.target.value)
-                setStartingPoint(e.target.value)
+                setOriginInput(e.target.value);
+                setStartingPoint(e.target.value);
               }}
-              onFocus={() => setActiveField('origin')}
+              onFocus={() => setActiveField("origin")}
               onBlur={handleOriginBlur}
               autoComplete="off"
             />
@@ -84,8 +77,8 @@ export default function StepOrigin({ onNext }: Props) {
               <button
                 className="field-clear"
                 onClick={() => {
-                  setOriginInput('')
-                  setStartingPoint('')
+                  setOriginInput("");
+                  setStartingPoint("");
                 }}
                 aria-label="Clear"
               >
@@ -93,16 +86,15 @@ export default function StepOrigin({ onNext }: Props) {
               </button>
             )}
           </div>
-          {activeField === 'origin' && originAC.predictions.length > 0 && (
-            <AutocompleteDropdown
-              predictions={originAC.predictions}
-              onSelect={selectOrigin}
-            />
+          {activeField === "origin" && originAC.predictions.length > 0 && (
+            <AutocompleteDropdown predictions={originAC.predictions} onSelect={selectOrigin} />
           )}
         </div>
 
         {/* Route arrow */}
-        <div className="route-arrow" aria-hidden="true">↓</div>
+        <div className="route-arrow" aria-hidden="true">
+          ↓
+        </div>
 
         {/* Destination */}
         <div className="autocomplete-field">
@@ -115,10 +107,10 @@ export default function StepOrigin({ onNext }: Props) {
               placeholder="e.g. New Orleans, LA"
               value={destInput}
               onChange={(e) => {
-                setDestInput(e.target.value)
-                setDestination(e.target.value)
+                setDestInput(e.target.value);
+                setDestination(e.target.value);
               }}
-              onFocus={() => setActiveField('dest')}
+              onFocus={() => setActiveField("dest")}
               onBlur={handleDestBlur}
               autoComplete="off"
             />
@@ -126,8 +118,8 @@ export default function StepOrigin({ onNext }: Props) {
               <button
                 className="field-clear"
                 onClick={() => {
-                  setDestInput('')
-                  setDestination('')
+                  setDestInput("");
+                  setDestination("");
                 }}
                 aria-label="Clear"
               >
@@ -135,34 +127,27 @@ export default function StepOrigin({ onNext }: Props) {
               </button>
             )}
           </div>
-          {activeField === 'dest' && destAC.predictions.length > 0 && (
-            <AutocompleteDropdown
-              predictions={destAC.predictions}
-              onSelect={selectDest}
-            />
+          {activeField === "dest" && destAC.predictions.length > 0 && (
+            <AutocompleteDropdown predictions={destAC.predictions} onSelect={selectDest} />
           )}
         </div>
       </div>
 
       <div className="step-footer">
-        <button
-          className="btn-primary"
-          onClick={onNext}
-          disabled={!canContinue}
-        >
+        <button className="btn-primary" onClick={onNext} disabled={!canContinue}>
           Continue →
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 function AutocompleteDropdown({
   predictions,
   onSelect,
 }: {
-  predictions: PlacePrediction[]
-  onSelect: (p: PlacePrediction) => void
+  predictions: PlacePrediction[];
+  onSelect: (p: PlacePrediction) => void;
 }) {
   return (
     <ul className="autocomplete-dropdown" role="listbox">
@@ -178,5 +163,5 @@ function AutocompleteDropdown({
         </li>
       ))}
     </ul>
-  )
+  );
 }

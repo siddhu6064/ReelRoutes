@@ -1,28 +1,33 @@
-import RestaurantCard from './RestaurantCard'
+import RestaurantCard from "./RestaurantCard";
 
-import type { CuratedFoodChoice, FoodStop, MealSlot, RestaurantOption } from '../../../types/scratchPlan'
+import type {
+  CuratedFoodChoice,
+  FoodStop,
+  MealSlot,
+  RestaurantOption,
+} from "../../../types/scratchPlan";
 
 interface Props {
-  slot: FoodStop
-  choice: CuratedFoodChoice | undefined
-  dayIndex: number
-  onChoose: (meal: MealSlot, option: RestaurantOption) => void
-  onSkip: (meal: MealSlot) => void
+  slot: FoodStop;
+  choice: CuratedFoodChoice | undefined;
+  dayIndex: number;
+  onChoose: (meal: MealSlot, option: RestaurantOption) => void;
+  onSkip: (meal: MealSlot) => void;
 }
 
 const MEAL_LABELS: Record<MealSlot, { icon: string; label: string }> = {
-  breakfast: { icon: '☕', label: 'Breakfast' },
-  lunch:     { icon: '🥗', label: 'Lunch' },
-  dinner:    { icon: '🌆', label: 'Dinner' },
-}
+  breakfast: { icon: "☕", label: "Breakfast" },
+  lunch: { icon: "🥗", label: "Lunch" },
+  dinner: { icon: "🌆", label: "Dinner" },
+};
 
 export default function FoodSlot({ slot, choice, onChoose, onSkip }: Props) {
-  const { icon, label } = MEAL_LABELS[slot.meal]
-  const isSkipped = choice?.chosen === null
-  const hasOptions = slot.options.length > 0
+  const { icon, label } = MEAL_LABELS[slot.meal];
+  const isSkipped = choice?.chosen === null;
+  const hasOptions = slot.options.length > 0;
 
   return (
-    <div className={`food-slot ${isSkipped ? 'skipped' : ''}`}>
+    <div className={`food-slot ${isSkipped ? "skipped" : ""}`}>
       {/* Meal header */}
       <div className="food-slot-header">
         <span className="food-slot-icon">{icon}</span>
@@ -37,7 +42,7 @@ export default function FoodSlot({ slot, choice, onChoose, onSkip }: Props) {
           onClick={() => onSkip(slot.meal)}
           aria-label={isSkipped ? `Undo skip ${label}` : `Skip ${label}`}
         >
-          {isSkipped ? 'Undo skip' : 'Skip'}
+          {isSkipped ? "Undo skip" : "Skip"}
         </button>
       </div>
 
@@ -61,5 +66,5 @@ export default function FoodSlot({ slot, choice, onChoose, onSkip }: Props) {
         </p>
       )}
     </div>
-  )
+  );
 }

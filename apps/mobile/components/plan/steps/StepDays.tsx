@@ -1,46 +1,40 @@
-import React from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native'
-import * as Haptics from 'expo-haptics'
-import { useScratchPlanStore } from '@/stores/scratchPlanStore'
-import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import * as Haptics from "expo-haptics";
+import { useScratchPlanStore } from "@/stores/scratchPlanStore";
+import { Colors, Spacing, Radius, FontSize, FontWeight } from "@/components/plan/tokens";
 
-const MIN_DAYS = 1
-const MAX_DAYS = 14
-const PRESETS  = [3, 5, 7, 10, 14]
+const MIN_DAYS = 1;
+const MAX_DAYS = 14;
+const PRESETS = [3, 5, 7, 10, 14];
 
 interface Props {
-  onBack: () => void
-  onNext: () => void
+  onBack: () => void;
+  onNext: () => void;
 }
 
 export default function StepDays({ onBack, onNext }: Props) {
-  const days    = useScratchPlanStore((s) => s.days)
-  const setDays = useScratchPlanStore((s) => s.setDays)
+  const days = useScratchPlanStore((s) => s.days);
+  const setDays = useScratchPlanStore((s) => s.setDays);
 
   const decrement = () => {
     if (days > MIN_DAYS) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-      setDays(days - 1)
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setDays(days - 1);
     }
-  }
+  };
 
   const increment = () => {
     if (days < MAX_DAYS) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-      setDays(days + 1)
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setDays(days + 1);
     }
-  }
+  };
 
   const selectPreset = (n: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-    setDays(n)
-  }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setDays(n);
+  };
 
   return (
     <ScrollView
@@ -49,9 +43,7 @@ export default function StepDays({ onBack, onNext }: Props) {
       keyboardShouldPersistTaps="handled"
     >
       <Text style={styles.title}>How long is your trip?</Text>
-      <Text style={styles.subtitle}>
-        We'll plan the right number of stops per day.
-      </Text>
+      <Text style={styles.subtitle}>We'll plan the right number of stops per day.</Text>
 
       {/* Stepper */}
       <View style={styles.stepper}>
@@ -66,7 +58,7 @@ export default function StepDays({ onBack, onNext }: Props) {
 
         <View style={styles.stepDisplay}>
           <Text style={styles.stepNum}>{days}</Text>
-          <Text style={styles.stepUnit}>{days === 1 ? 'day' : 'days'}</Text>
+          <Text style={styles.stepUnit}>{days === 1 ? "day" : "days"}</Text>
         </View>
 
         <TouchableOpacity
@@ -88,9 +80,7 @@ export default function StepDays({ onBack, onNext }: Props) {
             onPress={() => selectPreset(n)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.presetText, days === n && styles.presetTextSelected]}>
-              {n}d
-            </Text>
+            <Text style={[styles.presetText, days === n && styles.presetTextSelected]}>{n}d</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -109,7 +99,7 @@ export default function StepDays({ onBack, onNext }: Props) {
         </TouchableOpacity>
       </View>
     </ScrollView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -118,24 +108,24 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     paddingTop: Spacing.xxl,
     gap: Spacing.xl,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: FontSize.xxl,
     fontWeight: FontWeight.black,
     color: Colors.black,
     letterSpacing: -0.5,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   subtitle: {
     fontSize: FontSize.md,
     color: Colors.gray500,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     lineHeight: 22,
   },
   stepper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.xxl,
     marginVertical: Spacing.md,
   },
@@ -145,8 +135,8 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     borderWidth: 2,
     borderColor: Colors.gray200,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: Colors.white,
   },
   stepBtnDisabled: { opacity: 0.35 },
@@ -155,7 +145,7 @@ const styles = StyleSheet.create({
     color: Colors.gray700,
     lineHeight: 28,
   },
-  stepDisplay: { alignItems: 'center', minWidth: 80 },
+  stepDisplay: { alignItems: "center", minWidth: 80 },
   stepNum: {
     fontSize: 56,
     fontWeight: FontWeight.black,
@@ -170,10 +160,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   presets: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.sm,
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
   presetChip: {
     borderWidth: 1.5,
@@ -196,12 +186,12 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: FontSize.sm,
     color: Colors.gray400,
-    textAlign: 'center',
+    textAlign: "center",
   },
   footer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.md,
-    width: '100%',
+    width: "100%",
     marginTop: Spacing.md,
   },
   backBtn: {
@@ -210,7 +200,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray200,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
   },
   backText: {
     fontSize: FontSize.md,
@@ -222,11 +212,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.blue,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
   },
   nextText: {
     fontSize: FontSize.md,
     fontWeight: FontWeight.bold,
     color: Colors.white,
   },
-})
+});

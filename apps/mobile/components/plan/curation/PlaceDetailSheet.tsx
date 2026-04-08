@@ -1,20 +1,13 @@
-import React, { useCallback, useMemo, useRef } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Linking,
-} from 'react-native'
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import type { ActivityStop } from '@/types/scratchPlan'
-import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
+import React, { useCallback, useMemo, useRef } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from "react-native";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import type { ActivityStop } from "@/types/scratchPlan";
+import { Colors, Spacing, Radius, FontSize, FontWeight } from "@/components/plan/tokens";
 
 interface Props {
-  stop: ActivityStop | null
-  onClose: () => void
-  onRemove: () => void
+  stop: ActivityStop | null;
+  onClose: () => void;
+  onRemove: () => void;
 }
 
 /**
@@ -25,37 +18,38 @@ interface Props {
  * in the parent navigator/screen.
  */
 export default function PlaceDetailSheet({ stop, onClose, onRemove }: Props) {
-  const bottomSheetRef = useRef<BottomSheet>(null)
-  const snapPoints = useMemo(() => ['55%', '85%'], [])
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ["55%", "85%"], []);
 
   const handleSheetChange = useCallback(
-    (index: number) => { if (index === -1) onClose() },
-    [onClose]
-  )
+    (index: number) => {
+      if (index === -1) onClose();
+    },
+    [onClose],
+  );
 
   // Open/close based on stop presence
   React.useEffect(() => {
     if (stop) {
-      bottomSheetRef.current?.expand()
+      bottomSheetRef.current?.expand();
     } else {
-      bottomSheetRef.current?.close()
+      bottomSheetRef.current?.close();
     }
-  }, [stop])
+  }, [stop]);
 
-  if (!stop) return null
+  if (!stop) return null;
 
-  const priceLabel = stop.price_level != null
-    ? ['Free', '$', '$$', '$$$', '$$$$'][stop.price_level] ?? ''
-    : null
+  const priceLabel =
+    stop.price_level != null ? (["Free", "$", "$$", "$$$", "$$$$"][stop.price_level] ?? "") : null;
 
   const openWebsite = () => {
-    if (stop.website) Linking.openURL(stop.website)
-  }
+    if (stop.website) Linking.openURL(stop.website);
+  };
 
   const openMaps = () => {
-    const q = encodeURIComponent(stop.name + ', ' + (stop.address ?? ''))
-    Linking.openURL(`https://maps.google.com/?q=${q}`)
-  }
+    const q = encodeURIComponent(stop.name + ", " + (stop.address ?? ""));
+    Linking.openURL(`https://maps.google.com/?q=${q}`);
+  };
 
   return (
     <BottomSheet
@@ -70,11 +64,7 @@ export default function PlaceDetailSheet({ stop, onClose, onRemove }: Props) {
       <BottomSheetScrollView contentContainerStyle={styles.content}>
         {/* Photo */}
         {stop.photo_url ? (
-          <Image
-            source={{ uri: stop.photo_url }}
-            style={styles.photo}
-            resizeMode="cover"
-          />
+          <Image source={{ uri: stop.photo_url }} style={styles.photo} resizeMode="cover" />
         ) : (
           <View style={styles.photoPlaceholder}>
             <Text style={{ fontSize: 40 }}>📍</Text>
@@ -95,9 +85,7 @@ export default function PlaceDetailSheet({ stop, onClose, onRemove }: Props) {
           </View>
 
           {/* Address */}
-          {stop.address ? (
-            <Text style={styles.address}>📍 {stop.address}</Text>
-          ) : null}
+          {stop.address ? <Text style={styles.address}>📍 {stop.address}</Text> : null}
 
           {/* Famous for */}
           {stop.famous_for ? (
@@ -109,13 +97,19 @@ export default function PlaceDetailSheet({ stop, onClose, onRemove }: Props) {
           {/* Meta chips */}
           <View style={styles.metaRow}>
             {stop.rating != null && (
-              <View style={styles.chip}><Text style={styles.chipText}>★ {stop.rating.toFixed(1)}</Text></View>
+              <View style={styles.chip}>
+                <Text style={styles.chipText}>★ {stop.rating.toFixed(1)}</Text>
+              </View>
             )}
             {priceLabel && (
-              <View style={styles.chip}><Text style={styles.chipText}>{priceLabel}</Text></View>
+              <View style={styles.chip}>
+                <Text style={styles.chipText}>{priceLabel}</Text>
+              </View>
             )}
             {stop.best_time && (
-              <View style={styles.chip}><Text style={styles.chipText}>🕐 {stop.best_time}</Text></View>
+              <View style={styles.chip}>
+                <Text style={styles.chipText}>🕐 {stop.best_time}</Text>
+              </View>
             )}
           </View>
 
@@ -131,17 +125,13 @@ export default function PlaceDetailSheet({ stop, onClose, onRemove }: Props) {
           {stop.opening_hours ? (
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Opening hours</Text>
-              <Text style={styles.sectionText}>
-                {stop.opening_hours.replace(/ \| /g, '\n')}
-              </Text>
+              <Text style={styles.sectionText}>{stop.opening_hours.replace(/ \| /g, "\n")}</Text>
             </View>
           ) : null}
 
           {/* Phone */}
           {stop.phone ? (
-            <TouchableOpacity
-              onPress={() => Linking.openURL(`tel:${stop.phone}`)}
-            >
+            <TouchableOpacity onPress={() => Linking.openURL(`tel:${stop.phone}`)}>
               <Text style={styles.phoneLink}>📞 {stop.phone}</Text>
             </TouchableOpacity>
           ) : null}
@@ -161,7 +151,10 @@ export default function PlaceDetailSheet({ stop, onClose, onRemove }: Props) {
           {/* Remove button */}
           <TouchableOpacity
             style={styles.removeBtn}
-            onPress={() => { onRemove(); onClose() }}
+            onPress={() => {
+              onRemove();
+              onClose();
+            }}
             activeOpacity={0.8}
           >
             <Text style={styles.removeText}>Remove this stop</Text>
@@ -169,26 +162,26 @@ export default function PlaceDetailSheet({ stop, onClose, onRemove }: Props) {
         </View>
       </BottomSheetScrollView>
     </BottomSheet>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   handle: { backgroundColor: Colors.gray200, width: 36 },
   sheetBg: { backgroundColor: Colors.white, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
   content: { paddingBottom: 40 },
-  photo: { width: '100%', height: 200 },
+  photo: { width: "100%", height: 200 },
   photoPlaceholder: {
-    width: '100%',
+    width: "100%",
     height: 140,
     backgroundColor: Colors.gray100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   body: { padding: Spacing.xl, gap: Spacing.md },
   titleRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     gap: Spacing.md,
   },
   name: {
@@ -203,8 +196,8 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: Radius.full,
     backgroundColor: Colors.gray100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   closeX: { fontSize: 18, color: Colors.gray500, lineHeight: 20 },
   address: { fontSize: FontSize.sm, color: Colors.gray500 },
@@ -213,14 +206,14 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   famousText: {
     fontSize: FontSize.sm,
     color: Colors.famousText,
     fontWeight: FontWeight.medium,
   },
-  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  metaRow: { flexDirection: "row", flexWrap: "wrap", gap: Spacing.sm },
   chip: {
     backgroundColor: Colors.gray100,
     borderRadius: Radius.sm,
@@ -241,28 +234,28 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     fontWeight: FontWeight.bold,
     color: Colors.gray500,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.8,
   },
   sectionText: { fontSize: FontSize.sm, color: Colors.gray700, lineHeight: 20 },
   phoneLink: { fontSize: FontSize.sm, color: Colors.blue, fontWeight: FontWeight.medium },
-  actions: { flexDirection: 'row', gap: Spacing.md },
+  actions: { flexDirection: "row", gap: Spacing.md },
   actionBtn: {
     flex: 1,
     borderWidth: 1.5,
     borderColor: Colors.gray200,
     borderRadius: Radius.lg,
     padding: Spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
   },
   actionText: { fontSize: FontSize.sm, color: Colors.gray700, fontWeight: FontWeight.medium },
   removeBtn: {
     borderWidth: 1.5,
-    borderColor: '#FECACA',
+    borderColor: "#FECACA",
     backgroundColor: Colors.redSoft,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: Spacing.sm,
   },
   removeText: {
@@ -270,4 +263,4 @@ const styles = StyleSheet.create({
     color: Colors.red,
     fontWeight: FontWeight.semibold,
   },
-})
+});

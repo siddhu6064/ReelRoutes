@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef } from "react";
 import {
   View,
   Text,
@@ -7,41 +7,41 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native'
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
-import { useScratchPlanStore } from '@/stores/scratchPlanStore'
-import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
+} from "react-native";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { useScratchPlanStore } from "@/stores/scratchPlanStore";
+import { Colors, Spacing, Radius, FontSize, FontWeight } from "@/components/plan/tokens";
 
-const GOOGLE_API_KEY = (process.env['EXPO_PUBLIC_GOOGLE_MAPS_API_KEY']) ?? ''
+const GOOGLE_API_KEY = process.env["EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"] ?? "";
 
 interface Props {
-  onNext: () => void
+  onNext: () => void;
 }
 
 export default function StepOrigin({ onNext }: Props) {
-  const startingPoint = useScratchPlanStore((s) => s.startingPoint)
-  const destination   = useScratchPlanStore((s) => s.destination)
-  const setStartingPoint = useScratchPlanStore((s) => s.setStartingPoint)
-  const setDestination   = useScratchPlanStore((s) => s.setDestination)
+  const startingPoint = useScratchPlanStore((s) => s.startingPoint);
+  const destination = useScratchPlanStore((s) => s.destination);
+  const setStartingPoint = useScratchPlanStore((s) => s.setStartingPoint);
+  const setDestination = useScratchPlanStore((s) => s.setDestination);
 
-  const canContinue = startingPoint.trim().length >= 2 && destination.trim().length >= 2
+  const canContinue = startingPoint.trim().length >= 2 && destination.trim().length >= 2;
 
-  const originRef = useRef<any>(null)
-  const destRef   = useRef<any>(null)
+  const originRef = useRef<any>(null);
+  const destRef = useRef<any>(null);
 
   // Pre-populate refs if values already set (navigating back)
   React.useEffect(() => {
     if (startingPoint && originRef.current) {
-      originRef.current.setAddressText(startingPoint)
+      originRef.current.setAddressText(startingPoint);
     }
     if (destination && destRef.current) {
-      destRef.current.setAddressText(destination)
+      destRef.current.setAddressText(destination);
     }
-  }, [])
+  }, []);
 
   const sharedACProps = {
     fetchDetails: false,
-    query: { key: GOOGLE_API_KEY, language: 'en', types: '(cities)' },
+    query: { key: GOOGLE_API_KEY, language: "en", types: "(cities)" },
     styles: {
       textInput: styles.acInput,
       listView: styles.acDropdown,
@@ -53,13 +53,13 @@ export default function StepOrigin({ onNext }: Props) {
     minLength: 2,
     debounce: 300,
     keepResultsAfterBlur: false,
-    keyboardShouldPersistTaps: 'handled' as const,
-  }
+    keyboardShouldPersistTaps: "handled" as const,
+  };
 
   return (
     <KeyboardAvoidingView
       style={styles.kav}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         style={styles.scroll}
@@ -67,9 +67,7 @@ export default function StepOrigin({ onNext }: Props) {
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.title}>Where are you going?</Text>
-        <Text style={styles.subtitle}>
-          Tell us your starting point and destination.
-        </Text>
+        <Text style={styles.subtitle}>Tell us your starting point and destination.</Text>
 
         {/* Starting from */}
         <View style={styles.fieldWrap}>
@@ -80,10 +78,10 @@ export default function StepOrigin({ onNext }: Props) {
               ref={originRef}
               placeholder="e.g. Austin, TX"
               onPress={(data: { description: string }) => setStartingPoint(data.description)}
-              onFail={(_err: unknown) => console.warn('Origin AC error')}
+              onFail={(_err: unknown) => console.warn("Origin AC error")}
               textInputProps={{
                 onChangeText: setStartingPoint,
-                clearButtonMode: 'while-editing',
+                clearButtonMode: "while-editing",
               }}
               {...sharedACProps}
             />
@@ -102,10 +100,10 @@ export default function StepOrigin({ onNext }: Props) {
               ref={destRef}
               placeholder="e.g. New Orleans, LA"
               onPress={(data: { description: string }) => setDestination(data.description)}
-              onFail={(_err: unknown) => console.warn('Destination AC error')}
+              onFail={(_err: unknown) => console.warn("Destination AC error")}
               textInputProps={{
                 onChangeText: setDestination,
-                clearButtonMode: 'while-editing',
+                clearButtonMode: "while-editing",
               }}
               {...sharedACProps}
             />
@@ -122,7 +120,7 @@ export default function StepOrigin({ onNext }: Props) {
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -154,15 +152,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   acWrap: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     borderWidth: 1.5,
     borderColor: Colors.gray200,
     borderRadius: Radius.lg,
     backgroundColor: Colors.white,
     paddingLeft: Spacing.md,
     paddingTop: 2,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   fieldIcon: { fontSize: 18, marginTop: 11 },
   acInput: {
@@ -171,10 +169,10 @@ const styles = StyleSheet.create({
     color: Colors.black,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   acDropdown: {
-    position: 'absolute',
+    position: "absolute",
     top: 52,
     left: -Spacing.md,
     right: 0,
@@ -183,7 +181,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray200,
     borderRadius: Radius.lg,
     backgroundColor: Colors.white,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
@@ -195,14 +193,14 @@ const styles = StyleSheet.create({
   arrow: {
     fontSize: 22,
     color: Colors.gray200,
-    textAlign: 'center',
+    textAlign: "center",
     marginVertical: -Spacing.xs,
   },
   btn: {
     backgroundColor: Colors.blue,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: Spacing.md,
   },
   btnDisabled: { opacity: 0.45 },
@@ -211,4 +209,4 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.bold,
     color: Colors.white,
   },
-})
+});

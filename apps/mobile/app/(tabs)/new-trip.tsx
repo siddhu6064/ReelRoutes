@@ -178,19 +178,17 @@ export default function NewTripScreen() {
           ))}
         </View>
 
-
         {/* Plan from Scratch */}
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>or</Text>
           <View style={styles.dividerLine} />
         </View>
-        <Pressable
-          style={styles.planBtn}
-          onPress={() => router.push("/plan-wizard")}
-        >
-          <Text style={styles.planBtnText}>✨  Plan from scratch with AI</Text>
-          <Text style={styles.planBtnSub}>Tell us where you're going — AI builds the itinerary</Text>
+        <Pressable style={styles.planBtn} onPress={() => router.push("/plan-wizard")}>
+          <Text style={styles.planBtnText}>✨ Plan from scratch with AI</Text>
+          <Text style={styles.planBtnSub}>
+            Tell us where you're going — AI builds the itinerary
+          </Text>
         </Pressable>
 
         {/* Native share tip */}
@@ -267,7 +265,6 @@ const styles = StyleSheet.create({
   chipActive: { borderColor: CORAL },
   chipText: { color: MUTED, fontSize: 12, fontWeight: "600" },
   chipTextActive: { color: CORAL },
-
 
   divider: { flexDirection: "row", alignItems: "center", gap: 10 },
   dividerLine: { flex: 1, height: 1, backgroundColor: BORDER },

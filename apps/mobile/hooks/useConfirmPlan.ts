@@ -1,27 +1,25 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation } from "@tanstack/react-query";
 import type {
   CuratedDay,
   PlanConfirmRequest,
   PlanConfirmResponse,
   TravelMode,
   TripPreference,
-} from '@/types/scratchPlan'
+} from "@/types/scratchPlan";
 
-const API_BASE = (process.env['EXPO_PUBLIC_API_URL']) ?? 'http://localhost:8000'
+const API_BASE = process.env["EXPO_PUBLIC_API_URL"] ?? "http://localhost:8000";
 
-async function postConfirmPlan(
-  req: PlanConfirmRequest
-): Promise<PlanConfirmResponse> {
+async function postConfirmPlan(req: PlanConfirmRequest): Promise<PlanConfirmResponse> {
   const res = await fetch(`${API_BASE}/trips/plan/confirm`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(req),
-  })
+  });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error(err.detail ?? `Confirm request failed (${res.status})`)
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail ?? `Confirm request failed (${res.status})`);
   }
-  return res.json()
+  return res.json();
 }
 
 /**
@@ -32,7 +30,7 @@ export function useConfirmPlan() {
   return useMutation<PlanConfirmResponse, Error, PlanConfirmRequest>({
     mutationFn: postConfirmPlan,
     retry: false,
-  })
+  });
 }
 
 /**
@@ -40,12 +38,12 @@ export function useConfirmPlan() {
  * Called by CurationScreen when the user clicks "Save Trip".
  */
 export function buildConfirmRequest(params: {
-  startingPoint: string
-  destination: string
-  days: number
-  travelMode: TravelMode
-  preferences: TripPreference[]
-  curatedDays: CuratedDay[]
+  startingPoint: string;
+  destination: string;
+  days: number;
+  travelMode: TravelMode;
+  preferences: TripPreference[];
+  curatedDays: CuratedDay[];
 }): PlanConfirmRequest {
   return {
     starting_point: params.startingPoint,
@@ -78,5 +76,5 @@ export function buildConfirmRequest(params: {
           meal: fc.meal,
         })),
     })),
-  }
+  };
 }

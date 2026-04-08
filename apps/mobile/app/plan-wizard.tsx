@@ -1,24 +1,18 @@
-import React, { useCallback } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native'
-import { useRouter } from 'expo-router'
-import { useScratchPlanStore, selectPlanRequest } from '@/stores/scratchPlanStore'
-import { usePlanTrip } from '@/hooks/usePlanTrip'
-import StepOrigin      from '@/components/plan/steps/StepOrigin'
-import StepDays        from '@/components/plan/steps/StepDays'
-import StepPreferences from '@/components/plan/steps/StepPreferences'
-import StepLoading     from '@/components/plan/steps/StepLoading'
-import CurationScreen  from '@/components/plan/curation/CurationScreen'
-import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
-import type { WizardStep } from '@/types/scratchPlan'
+import React, { useCallback } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
+import { useRouter } from "expo-router";
+import { useScratchPlanStore, selectPlanRequest } from "@/stores/scratchPlanStore";
+import { usePlanTrip } from "@/hooks/usePlanTrip";
+import StepOrigin from "@/components/plan/steps/StepOrigin";
+import StepDays from "@/components/plan/steps/StepDays";
+import StepPreferences from "@/components/plan/steps/StepPreferences";
+import StepLoading from "@/components/plan/steps/StepLoading";
+import CurationScreen from "@/components/plan/curation/CurationScreen";
+import { Colors, Spacing, Radius, FontSize, FontWeight } from "@/components/plan/tokens";
+import type { WizardStep } from "@/types/scratchPlan";
 
-const STEPS: WizardStep[] = ['origin', 'days', 'preferences', 'loading']
-const STEP_LABELS = ['Where', 'When', 'Vibe', 'Planning']
+const STEPS: WizardStep[] = ["origin", "days", "preferences", "loading"];
+const STEP_LABELS = ["Where", "When", "Vibe", "Planning"];
 
 /**
  * PlanWizardScreen
@@ -32,32 +26,32 @@ const STEP_LABELS = ['Where', 'When', 'Vibe', 'Planning']
  * not a stack push, so the back button is suppressed during curation).
  */
 export default function PlanWizardScreen() {
-  const router = useRouter()
-  const step       = useScratchPlanStore((s) => s.step)
-  const setStep    = useScratchPlanStore((s) => s.setStep)
-  const setDraft   = useScratchPlanStore((s) => s.setDraft)
-  const reset      = useScratchPlanStore((s) => s.reset)
+  const router = useRouter();
+  const step = useScratchPlanStore((s) => s.step);
+  const setStep = useScratchPlanStore((s) => s.setStep);
+  const setDraft = useScratchPlanStore((s) => s.setDraft);
+  const reset = useScratchPlanStore((s) => s.reset);
 
-  const planRequest = useScratchPlanStore(selectPlanRequest)
-  const { mutate: planTrip, error: planError } = usePlanTrip()
+  const planRequest = useScratchPlanStore(selectPlanRequest);
+  const { mutate: planTrip, error: planError } = usePlanTrip();
 
   const handleGenerate = useCallback(() => {
-    setStep('loading')
+    setStep("loading");
     planTrip(planRequest, {
       onSuccess: (draft) => setDraft(draft),
-      onError:   ()      => setStep('preferences'),
-    })
-  }, [planRequest, planTrip, setStep, setDraft])
+      onError: () => setStep("preferences"),
+    });
+  }, [planRequest, planTrip, setStep, setDraft]);
 
   const handleClose = () => {
-    reset()
-    router.back()
-  }
+    reset();
+    router.back();
+  };
 
   // Curation takes over the whole screen
-  if (step === 'curation') return <CurationScreen />
+  if (step === "curation") return <CurationScreen />;
 
-  const currentStepIndex = STEPS.indexOf(step)
+  const currentStepIndex = STEPS.indexOf(step);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -76,12 +70,12 @@ export default function PlanWizardScreen() {
 
       {/* Progress dots */}
       <View style={styles.progress}>
-        {STEPS.filter((s) => s !== 'loading').map((s, i) => (
+        {STEPS.filter((s) => s !== "loading").map((s, i) => (
           <View key={s} style={styles.progressItem}>
             <View
               style={[
                 styles.dot,
-                i <= currentStepIndex && step !== 'loading' && styles.dotActive,
+                i <= currentStepIndex && step !== "loading" && styles.dotActive,
                 i < currentStepIndex && styles.dotDone,
               ]}
             >
@@ -102,34 +96,29 @@ export default function PlanWizardScreen() {
 
       {/* Step content */}
       <View style={styles.content}>
-        {step === 'origin' && (
-          <StepOrigin onNext={() => setStep('days')} />
+        {step === "origin" && <StepOrigin onNext={() => setStep("days")} />}
+        {step === "days" && (
+          <StepDays onBack={() => setStep("origin")} onNext={() => setStep("preferences")} />
         )}
-        {step === 'days' && (
-          <StepDays
-            onBack={() => setStep('origin')}
-            onNext={() => setStep('preferences')}
-          />
-        )}
-        {step === 'preferences' && (
+        {step === "preferences" && (
           <StepPreferences
-            onBack={() => setStep('days')}
+            onBack={() => setStep("days")}
             onGenerate={handleGenerate}
             {...(planError?.message !== undefined && { error: planError.message })}
           />
         )}
-        {step === 'loading' && <StepLoading />}
+        {step === "loading" && <StepLoading />}
       </View>
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.white },
   navbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.lg,
     borderBottomWidth: 0.5,
@@ -140,8 +129,8 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: Radius.full,
     backgroundColor: Colors.gray100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   navCloseText: { fontSize: FontSize.md, color: Colors.gray500 },
   navTitle: {
@@ -150,15 +139,15 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
   progress: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     gap: Spacing.xxl,
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.xl,
     borderBottomWidth: 0.5,
     borderBottomColor: Colors.gray100,
   },
-  progressItem: { alignItems: 'center', gap: Spacing.xs },
+  progressItem: { alignItems: "center", gap: Spacing.xs },
   dot: {
     width: 32,
     height: 32,
@@ -166,8 +155,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.gray200,
     backgroundColor: Colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   dotActive: { borderColor: Colors.blue, backgroundColor: Colors.blueSoft },
   dotDone: { borderColor: Colors.green, backgroundColor: Colors.green },
@@ -177,4 +166,4 @@ const styles = StyleSheet.create({
   dotLabel: { fontSize: FontSize.xs, color: Colors.gray400, fontWeight: FontWeight.medium },
   dotLabelActive: { color: Colors.blue },
   content: { flex: 1 },
-})
+});

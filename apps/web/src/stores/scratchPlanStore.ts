@@ -1,5 +1,5 @@
-import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 import type {
   ActivityStop,
@@ -13,31 +13,31 @@ import type {
   TravelMode,
   TripPreference,
   WizardStep,
-} from '../types/scratchPlan'
+} from "../types/scratchPlan";
 
 // ─── State shape ─────────────────────────────────────────────────────────────
 
 interface ScratchPlanState {
-  step: WizardStep
-  startingPoint: string
-  destination: string
-  days: number
-  preferences: TripPreference[]
-  travelMode: TravelMode
-  draft: DraftItinerary | null
-  curatedDays: CuratedDay[]
+  step: WizardStep;
+  startingPoint: string;
+  destination: string;
+  days: number;
+  preferences: TripPreference[];
+  travelMode: TravelMode;
+  draft: DraftItinerary | null;
+  curatedDays: CuratedDay[];
 
-  setStep: (step: WizardStep) => void
-  setStartingPoint: (v: string) => void
-  setDestination: (v: string) => void
-  setDays: (n: number) => void
-  togglePreference: (p: TripPreference) => void
-  setDraft: (draft: DraftItinerary) => void
-  removeActivityStop: (dayIndex: number, stopIndex: number) => void
-  reorderActivityStops: (dayIndex: number, fromIndex: number, toIndex: number) => void
-  chooseFoodOption: (dayIndex: number, meal: MealSlot, option: RestaurantOption) => void
-  skipFoodSlot: (dayIndex: number, meal: MealSlot) => void
-  reset: () => void
+  setStep: (step: WizardStep) => void;
+  setStartingPoint: (v: string) => void;
+  setDestination: (v: string) => void;
+  setDays: (n: number) => void;
+  togglePreference: (p: TripPreference) => void;
+  setDraft: (draft: DraftItinerary) => void;
+  removeActivityStop: (dayIndex: number, stopIndex: number) => void;
+  reorderActivityStops: (dayIndex: number, fromIndex: number, toIndex: number) => void;
+  chooseFoodOption: (dayIndex: number, meal: MealSlot, option: RestaurantOption) => void;
+  skipFoodSlot: (dayIndex: number, meal: MealSlot) => void;
+  reset: () => void;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -45,29 +45,27 @@ interface ScratchPlanState {
 function initCuratedDays(draft: DraftItinerary): CuratedDay[] {
   return draft.days_plan.map((dayPlan) => {
     const activityStops: ActivityStop[] = dayPlan.stops.filter(
-      (s): s is ActivityStop => s.type === 'activity'
-    )
-    const foodSlots: FoodStop[] = dayPlan.stops.filter(
-      (s): s is FoodStop => s.type === 'food'
-    )
+      (s): s is ActivityStop => s.type === "activity",
+    );
+    const foodSlots: FoodStop[] = dayPlan.stops.filter((s): s is FoodStop => s.type === "food");
     const foodChoices: CuratedFoodChoice[] = foodSlots.map((slot) => ({
       meal: slot.meal,
       chosen: slot.options[0] ?? null,
-    }))
-    return { day: dayPlan.day, activityStops, foodChoices, foodSlots }
-  })
+    }));
+    return { day: dayPlan.day, activityStops, foodChoices, foodSlots };
+  });
 }
 
 const DEFAULT_STATE = {
-  step: 'origin' as WizardStep,
-  startingPoint: '',
-  destination: '',
+  step: "origin" as WizardStep,
+  startingPoint: "",
+  destination: "",
   days: 3,
   preferences: [] as TripPreference[],
-  travelMode: 'driving' as TravelMode,
+  travelMode: "driving" as TravelMode,
   draft: null,
   curatedDays: [] as CuratedDay[],
-}
+};
 
 // ─── Store ───────────────────────────────────────────────────────────────────
 
@@ -75,10 +73,10 @@ export const useScratchPlanStore = create<ScratchPlanState>()(
   devtools(
     (set) => ({
       ...DEFAULT_STATE,
-      setStep: (step) => set({ step }, false, 'setStep'),
-      setStartingPoint: (startingPoint) => set({ startingPoint }, false, 'setStartingPoint'),
-      setDestination: (destination) => set({ destination }, false, 'setDestination'),
-      setDays: (days) => set({ days }, false, 'setDays'),
+      setStep: (step) => set({ step }, false, "setStep"),
+      setStartingPoint: (startingPoint) => set({ startingPoint }, false, "setStartingPoint"),
+      setDestination: (destination) => set({ destination }, false, "setDestination"),
+      setDays: (days) => set({ days }, false, "setDays"),
       togglePreference: (p) =>
         set(
           (state) => ({
@@ -87,35 +85,35 @@ export const useScratchPlanStore = create<ScratchPlanState>()(
               : [...state.preferences, p],
           }),
           false,
-          'togglePreference'
+          "togglePreference",
         ),
       setDraft: (draft) =>
-        set({ draft, curatedDays: initCuratedDays(draft), step: 'curation' }, false, 'setDraft'),
+        set({ draft, curatedDays: initCuratedDays(draft), step: "curation" }, false, "setDraft"),
       removeActivityStop: (dayIndex, stopIndex) =>
         set(
           (state) => ({
             curatedDays: state.curatedDays.map((d, di) =>
               di !== dayIndex
                 ? d
-                : { ...d, activityStops: d.activityStops.filter((_, si) => si !== stopIndex) }
+                : { ...d, activityStops: d.activityStops.filter((_, si) => si !== stopIndex) },
             ),
           }),
           false,
-          'removeActivityStop'
+          "removeActivityStop",
         ),
       reorderActivityStops: (dayIndex, fromIndex, toIndex) =>
         set(
           (state) => ({
             curatedDays: state.curatedDays.map((d, di) => {
-              if (di !== dayIndex) return d
-              const stops = [...d.activityStops]
-              const [moved] = stops.splice(fromIndex, 1)
-              if (moved) stops.splice(toIndex, 0, moved)
-              return { ...d, activityStops: stops }
+              if (di !== dayIndex) return d;
+              const stops = [...d.activityStops];
+              const [moved] = stops.splice(fromIndex, 1);
+              if (moved) stops.splice(toIndex, 0, moved);
+              return { ...d, activityStops: stops };
             }),
           }),
           false,
-          'reorderActivityStops'
+          "reorderActivityStops",
         ),
       chooseFoodOption: (dayIndex, meal, option) =>
         set(
@@ -126,13 +124,13 @@ export const useScratchPlanStore = create<ScratchPlanState>()(
                 : {
                     ...d,
                     foodChoices: d.foodChoices.map((fc) =>
-                      fc.meal === meal ? { ...fc, chosen: option } : fc
+                      fc.meal === meal ? { ...fc, chosen: option } : fc,
                     ),
-                  }
+                  },
             ),
           }),
           false,
-          'chooseFoodOption'
+          "chooseFoodOption",
         ),
       skipFoodSlot: (dayIndex, meal) =>
         set(
@@ -143,19 +141,19 @@ export const useScratchPlanStore = create<ScratchPlanState>()(
                 : {
                     ...d,
                     foodChoices: d.foodChoices.map((fc) =>
-                      fc.meal === meal ? { ...fc, chosen: null } : fc
+                      fc.meal === meal ? { ...fc, chosen: null } : fc,
                     ),
-                  }
+                  },
             ),
           }),
           false,
-          'skipFoodSlot'
+          "skipFoodSlot",
         ),
-      reset: () => set(DEFAULT_STATE, false, 'reset'),
+      reset: () => set(DEFAULT_STATE, false, "reset"),
     }),
-    { name: 'scratch-plan-store' }
-  )
-)
+    { name: "scratch-plan-store" },
+  ),
+);
 
 // ─── Selectors ───────────────────────────────────────────────────────────────
 
@@ -166,19 +164,19 @@ export function selectPlanRequest(state: ScratchPlanState): PlanRequest {
     days: state.days,
     preferences: state.preferences,
     travel_mode: state.travelMode,
-  }
+  };
 }
 
 export function selectAllActivityPins(state: ScratchPlanState): ActivityStop[] {
-  return state.curatedDays.flatMap((d) => d.activityStops)
+  return state.curatedDays.flatMap((d) => d.activityStops);
 }
 
 export function selectChosenFoodPins(state: ScratchPlanState): RestaurantOption[] {
   return state.curatedDays.flatMap((d) =>
-    d.foodChoices.filter((fc) => fc.chosen !== null).map((fc) => fc.chosen!)
-  )
+    d.foodChoices.filter((fc) => fc.chosen !== null).map((fc) => fc.chosen!),
+  );
 }
 
 export function selectTotalStops(state: ScratchPlanState): number {
-  return state.curatedDays.reduce((acc, d) => acc + d.activityStops.length, 0)
+  return state.curatedDays.reduce((acc, d) => acc + d.activityStops.length, 0);
 }

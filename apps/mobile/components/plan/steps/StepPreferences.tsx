@@ -1,46 +1,40 @@
-import React from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native'
-import * as Haptics from 'expo-haptics'
-import { useScratchPlanStore } from '@/stores/scratchPlanStore'
-import type { TripPreference } from '@/types/scratchPlan'
-import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import * as Haptics from "expo-haptics";
+import { useScratchPlanStore } from "@/stores/scratchPlanStore";
+import type { TripPreference } from "@/types/scratchPlan";
+import { Colors, Spacing, Radius, FontSize, FontWeight } from "@/components/plan/tokens";
 
 const PREFERENCES: Array<{
-  value: TripPreference
-  label: string
-  emoji: string
-  desc: string
+  value: TripPreference;
+  label: string;
+  emoji: string;
+  desc: string;
 }> = [
-  { value: 'food',       label: 'Food & Drink', emoji: '🍜', desc: 'Local cuisine & restaurants' },
-  { value: 'history',   label: 'History',       emoji: '🏛',  desc: 'Museums & heritage sites' },
-  { value: 'nature',    label: 'Nature',        emoji: '🌿', desc: 'Parks, hikes & scenic spots' },
-  { value: 'art',       label: 'Art & Culture', emoji: '🎨', desc: 'Galleries & live music' },
-  { value: 'adventure', label: 'Adventure',     emoji: '🧗', desc: 'Outdoor activities' },
-  { value: 'shopping',  label: 'Shopping',      emoji: '🛍',  desc: 'Markets & boutiques' },
-  { value: 'nightlife', label: 'Nightlife',     emoji: '🌙', desc: 'Bars & evening entertainment' },
-]
+  { value: "food", label: "Food & Drink", emoji: "🍜", desc: "Local cuisine & restaurants" },
+  { value: "history", label: "History", emoji: "🏛", desc: "Museums & heritage sites" },
+  { value: "nature", label: "Nature", emoji: "🌿", desc: "Parks, hikes & scenic spots" },
+  { value: "art", label: "Art & Culture", emoji: "🎨", desc: "Galleries & live music" },
+  { value: "adventure", label: "Adventure", emoji: "🧗", desc: "Outdoor activities" },
+  { value: "shopping", label: "Shopping", emoji: "🛍", desc: "Markets & boutiques" },
+  { value: "nightlife", label: "Nightlife", emoji: "🌙", desc: "Bars & evening entertainment" },
+];
 
 interface Props {
-  onBack: () => void
-  onGenerate: () => void
-  error?: string
+  onBack: () => void;
+  onGenerate: () => void;
+  error?: string;
 }
 
 export default function StepPreferences({ onBack, onGenerate, error }: Props) {
-  const preferences      = useScratchPlanStore((s) => s.preferences)
-  const togglePreference = useScratchPlanStore((s) => s.togglePreference)
-  const destination      = useScratchPlanStore((s) => s.destination)
+  const preferences = useScratchPlanStore((s) => s.preferences);
+  const togglePreference = useScratchPlanStore((s) => s.togglePreference);
+  const destination = useScratchPlanStore((s) => s.destination);
 
   const toggle = (p: TripPreference) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-    togglePreference(p)
-  }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    togglePreference(p);
+  };
 
   return (
     <ScrollView
@@ -50,15 +44,15 @@ export default function StepPreferences({ onBack, onGenerate, error }: Props) {
     >
       <Text style={styles.title}>What's your vibe?</Text>
       <Text style={styles.subtitle}>
-        Choose what matters in{' '}
-        <Text style={styles.destHighlight}>{destination || 'your destination'}</Text>.
-        {'\n'}Skip to get a balanced mix.
+        Choose what matters in{" "}
+        <Text style={styles.destHighlight}>{destination || "your destination"}</Text>.{"\n"}Skip to
+        get a balanced mix.
       </Text>
 
       {/* 2-column chip grid */}
       <View style={styles.grid}>
         {PREFERENCES.map((pref) => {
-          const selected = preferences.includes(pref.value)
+          const selected = preferences.includes(pref.value);
           return (
             <TouchableOpacity
               key={pref.value}
@@ -77,13 +71,13 @@ export default function StepPreferences({ onBack, onGenerate, error }: Props) {
                 </View>
               )}
             </TouchableOpacity>
-          )
+          );
         })}
       </View>
 
       {preferences.length > 0 && (
         <Text style={styles.count}>
-          {preferences.length} interest{preferences.length !== 1 ? 's' : ''} selected
+          {preferences.length} interest{preferences.length !== 1 ? "s" : ""} selected
         </Text>
       )}
 
@@ -99,11 +93,11 @@ export default function StepPreferences({ onBack, onGenerate, error }: Props) {
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.generateBtn} onPress={onGenerate} activeOpacity={0.8}>
-          <Text style={styles.generateText}>✨  Plan my trip</Text>
+          <Text style={styles.generateText}>✨ Plan my trip</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -126,13 +120,13 @@ const styles = StyleSheet.create({
   },
   destHighlight: { color: Colors.blue, fontWeight: FontWeight.semibold },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: Spacing.md,
   },
   chip: {
-    width: '47%',
-    position: 'relative',
+    width: "47%",
+    position: "relative",
     borderWidth: 1.5,
     borderColor: Colors.gray200,
     borderRadius: Radius.lg,
@@ -157,15 +151,15 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   checkBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: Spacing.sm,
     right: Spacing.sm,
     width: 20,
     height: 20,
     borderRadius: Radius.full,
     backgroundColor: Colors.blue,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   checkText: {
     fontSize: 11,
@@ -176,7 +170,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
     color: Colors.blue,
     fontWeight: FontWeight.medium,
-    textAlign: 'center',
+    textAlign: "center",
   },
   errorBox: {
     backgroundColor: Colors.redSoft,
@@ -186,12 +180,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: FontSize.sm,
-    color: '#B91C1C',
+    color: "#B91C1C",
     fontWeight: FontWeight.medium,
   },
-  errorHint: { fontSize: FontSize.xs, color: '#DC2626' },
+  errorHint: { fontSize: FontSize.xs, color: "#DC2626" },
   footer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.md,
     marginTop: Spacing.sm,
   },
@@ -201,7 +195,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.gray200,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
   },
   backText: {
     fontSize: FontSize.md,
@@ -213,11 +207,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.blue,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
   },
   generateText: {
     fontSize: FontSize.md,
     fontWeight: FontWeight.bold,
     color: Colors.white,
   },
-})
+});

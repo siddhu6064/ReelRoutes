@@ -1,31 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 
-import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
+import { useScratchPlanStore } from "../../../stores/scratchPlanStore";
 const STAGES = [
-  { pct: 15, label: 'Asking AI for the best spots…' },
-  { pct: 35, label: 'Geocoding locations…' },
-  { pct: 55, label: 'Sorting stops by proximity…' },
-  { pct: 70, label: 'Enriching with local tips…' },
-  { pct: 85, label: 'Finding great restaurants…' },
-  { pct: 97, label: 'Finishing your itinerary…' },
-]
+  { pct: 15, label: "Asking AI for the best spots…" },
+  { pct: 35, label: "Geocoding locations…" },
+  { pct: 55, label: "Sorting stops by proximity…" },
+  { pct: 70, label: "Enriching with local tips…" },
+  { pct: 85, label: "Finding great restaurants…" },
+  { pct: 97, label: "Finishing your itinerary…" },
+];
 
-const STAGE_INTERVAL_MS = 3200
+const STAGE_INTERVAL_MS = 3200;
 
 export default function StepLoading() {
-  const destination = useScratchPlanStore((s) => s.destination)
-  const days = useScratchPlanStore((s) => s.days)
+  const destination = useScratchPlanStore((s) => s.destination);
+  const days = useScratchPlanStore((s) => s.days);
 
-  const [stageIndex, setStageIndex] = useState(0)
+  const [stageIndex, setStageIndex] = useState(0);
 
   useEffect(() => {
     const id = setInterval(() => {
-      setStageIndex((i) => Math.min(i + 1, STAGES.length - 1))
-    }, STAGE_INTERVAL_MS)
-    return () => clearInterval(id)
-  }, [])
+      setStageIndex((i) => Math.min(i + 1, STAGES.length - 1));
+    }, STAGE_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, []);
 
-  const { pct, label } = STAGES[stageIndex]
+  const { pct, label } = STAGES[stageIndex];
 
   return (
     <div className="loading-screen">
@@ -39,7 +39,7 @@ export default function StepLoading() {
 
       <div className="loading-text">
         <h2 className="loading-title">
-          Planning {days} day{days !== 1 ? 's' : ''} in{' '}
+          Planning {days} day{days !== 1 ? "s" : ""} in{" "}
           <span className="loading-dest">{destination}</span>
         </h2>
         <p className="loading-stage">{label}</p>
@@ -58,9 +58,7 @@ export default function StepLoading() {
       </div>
       <p className="loading-pct">{pct}%</p>
 
-      <p className="loading-note">
-        This usually takes 15–25 seconds. Hang tight!
-      </p>
+      <p className="loading-note">This usually takes 15–25 seconds. Hang tight!</p>
     </div>
-  )
+  );
 }

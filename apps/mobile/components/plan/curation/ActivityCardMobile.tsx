@@ -1,23 +1,16 @@
-import React from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Pressable,
-} from 'react-native'
-import type { ActivityStop } from '@/types/scratchPlan'
-import { Colors, Spacing, Radius, FontSize, FontWeight } from '@/components/plan/tokens'
+import React from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Pressable } from "react-native";
+import type { ActivityStop } from "@/types/scratchPlan";
+import { Colors, Spacing, Radius, FontSize, FontWeight } from "@/components/plan/tokens";
 
 interface Props {
-  stop: ActivityStop
-  index: number
-  onRemove: () => void
-  onPress: () => void   // opens detail bottom sheet
+  stop: ActivityStop;
+  index: number;
+  onRemove: () => void;
+  onPress: () => void; // opens detail bottom sheet
   /** Passed from DraggableFlatList drag() call */
-  drag?: () => void
-  isActive?: boolean
+  drag?: () => void;
+  isActive?: boolean;
 }
 
 export default function ActivityCardMobile({
@@ -28,15 +21,11 @@ export default function ActivityCardMobile({
   drag,
   isActive,
 }: Props) {
-  const priceLabel = stop.price_level != null
-    ? ['Free', '$', '$$', '$$$', '$$$$'][stop.price_level] ?? ''
-    : null
+  const priceLabel =
+    stop.price_level != null ? (["Free", "$", "$$", "$$$", "$$$$"][stop.price_level] ?? "") : null;
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.card, isActive && styles.cardDragging]}
-    >
+    <Pressable onPress={onPress} style={[styles.card, isActive && styles.cardDragging]}>
       {/* Drag handle — long press activates drag */}
       <TouchableOpacity
         onLongPress={drag}
@@ -49,11 +38,7 @@ export default function ActivityCardMobile({
 
       {/* Photo */}
       {stop.photo_url ? (
-        <Image
-          source={{ uri: stop.photo_url }}
-          style={styles.photo}
-          resizeMode="cover"
-        />
+        <Image source={{ uri: stop.photo_url }} style={styles.photo} resizeMode="cover" />
       ) : (
         <View style={styles.photoPlaceholder}>
           <Text style={styles.photoEmoji}>📍</Text>
@@ -63,7 +48,9 @@ export default function ActivityCardMobile({
       {/* Content */}
       <View style={styles.content}>
         <View style={styles.headerRow}>
-          <Text style={styles.name} numberOfLines={1}>{stop.name}</Text>
+          <Text style={styles.name} numberOfLines={1}>
+            {stop.name}
+          </Text>
           <TouchableOpacity
             style={styles.removeBtn}
             onPress={onRemove}
@@ -115,7 +102,7 @@ export default function ActivityCardMobile({
         <Text style={styles.tapHint}>Tap for details →</Text>
       </View>
     </Pressable>
-  )
+  );
 }
 
 function DragIcon() {
@@ -128,13 +115,13 @@ function DragIcon() {
         </View>
       ))}
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     backgroundColor: Colors.white,
     borderWidth: 1.5,
     borderColor: Colors.gray200,
@@ -155,15 +142,15 @@ const styles = StyleSheet.create({
   dragHandle: {
     paddingTop: 2,
     paddingRight: 2,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   dragDots: { gap: 4 },
-  dotRow: { flexDirection: 'row', gap: 4 },
+  dotRow: { flexDirection: "row", gap: 4 },
   dot: {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor:  Colors.gray200,
+    backgroundColor: Colors.gray200,
   },
   photo: {
     width: 72,
@@ -176,16 +163,16 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: Radius.md,
     backgroundColor: Colors.gray100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
   photoEmoji: { fontSize: 24 },
   content: { flex: 1, gap: Spacing.xs },
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     gap: Spacing.sm,
   },
   name: {
@@ -201,8 +188,8 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
     borderWidth: 1.5,
     borderColor: Colors.gray200,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
   removeX: { fontSize: 16, color: Colors.gray400, lineHeight: 18 },
@@ -211,14 +198,14 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   famousText: {
     fontSize: FontSize.xs,
     color: Colors.famousText,
     fontWeight: FontWeight.medium,
   },
-  metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
+  metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 4 },
   metaChip: {
     backgroundColor: Colors.gray100,
     borderRadius: Radius.sm,
@@ -239,4 +226,4 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.medium,
     marginTop: 2,
   },
-})
+});
