@@ -77,21 +77,21 @@ export interface ConfirmActivityStop {
   name: string
   lat: number
   lng: number
-  place_id?: string
-  address?: string
-  famous_for?: string
-  best_time?: string
-  local_tip?: string
-  photo_url?: string
+  place_id?: string | undefined
+  address?: string | undefined
+  famous_for?: string | undefined
+  best_time?: string | undefined
+  local_tip?: string | undefined
+  photo_url?: string | undefined
 }
 
 export interface ConfirmFoodStop {
   name: string
   lat: number
   lng: number
-  place_id?: string
-  address?: string
-  known_for?: string
+  place_id?: string | undefined
+  address?: string | undefined
+  known_for?: string | undefined
   meal: MealSlot
 }
 

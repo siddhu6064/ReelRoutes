@@ -8,8 +8,8 @@ import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
 import ActivityCard from './ActivityCard'
 import FoodSlot from './FoodSlot'
 
-import type { DragEndEvent } from '@dnd-kit/core'
 import type { ActivityStop, CuratedDay, MealSlot, RestaurantOption } from '../../../types/scratchPlan'
+import type { DragEndEvent } from '@dnd-kit/core'
 
 interface Props {
   curatedDay: CuratedDay

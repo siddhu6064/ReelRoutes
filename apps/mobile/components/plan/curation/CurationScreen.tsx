@@ -74,7 +74,7 @@ export default function CurationScreen() {
     confirmPlan(req, {
       onSuccess: (res) => {
         reset()
-        router.replace('TripDetail', { tripId: res.trip_id })
+        router.replace(`/trip/${res.trip_id}` as never)
       },
       onError: (err) => {
         Alert.alert(
