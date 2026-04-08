@@ -1,308 +1,276 @@
-# ReelRoutes — Pending Tasks (Requires External Access)
+# ReelRoutes — Pending Tasks
 
-Tasks that are code-complete but need a manual step in an external
-dashboard before they fully activate. Pick these up when you have
-access to the relevant console.
-
----
-
-## 🍎 Apple Developer Portal — Share Extension App Group
-
-**Blocked by:** Apple Developer Portal access  
-**Time needed:** ~5 minutes  
-**Code is:** ✅ complete — `app.json`, `eas.json`, `hooks/useShareIntent.ts` all done
-
-### Steps
-
-1. Go to **developer.apple.com → Certificates, Identifiers & Profiles → Identifiers**
-2. Select `app.reelroutes.mobile`
-3. Enable **App Groups** capability
-4. Create App Group: `group.app.reelroutes.mobile`
-5. Create a second identifier: `app.reelroutes.mobile.ShareExtension`
-6. Enable **App Groups** on that identifier, add to the same group
-7. Then run: `eas build --platform ios --profile preview`
-8. Install the TestFlight build and test: YouTube → Share → ReelRoutes
-
-### What it unlocks
-
-The native iOS share sheet extension — user taps Share in any video
-app and ReelRoutes appears as a destination. Import starts automatically.
+Tasks organised by category. Code-complete items need only an external
+dashboard step. Development items are unblocked and ready to build.
 
 ---
 
-## 🚀 EAS Dashboard — Clerk Keys
+## ✅ Recently Completed
 
-**Blocked by:** Clerk dashboard access  
-**Time needed:** ~2 minutes
-
-### Steps
-
-1. Go to **dashboard.clerk.com → your app → API Keys**
-2. Copy the publishable key for test and live environments
-3. In `apps/mobile/eas.json`, replace:
-   - `"pk_test_REPLACE_ME"` → your test publishable key (preview profile)
-   - `"pk_live_REPLACE_ME"` → your live publishable key (production profile)
+| Task                                                      | Completed   |
+| --------------------------------------------------------- | ----------- |
+| Plan from Scratch — backend (8 services, 2 endpoints)     | ✅ Apr 2026 |
+| Plan from Scratch — web wizard (4 steps + curation UI)    | ✅ Apr 2026 |
+| Plan from Scratch — mobile wizard (4 steps + curation UI) | ✅ Apr 2026 |
+| Test suite 898 → 990 tests, 79% → 83% coverage            | ✅ Apr 2026 |
+| CI fully green (Python + TypeScript + Prettier)           | ✅ Apr 2026 |
 
 ---
 
-## 🚀 EAS Dashboard + App Store Connect — Submit config
+## 🔑 Needs External Access (Dashboard Steps Only)
 
-**Blocked by:** Apple Team ID + App Store Connect App ID  
-**Time needed:** ~5 minutes
+### Apple Developer Portal — Share Extension App Group
 
-### Steps
+**Blocked by:** Apple Developer Portal  
+**Time:** ~5 min
 
-1. In `apps/mobile/eas.json` under `submit.production.ios`, replace:
-   - `"your-apple-id@example.com"` → your Apple ID email
-   - `"ascAppId": "XXXXXXXXXX"` → App Store Connect app numeric ID
-   - `"appleTeamId": "XXXXXXXXXX"` → your 10-character Apple Team ID
-2. For Android: add `google-play-service-account.json` to `apps/mobile/`
-   (download from Google Play Console → Setup → API access)
+1. Go to **developer.apple.com → Identifiers → `app.reelroutes.mobile`**
+2. Enable **App Groups**, create group: `group.app.reelroutes.mobile`
+3. Create `app.reelroutes.mobile.ShareExtension`, add to same group
+4. Run: `eas build --platform ios --profile preview`
+5. Install via TestFlight → YouTube → Share → ReelRoutes
 
 ---
 
-## 📊 Sentry DSN
+### EAS Dashboard — Clerk Keys
+
+**Blocked by:** Clerk dashboard  
+**Time:** ~2 min
+
+In `apps/mobile/eas.json`, replace:
+
+- `"pk_test_REPLACE_ME"` → test publishable key (preview profile)
+- `"pk_live_REPLACE_ME"` → live publishable key (production profile)
+
+---
+
+### EAS Dashboard + App Store Connect — Submit config
+
+**Blocked by:** Apple Team ID + ASC App ID  
+**Time:** ~5 min
+
+In `apps/mobile/eas.json` under `submit.production.ios`, replace:
+
+- `"your-apple-id@example.com"` → your Apple ID
+- `"ascAppId": "XXXXXXXXXX"` → App Store Connect numeric ID
+- `"appleTeamId": "XXXXXXXXXX"` → 10-character Apple Team ID
+
+For Android: add `google-play-service-account.json` to `apps/mobile/`
+
+---
+
+### Sentry DSN
 
 **Blocked by:** Sentry project creation  
-**Time needed:** ~3 minutes
+**Time:** ~3 min
 
-### Steps
-
-1. Create a new project at **sentry.io** (React Native + FastAPI)
-2. Copy the DSN
-3. Add to Railway env vars: `SENTRY_DSN=https://...`
-4. Add to Vercel env vars: `SENTRY_DSN=https://...`
-5. Add to EAS env vars: `EXPO_PUBLIC_SENTRY_DSN=https://...`
+1. Create project at **sentry.io** (React Native + FastAPI)
+2. Add `SENTRY_DSN` to Railway, Vercel, and `EXPO_PUBLIC_SENTRY_DSN` to EAS
 
 ---
 
-## 📊 PostHog API Key
+### PostHog API Key
 
-**Blocked by:** PostHog project creation  
-**Time needed:** ~2 minutes
+**Blocked by:** PostHog project  
+**Time:** ~2 min
 
-### Steps
-
-1. Create project at **posthog.com**
-2. Copy the project API key
-3. Add `POSTHOG_API_KEY` to Railway, Vercel, and EAS env vars
+Add `POSTHOG_API_KEY` to Railway, Vercel, and EAS env vars.
 
 ---
 
-## 🤖 Android — Digital Asset Links (for autoVerify)
+### Android — Digital Asset Links
 
 **Blocked by:** Production domain + signing key  
-**Time needed:** ~10 minutes  
-**Why needed:** The `autoVerify: true` intent filters in `app.json` tell Android
-to verify that reelroutes.app is associated with the app. Without this, Android
-shows "Open with…" chooser every time instead of routing directly.
+**Time:** ~10 min
 
-### Steps
-
-1. Get your SHA-256 fingerprint from EAS:
-   `eas credentials --platform android`
-2. Create `https://reelroutes.app/.well-known/assetlinks.json`:
-
-```json
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "app.reelroutes.mobile",
-      "sha256_cert_fingerprints": ["YOUR_SHA256_HERE"]
-    }
-  }
-]
-```
-
-3. Deploy this file to the web server (Vercel — add to `apps/web/public/.well-known/`)
-4. Verify with: `adb shell pm get-app-links app.reelroutes.mobile`
+1. Get SHA-256: `eas credentials --platform android`
+2. File is already at `apps/web/public/.well-known/assetlinks.json` — fill in SHA
+3. Verify: `adb shell pm get-app-links app.reelroutes.mobile`
 
 ---
 
-## 🚂 Railway — API Deploy
+### Railway — API Deploy
 
 **Blocked by:** Railway account + all API keys ready  
-**Time needed:** ~15 minutes  
-**Code is:** ✅ complete — `Procfile`, `railway.toml`, `.env.example` all done
-
-### Steps
+**Time:** ~15 min  
+**Code:** ✅ `Procfile`, `railway.toml`, `.env.example` done
 
 ```bash
 npm install -g @railway/cli
-railway login
-cd apps/api
-railway init          # create new project
-railway link          # link repo
+railway login && cd apps/api
+railway init && railway link
 ```
 
-1. In Railway dashboard → Service Settings → Source → **Root Directory**: `apps/api`
-2. Add Redis plugin: Railway dashboard → New → Database → Redis
-3. Paste all vars from `apps/api/.env.example` into Railway → Variables
-4. Add second Worker service with start command:
-   `poetry run arq app.workers.job_worker.WorkerSettings`
-5. Add custom domain: `api.reelroutes.app`
-6. Verify: `curl https://api.reelroutes.app/api/health` → 200 OK
+- Root Directory: `apps/api`
+- Add Redis plugin
+- Add Worker service: `poetry run arq app.workers.job_worker.WorkerSettings`
+- Add `OPENAI_API_KEY`, `GOOGLE_PLACES_API_KEY`, `CLERK_SECRET_KEY`, `MONGODB_URL`, `REDIS_URL`
+- Custom domain: `api.reelroutes.app`
 
 ---
 
-## ▲ Vercel — Web Deploy
+### Vercel — Web Deploy
 
-**Blocked by:** Vercel account + Clerk live key + Railway API deployed first  
-**Time needed:** ~5 minutes  
-**Code is:** ✅ complete — `vercel.json`, `.env.example` done
-
-### Steps
+**Blocked by:** Railway API deployed first + Clerk live key  
+**Time:** ~5 min  
+**Code:** ✅ `vercel.json`, `.env.example` done
 
 ```bash
-npm install -g vercel
-cd apps/web
-vercel
+cd apps/web && vercel
 ```
 
-Or: Vercel dashboard → New Project → Import from GitHub → Root Directory: `apps/web`
-
-Environment variables to add in Vercel dashboard:
-
-```
-VITE_API_URL=https://api.reelroutes.app
-VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
-```
-
-Add custom domains: `reelroutes.app` and `www.reelroutes.app`
+Env vars: `VITE_API_URL`, `VITE_CLERK_PUBLISHABLE_KEY`, `VITE_GOOGLE_MAPS_API_KEY`  
+Custom domains: `reelroutes.app` and `www.reelroutes.app`
 
 ---
 
-## 📱 EAS — Preview Build (real device)
+### Custom Domains — DNS
 
-**Blocked by:** Apple Developer account + filled eas.json placeholders  
-**Time needed:** ~20 minutes (build takes ~10 min on EAS servers)  
-**Code is:** ✅ complete — `eas.json` profiles ready
+**Blocked by:** DNS / registrar access
 
-### Before running
-
-Fill in `apps/mobile/eas.json`:
-
-```json
-"appleId": "your@email.com"
-"ascAppId": "1234567890"
-"appleTeamId": "ABCDE12345"
-"EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_..."
-```
-
-### Commands
-
-```bash
-cd apps/mobile
-eas build --platform ios --profile preview
-# Install via TestFlight, test: YouTube → Share → ReelRoutes
-eas build --platform android --profile preview
-# Install APK, test: YouTube → Share → ReelRoutes
-```
+- API: CNAME `api.reelroutes.app → <railway>.up.railway.app`
+- Web: CNAME/A `reelroutes.app → vercel`
 
 ---
 
-## 🌐 Custom Domains — DNS Access Required
+### App Store Assets — Screenshots & Preview
 
-**Blocked by:** DNS / domain registrar access
-**Code is:** ✅ complete — Railway and Vercel configs ready
+**Blocked by:** Working build on real device  
+**Time:** ~2 hours
 
-### Steps
-
-1. **API domain:** In Railway → Settings → Domains → add `api.reelroutes.app`
-   Then add CNAME in your DNS: `api.reelroutes.app → <railway-generated>.up.railway.app`
-2. **Web domain:** In Vercel → Settings → Domains → add `reelroutes.app` and `www.reelroutes.app`
-   Then add CNAME/A record in your DNS registrar
-
----
-
-## 🏪 App Store Assets — Screenshots & Preview Video
-
-**Blocked by:** Working app build on a real device
-**Time needed:** ~2 hours
-
-### Steps
-
-1. Install the EAS preview build on an iPhone (via TestFlight)
-2. Record the share flow: YouTube → Share → ReelRoutes → pins drop on map
-3. Screenshot sequence (6.7" iPhone):
-   - Screenshot 1: Share sheet showing ReelRoutes option
-   - Screenshot 2: Processing screen with progress steps
-   - Screenshot 3: Trip map with pins
-   - Screenshot 4: Day-by-day itinerary
-   - Screenshot 5: Trip Wrapped stats card
-4. Create Google Play feature graphic (1024×500px) using Figma or Canva
-5. Confirm `icon.png` at 1024×1024 is in `apps/mobile/assets/`
-6. Upload screenshots to App Store Connect and Google Play Console
+1. Install EAS preview build via TestFlight
+2. Record share flow: YouTube → Share → ReelRoutes → map pins drop
+3. Screenshots (6.7" iPhone): share sheet, processing, map, itinerary, Wrapped
+4. Capture **Plan from Scratch** flow: destination → wizard → curated map
+5. Google Play feature graphic (1024×500px)
+6. Upload to App Store Connect + Google Play Console
 
 ---
 
-## 🏪 App Store Submission
+### App Store Submission
 
 **Blocked by:** Assets + Apple/Google accounts + EAS production build
-**Depends on:** All items above
-
-### iOS
 
 ```bash
-eas build --platform ios --profile production
-eas submit --platform ios
+eas build --platform ios --profile production && eas submit --platform ios
+eas build --platform android --profile production && eas submit --platform android
 ```
 
-Fill App Store Connect from `apps/mobile/store-listings/en.md`
-Set Privacy labels: location (when in use), usage data
-
-### Android
-
-```bash
-eas build --platform android --profile production
-eas submit --platform android
-```
-
-Fill Google Play Console from `apps/mobile/store-listings/en.md`
-Upload all 5 language listings from `store-listings/*.md`
-Complete Data Safety form (location, background processing)
+Store listings are in `apps/mobile/store-listings/*.md` (5 languages).
 
 ---
 
-## 🗺 Open Now Badge on Map Pins
+## 🛠 Development Tasks (Unblocked)
 
-**Blocked by:** Nothing — pure frontend work, can be done any time
-**Estimated time:** ~30 minutes
+These are ready to build — no external access needed.
 
-### What it needs
+### 1. Open Now Badge on Map Pins
 
-- `PinDocument.open_now: bool | null` is already stored from Google Places
-- In `apps/mobile/app/trip/[tripId].tsx` — add a small green/red dot
-  overlay on `<Marker>` when `pin.openNow !== null`
-- In `apps/web/src/components/TripMapPage` (or equivalent) — same badge on web markers
-- Design: small circle (8px), green = open, red = closed, grey = unknown
+**Effort:** ~30 min  
+**Value:** High — visual quality, data already available
+
+`PinDocument.open_now: bool | null` is stored from Google Places.
+
+- Mobile: overlay green/red/grey dot on `<Marker>` in `app/trip/[tripId].tsx`
+- Web: same badge on map markers in `TripMapPage`
 
 ---
 
-## 🔴 Redis Cache — Trending Feed
+### 2. Trending Feed Cache
 
-**Blocked by:** Redis available in production (Railway plugin)
-**Estimated time:** ~20 minutes
+**Effort:** ~20 min  
+**Value:** Medium — reduces DB load at scale
 
-### What it needs
+Add 5-minute in-memory TTL cache to `GET /api/explore/trending` in `app/routers/explore.py`.
 
-Add a 5-minute in-memory cache to `GET /api/explore/trending`
-(Redis TTL cache is ideal in prod, but a simple `functools.lru_cache`
-with a timestamp works as a fallback for now):
+---
 
-```python
-# In apps/api/app/routers/explore.py
-import time
-_trending_cache: dict = {"data": None, "at": 0.0}
-CACHE_TTL = 300  # 5 minutes
+### 3. Plan from Scratch — Deep Link Entry
 
-async def get_trending(...):
-    now = time.monotonic()
-    if _trending_cache["data"] and now - _trending_cache["at"] < CACHE_TTL:
-        return {"ok": True, "data": _trending_cache["data"]}
-    # ... fetch from DB ...
-    _trending_cache.update({"data": result, "at": now})
-    return {"ok": True, "data": result}
-```
+**Effort:** ~1 hour  
+**Value:** High — discoverability
+
+Add a "Plan a trip" deep link / card to the home screen tab so users
+discover scratch planning without having to find it buried in new-trip flow.
+
+- Mobile: add card to `app/(tabs)/index.tsx`
+- Web: add CTA to `ImportPage.tsx` or a new `HomePage`
+
+---
+
+### 4. Plan from Scratch — Share/Export Curated Plan
+
+**Effort:** ~2 hours  
+**Value:** High — virality
+
+After confirming a plan, show a shareable summary card (Mapbox static
+snapshot + destination + days + top 3 stops). Hook into existing
+`FlyoverSheet` / `WrappedCard` pattern.
+
+---
+
+### 5. Itinerary Refinement Chat
+
+**Effort:** ~3 hours  
+**Value:** High — retention
+
+After a plan is confirmed, surface the AI chat drawer pre-seeded with
+context about the scratch-planned trip (destination, days, stops). Currently
+chat works for video-imported trips only — extend it to scratch trips by
+passing `source: "scratch"` context in the system prompt.
+
+---
+
+### 6. Push Notification — Plan Ready
+
+**Effort:** ~1 hour  
+**Value:** Medium
+
+When `POST /trips/plan/confirm` completes, fire `send_trip_ready()` to
+notify the user their curated plan has been saved. Infrastructure is
+already wired — just needs the call added to `trip_builder.py`.
+
+---
+
+### 7. Test Coverage — Remaining 17%
+
+**Effort:** ~3 hours  
+**Value:** Medium — hygiene
+
+Current coverage: **83%**. Next targets:
+
+- `routers/trip_extras.py` (54%) — 62 uncovered lines, mostly HTTP handler branches
+- `services/geocoding/storage.py` (67%) — `geocoded_locations_to_pins` branches
+- `adapters/youtube.py` (67%) — ytdlp error path branches
+- `services/expense_service.py` (73%) — settlement calculation paths
+
+---
+
+### 8. Rate Limit Middleware Tests
+
+**Effort:** ~1 hour  
+**Value:** Medium
+
+`app/middleware/rate_limit.py` is at 25% coverage. The Redis-dependent
+paths need `fakeredis` or a mock. Add to a new `tests/middleware/` suite.
+
+---
+
+### 9. Mobile — Plan Wizard Google Maps Integration
+
+**Effort:** ~30 min (keys only)  
+**Value:** Blocker for real-device use
+
+Add `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` to `apps/mobile/eas.json` preview
+and production env sections. Currently the key is read from env but not
+set in the EAS build profiles.
+
+---
+
+### 10. Web — PlanEntryPage Route Registration
+
+**Effort:** ~15 min  
+**Value:** Required for web launch
+
+Confirm `PlanEntryPage` is registered in `App.tsx` router and linked
+from the main nav. Check that `NavBar.tsx` has a "Plan a trip" link.
