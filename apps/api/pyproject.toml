@@ -58,6 +58,7 @@ mongomock-motor = "^0.0.34"
 ruff = "^0.6.0"
 mypy = "^1.11.0"
 types-python-jose = "^3.3.0"
+respx = "^0.23.0"
 
 [tool.ruff]
 target-version = "py312"
@@ -87,7 +88,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 # Tests: pytest fixture injection looks like redefinition; fixtures look like unused args
-"tests/**/*.py" = ["F811", "ARG001", "ARG002"]
+"tests/**/*.py" = ["F811", "ARG001", "ARG002", "B017"]
 # Adapters: interface methods must match signature even if not all params used
 "app/adapters/*.py" = ["ARG002"]
 # Extraction prompt: unicode characters in prompt strings are intentional

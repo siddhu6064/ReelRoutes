@@ -25,7 +25,9 @@ def _make_pin(visited: bool = False) -> MagicMock:
     p.place_name = "Shibuya"
     p.lat = 35.658
     p.lng = 139.701
-    p.visited_at = MagicMock() if visited else None
+    from datetime import UTC, datetime
+
+    p.visited_at = datetime.now(UTC) if visited else None
     p.category = MagicMock(value="landmark")
     p.diary_entry = None
     return p
@@ -53,7 +55,7 @@ class TestGetUnresolvedPlaces:
 
         with (
             patch("app.routers.trips.TripService.get", AsyncMock(return_value=trip)),
-            patch("app.routers.trips.JobDocument.get", AsyncMock(return_value=job)),
+            patch("app.models.documents.JobDocument.get", AsyncMock(return_value=job)),
         ):
             resp = await client.get("/api/trips/trip123/unresolved?user_id=user_abc")
 
@@ -81,7 +83,7 @@ class TestGetUnresolvedPlaces:
 
         with (
             patch("app.routers.trips.TripService.get", AsyncMock(return_value=trip)),
-            patch("app.routers.trips.JobDocument.get", AsyncMock(return_value=job)),
+            patch("app.models.documents.JobDocument.get", AsyncMock(return_value=job)),
         ):
             resp = await client.get("/api/trips/trip123/unresolved?user_id=user_abc")
 

@@ -81,7 +81,7 @@ class TestUserDocumentInsertAndRead:
 class TestUserDocumentUniqueIndex:
     async def test_duplicate_clerk_id_raises(self) -> None:
         await SeedFactory.user(clerk_id="clerk_dup")
-        with pytest.raises(Exception):  # noqa: B017 — mongomock raises generic DuplicateKeyError
+        with pytest.raises(Exception):
             await SeedFactory.user(clerk_id="clerk_dup")
 
     async def test_different_clerk_ids_allowed(self) -> None:
