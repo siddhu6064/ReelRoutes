@@ -27,12 +27,11 @@ Cross-day carry-over
 from __future__ import annotations
 
 import logging
-from typing import List, Optional, Tuple
 
-from app.services.plan.haversine import centroid, haversine_km
-from app.services.plan.plan_geocoder import GeocodedPlace
-from app.services.plan.origin_geocoder import OriginGeocoderService
 from app.schemas.plan import ActivityStop, DayPlan
+from app.services.plan.haversine import centroid, haversine_km
+from app.services.plan.origin_geocoder import OriginGeocoderService
+from app.services.plan.plan_geocoder import GeocodedPlace
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +44,11 @@ class ProximityScheduler:
 
     async def schedule(
         self,
-        places: List[GeocodedPlace],
+        places: list[GeocodedPlace],
         days: int,
         starting_point: str,
         api_key: str,
-    ) -> List[DayPlan]:
+    ) -> list[DayPlan]:
         """
         Main entry point. Returns a list of DayPlan objects, one per day,
         with activity stops ordered for minimal travel within each day.
@@ -92,10 +91,10 @@ class ProximityScheduler:
 
     def _geographic_cluster(
         self,
-        places: List[GeocodedPlace],
+        places: list[GeocodedPlace],
         days: int,
-        origin: Tuple[float, float],
-    ) -> List[List[GeocodedPlace]]:
+        origin: tuple[float, float],
+    ) -> list[list[GeocodedPlace]]:
         """
         Assign places to `days` buckets using farthest-first seeding
         followed by nearest-seed assignment.
@@ -109,7 +108,7 @@ class ProximityScheduler:
             return [list(places)]
 
         if len(places) <= days:
-            buckets: List[List[GeocodedPlace]] = [[p] for p in places]
+            buckets: list[list[GeocodedPlace]] = [[p] for p in places]
             buckets += [[] for _ in range(days - len(places))]
             return buckets
 
@@ -129,10 +128,10 @@ class ProximityScheduler:
 
     def _farthest_first_seeds(
         self,
-        places: List[GeocodedPlace],
+        places: list[GeocodedPlace],
         k: int,
-        origin: Tuple[float, float],
-    ) -> List[Tuple[float, float]]:
+        origin: tuple[float, float],
+    ) -> list[tuple[float, float]]:
         """
         Pick k seed coordinates using the farthest-first heuristic.
 
@@ -148,7 +147,7 @@ class ProximityScheduler:
             range(len(coords)),
             key=lambda i: haversine_km(origin[0], origin[1], coords[i][0], coords[i][1]),
         )
-        seeds: List[Tuple[float, float]] = [coords[first_idx]]
+        seeds: list[tuple[float, float]] = [coords[first_idx]]
         remaining = set(range(len(coords))) - {first_idx}
 
         while len(seeds) < k and remaining:
@@ -165,8 +164,8 @@ class ProximityScheduler:
         return seeds
 
     def _rebalance_buckets(
-        self, buckets: List[List[GeocodedPlace]]
-    ) -> List[List[GeocodedPlace]]:
+        self, buckets: list[list[GeocodedPlace]]
+    ) -> list[list[GeocodedPlace]]:
         """
         Ensure no bucket is empty by pulling the last place from the
         largest bucket into each empty one.  Prevents zero-activity days.
@@ -189,14 +188,14 @@ class ProximityScheduler:
 
     def _order_buckets_by_proximity(
         self,
-        buckets: List[List[GeocodedPlace]],
-        origin: Tuple[float, float],
-    ) -> List[List[GeocodedPlace]]:
+        buckets: list[list[GeocodedPlace]],
+        origin: tuple[float, float],
+    ) -> list[list[GeocodedPlace]]:
         """
         Sort buckets so Day 1 centroid is nearest to the trip origin.
         Empty buckets are pushed to the end.
         """
-        def bucket_distance(bucket: List[GeocodedPlace]) -> float:
+        def bucket_distance(bucket: list[GeocodedPlace]) -> float:
             if not bucket:
                 return float("inf")
             c = centroid([(p.lat, p.lng) for p in bucket])
@@ -210,15 +209,15 @@ class ProximityScheduler:
 
     def _sort_buckets_with_carryover(
         self,
-        buckets: List[List[GeocodedPlace]],
-        origin: Tuple[float, float],
-    ) -> List[DayPlan]:
+        buckets: list[list[GeocodedPlace]],
+        origin: tuple[float, float],
+    ) -> list[DayPlan]:
         """
         Sort each bucket by nearest-neighbour, carrying the last stop's
         position forward as the start of the next day.
         """
         cur_lat, cur_lng = origin
-        day_plans: List[DayPlan] = []
+        day_plans: list[DayPlan] = []
 
         for day_idx, bucket in enumerate(buckets):
             if not bucket:
@@ -235,16 +234,16 @@ class ProximityScheduler:
 
     def _nearest_neighbour_sort(
         self,
-        places: List[GeocodedPlace],
+        places: list[GeocodedPlace],
         start_lat: float,
         start_lng: float,
-    ) -> Tuple[List[GeocodedPlace], float, float]:
+    ) -> tuple[list[GeocodedPlace], float, float]:
         """
         Greedy nearest-neighbour ordering starting from (start_lat, start_lng).
         Returns (ordered_places, final_lat, final_lng) for carry-over.
         """
         remaining = list(places)
-        ordered: List[GeocodedPlace] = []
+        ordered: list[GeocodedPlace] = []
         cur_lat, cur_lng = start_lat, start_lng
 
         while remaining:
@@ -265,9 +264,9 @@ class ProximityScheduler:
     async def _resolve_origin(
         self,
         starting_point: str,
-        places: List[GeocodedPlace],
+        places: list[GeocodedPlace],
         api_key: str,
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         """
         Geocode the starting_point string to real coordinates.
         Falls back to the centroid of all places on failure.
@@ -288,15 +287,15 @@ class ProximityScheduler:
         return centroid([(p.lat, p.lng) for p in places])
 
     def _to_activity_stops(
-        self, places: List[GeocodedPlace]
-    ) -> List[ActivityStop]:
+        self, places: list[GeocodedPlace]
+    ) -> list[ActivityStop]:
         """Convert ordered GeocodedPlace list → ActivityStop list with distances."""
-        stops: List[ActivityStop] = []
-        prev_lat: Optional[float] = None
-        prev_lng: Optional[float] = None
+        stops: list[ActivityStop] = []
+        prev_lat: float | None = None
+        prev_lng: float | None = None
 
         for place in places:
-            dist: Optional[float] = None
+            dist: float | None = None
             if prev_lat is not None and prev_lng is not None:
                 dist = round(
                     haversine_km(prev_lat, prev_lng, place.lat, place.lng), 2

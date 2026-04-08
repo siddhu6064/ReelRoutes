@@ -13,8 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from dataclasses import dataclass, field
-from typing import List, Optional
+from dataclasses import dataclass
 
 import httpx
 
@@ -36,10 +35,10 @@ class GeocodedPlace:
     place_id: str
     address: str
     famous_for: str
-    best_time: Optional[str]
-    local_tip: Optional[str]
+    best_time: str | None
+    local_tip: str | None
     category: str                   # "activity" | "food"
-    photo_url: Optional[str] = None
+    photo_url: str | None = None
     area: str = ""
     raw_query: str = ""
 
@@ -50,13 +49,13 @@ class PlanGeocoderService:
     Reuses the same API key and HTTP patterns as the existing geocoding service.
     """
 
-    def __init__(self, api_key: str, http_client: Optional[httpx.AsyncClient] = None) -> None:
+    def __init__(self, api_key: str, http_client: httpx.AsyncClient | None = None) -> None:
         self._api_key = api_key
         self._http = http_client or httpx.AsyncClient(timeout=GEOCODE_TIMEOUT_S)
 
     async def geocode_places(
-        self, places: List[RawPlace], destination: str
-    ) -> List[GeocodedPlace]:
+        self, places: list[RawPlace], destination: str
+    ) -> list[GeocodedPlace]:
         """
         Geocode all places concurrently (up to MAX_CONCURRENT_GEOCODE at once).
         Places that fail geocoding are silently skipped with a warning log.
@@ -67,8 +66,8 @@ class PlanGeocoderService:
         ]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        geocoded: List[GeocodedPlace] = []
-        for place, result in zip(places, results):
+        geocoded: list[GeocodedPlace] = []
+        for place, result in zip(places, results, strict=False):
             if isinstance(result, Exception):
                 logger.warning(
                     "Failed to geocode '%s': %s", place.name, result
@@ -90,7 +89,7 @@ class PlanGeocoderService:
         place: RawPlace,
         destination: str,
         semaphore: asyncio.Semaphore,
-    ) -> Optional[GeocodedPlace]:
+    ) -> GeocodedPlace | None:
         """Geocode a single place using Google Places Text Search."""
         query = place.geocode_query(destination)
 
@@ -140,7 +139,7 @@ class PlanGeocoderService:
             raw_query=query,
         )
 
-    def _extract_photo_url(self, place_result: dict) -> Optional[str]:
+    def _extract_photo_url(self, place_result: dict) -> str | None:
         """Build a Places Photo URL from the first photo reference, if available."""
         photos = place_result.get("photos", [])
         if not photos:

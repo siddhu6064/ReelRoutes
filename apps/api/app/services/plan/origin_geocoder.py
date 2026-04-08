@@ -10,7 +10,6 @@ instead of falling back to a centroid estimate.
 from __future__ import annotations
 
 import logging
-from typing import Optional, Tuple
 
 import httpx
 
@@ -29,12 +28,12 @@ class OriginGeocoderService:
     def __init__(
         self,
         api_key: str,
-        http_client: Optional[httpx.AsyncClient] = None,
+        http_client: httpx.AsyncClient | None = None,
     ) -> None:
         self._api_key = api_key
         self._http = http_client or httpx.AsyncClient(timeout=TIMEOUT_S)
 
-    async def resolve(self, starting_point: str) -> Optional[Tuple[float, float]]:
+    async def resolve(self, starting_point: str) -> tuple[float, float] | None:
         """
         Geocode `starting_point` and return (lat, lng).
         Returns None on failure — callers should fall back to centroid.

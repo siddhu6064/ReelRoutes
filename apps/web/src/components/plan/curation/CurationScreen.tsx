@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
+import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+
   useScratchPlanStore,
   selectTotalStops,
 } from '../../../stores/scratchPlanStore'

@@ -10,31 +10,26 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Annotated, List
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from openai import AsyncOpenAI
 
 from app.schemas.plan import (
-    ActivityStop,
-    ConfirmFoodStop,
-    DayPlan,
     DraftItinerary,
-    FoodStop,
     PlanConfirmRequest,
     PlanConfirmResponse,
     PlanRequest,
-    RestaurantOption,
 )
-from app.services.plan.ai_planner import AIPlannerService, RawPlace
-from app.services.plan.plan_geocoder import GeocodedPlace, PlanGeocoderService
-from app.services.plan.scheduler import ProximityScheduler
-from app.services.plan.food_injector import FoodInjectorService
 from app.services.plan.activity_enricher import ActivityEnricherService
+from app.services.plan.ai_planner import AIPlannerService
+from app.services.plan.food_injector import FoodInjectorService
+from app.services.plan.plan_geocoder import PlanGeocoderService
+from app.services.plan.scheduler import ProximityScheduler
 from app.services.plan.trip_builder import (
+    TripBuildDatabaseError,
     TripBuilderService,
     TripBuildValidationError,
-    TripBuildDatabaseError,
 )
 
 logger = logging.getLogger(__name__)

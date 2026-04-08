@@ -23,7 +23,7 @@ import ActivityCardMobile from '@/components/plan/curation/ActivityCardMobile'
 import FoodSlotMobile from '@/components/plan/curation/FoodSlotMobile'
 import PlaceDetailSheet from '@/components/plan/curation/PlaceDetailSheet'
 import PlanMap from '@/components/plan/PlanMap'
-import type { ActivityStop, MealSlot, RestaurantOption } from '@/types/scratchPlan'
+import type { ActivityStop, CuratedDay, MealSlot, RestaurantOption } from '@/types/scratchPlan'
 import { Colors, Spacing, Radius, FontSize, FontWeight } from '../tokens'
 
 export default function CurationScreen() {
@@ -57,7 +57,7 @@ export default function CurationScreen() {
     if (totalStops === 0) {
       Alert.alert(
         'No stops',
-        'You've removed all stops. Add some back or start over.',
+        "You've removed all stops. Add some back or start over.",
         [{ text: 'OK' }]
       )
       return
@@ -222,7 +222,7 @@ export default function CurationScreen() {
 
 interface DaySectionProps {
   dayIndex: number
-  curatedDay: import('../../../types/scratchPlan').CuratedDay
+  curatedDay: CuratedDay
   onReorder: (from: number, to: number) => void
   onRemove: (stopIndex: number) => void
   onPressStop: (stop: ActivityStop, stopIndex: number) => void

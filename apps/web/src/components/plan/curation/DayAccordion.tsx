@@ -1,25 +1,13 @@
-import { useState } from 'react'
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
+import type { DragEndEvent } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
+import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core'
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { type ReactElement } from 'react'
+
 import ActivityCard from './ActivityCard'
 import FoodSlot from './FoodSlot'
 import type { CuratedDay, MealSlot, RestaurantOption } from '../../../types/scratchPlan'
+import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
 
 interface Props {
   curatedDay: CuratedDay
@@ -148,7 +136,7 @@ function SortableActivityCard({
   onRemove,
 }: {
   id: string
-  stop: import('../../../types/scratchPlan').ActivityStop
+  stop: ActivityStop
   stopIndex: number
   dayIndex: number
   onRemove: () => void

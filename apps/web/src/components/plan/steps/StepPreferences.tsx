@@ -1,5 +1,5 @@
-import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
 import type { TripPreference } from '../../../types/scratchPlan'
+import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
 
 interface Props {
   onBack: () => void

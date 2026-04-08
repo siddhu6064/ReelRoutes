@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import { useScratchPlanStore } from '../../../stores/scratchPlanStore'
 
 const STAGES = [

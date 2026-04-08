@@ -1,11 +1,12 @@
 import React, { useCallback } from 'react'
-import { useScratchPlanStore, selectPlanRequest } from '../../stores/scratchPlanStore'
+
 import { usePlanTrip } from '../../hooks/usePlanTrip'
-import StepOrigin from './steps/StepOrigin'
-import StepDays from './steps/StepDays'
-import StepPreferences from './steps/StepPreferences'
-import StepLoading from './steps/StepLoading'
+import { selectPlanRequest, useScratchPlanStore } from '../../stores/scratchPlanStore'
 import CurationScreen from './curation/CurationScreen'
+import StepDays from './steps/StepDays'
+import StepLoading from './steps/StepLoading'
+import StepOrigin from './steps/StepOrigin'
+import StepPreferences from './steps/StepPreferences'
 
 /**
  * PlanFromScratch
@@ -22,8 +23,7 @@ export default function PlanFromScratch() {
   const step = useScratchPlanStore((s) => s.step)
   const setStep = useScratchPlanStore((s) => s.setStep)
   const setDraft = useScratchPlanStore((s) => s.setDraft)
-  const reset = useScratchPlanStore((s) => s.reset)
-
+  
   const planRequest = useScratchPlanStore(selectPlanRequest)
   const { mutate: planTrip, error } = usePlanTrip()
 

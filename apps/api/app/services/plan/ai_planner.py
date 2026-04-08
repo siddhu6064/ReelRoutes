@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from openai import AsyncOpenAI
 
-from app.schemas.plan import PlanRequest, TripPreference
+from app.schemas.plan import PlanRequest
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class RawPlace:
     """Lightweight container for a GPT-4o suggested place before geocoding."""
 
-    def __init__(self, data: Dict[str, Any]) -> None:
+    def __init__(self, data: dict[str, Any]) -> None:
         self.name: str = data.get("name", "").strip()
         self.area: str = data.get("area", "").strip()       # neighbourhood / district hint for geocoding
         self.famous_for: str = data.get("famous_for", "").strip()
@@ -108,7 +108,7 @@ class AIPlannerService:
     def __init__(self, client: AsyncOpenAI) -> None:
         self._client = client
 
-    async def generate_places(self, req: PlanRequest) -> List[RawPlace]:
+    async def generate_places(self, req: PlanRequest) -> list[RawPlace]:
         """
         Call GPT-4o and return a list of RawPlace objects.
         Raises ValueError if the response cannot be parsed.
@@ -138,7 +138,7 @@ class AIPlannerService:
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _parse_response(self, raw_text: str, req: PlanRequest) -> List[RawPlace]:
+    def _parse_response(self, raw_text: str, _req: PlanRequest) -> list[RawPlace]:
         """
         Parse GPT-4o JSON output into RawPlace objects.
         GPT-4o with json_object mode sometimes wraps the array in a key —
@@ -171,7 +171,7 @@ class AIPlannerService:
         if not isinstance(parsed, list):
             raise ValueError("Expected a JSON array of places from AI")
 
-        places: List[RawPlace] = []
+        places: list[RawPlace] = []
         for item in parsed:
             if not isinstance(item, dict):
                 continue

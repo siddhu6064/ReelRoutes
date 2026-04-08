@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { useScratchPlanStore, selectAllActivityPins, selectChosenFoodPins } from '../../../stores/scratchPlanStore'
 
+import { useScratchPlanStore, selectAllActivityPins, selectChosenFoodPins } from '../../../stores/scratchPlanStore'
 /**
  * CurationMap
  * -----------
@@ -16,16 +16,13 @@ export default function CurationMap() {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<google.maps.Marker[]>([])
-
   const activityPins = useScratchPlanStore(selectAllActivityPins)
   const foodPins     = useScratchPlanStore(selectChosenFoodPins)
   const destination  = useScratchPlanStore((s) => s.destination)
-
   // Initialise map once
   useEffect(() => {
     if (!mapRef.current || !window.google?.maps) return
     if (mapInstanceRef.current) return   // already initialised
-
     mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
       zoom: 12,
       center: { lat: 0, lng: 0 },
@@ -35,24 +32,19 @@ export default function CurationMap() {
       styles: CLEAN_MAP_STYLE,
     })
   }, [])
-
   // Update markers whenever pins change
   useEffect(() => {
     const map = mapInstanceRef.current
     if (!map || !window.google?.maps) return
-
     // Clear old markers
     markersRef.current.forEach((m) => m.setMap(null))
     markersRef.current = []
-
     const bounds = new window.google.maps.LatLngBounds()
     const allPins = [
       ...activityPins.map((p) => ({ lat: p.lat, lng: p.lng, type: 'activity' as const, label: p.name })),
       ...foodPins.map((p) => ({ lat: p.lat, lng: p.lng, type: 'food' as const, label: p.name })),
     ]
-
     if (allPins.length === 0) return
-
     allPins.forEach((pin, i) => {
       const pos = { lat: pin.lat, lng: pin.lng }
       const marker = new window.google.maps.Marker({
@@ -78,10 +70,8 @@ export default function CurationMap() {
       bounds.extend(pos)
       markersRef.current.push(marker)
     })
-
     map.fitBounds(bounds, 60)
   }, [activityPins, foodPins])
-
   return (
     <div className="curation-map-wrapper">
       <div className="map-legend">
@@ -94,7 +84,6 @@ export default function CurationMap() {
     </div>
   )
 }
-
 // Minimal, clean map style
 const CLEAN_MAP_STYLE: google.maps.MapTypeStyle[] = [
   { featureType: 'poi', stylers: [{ visibility: 'off' }] },

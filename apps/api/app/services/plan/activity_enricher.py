@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import List, Optional
 
 import httpx
 
@@ -62,12 +61,12 @@ class ActivityEnricherService:
     def __init__(
         self,
         api_key: str,
-        http_client: Optional[httpx.AsyncClient] = None,
+        http_client: httpx.AsyncClient | None = None,
     ) -> None:
         self._api_key = api_key
         self._http = http_client or httpx.AsyncClient(timeout=TIMEOUT_S)
 
-    async def enrich(self, stops: List[ActivityStop]) -> List[ActivityStop]:
+    async def enrich(self, stops: list[ActivityStop]) -> list[ActivityStop]:
         """
         Enrich all activity stops concurrently.
         Returns a new list — original stops are not mutated.
@@ -78,8 +77,8 @@ class ActivityEnricherService:
             return_exceptions=True,
         )
 
-        enriched: List[ActivityStop] = []
-        for stop, result in zip(stops, results):
+        enriched: list[ActivityStop] = []
+        for stop, result in zip(stops, results, strict=False):
             if isinstance(result, ActivityStop):
                 enriched.append(result)
             else:
@@ -161,7 +160,7 @@ class ActivityEnricherService:
         )
 
     @staticmethod
-    def _format_opening_hours(hours_data: dict) -> Optional[str]:
+    def _format_opening_hours(hours_data: dict) -> str | None:
         """
         Convert Places opening_hours into a compact human-readable string.
         e.g. "Mon–Fri: 9:00 AM – 5:00 PM | Sat–Sun: 10:00 AM – 4:00 PM"

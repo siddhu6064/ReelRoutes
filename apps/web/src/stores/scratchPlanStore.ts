@@ -1,6 +1,7 @@
+import type {
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import type {
+
   ActivityStop,
   CuratedDay,
   CuratedFoodChoice,
@@ -217,7 +218,7 @@ export const useScratchPlanStore = create<ScratchPlanState>()(
 // ─── Selectors ───────────────────────────────────────────────────────────────
 
 /** Build the PlanRequest body from wizard state */
-export function selectPlanRequest(state: ScratchPlanState): import('../types/scratchPlan').PlanRequest {
+export function selectPlanRequest(state: ScratchPlanState): PlanRequest {
   return {
     starting_point: state.startingPoint,
     destination: state.destination,

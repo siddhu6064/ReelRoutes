@@ -30,12 +30,10 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import List
+from datetime import UTC, datetime
 
+from app.models.documents import PinDocument, TripDocument
 from app.schemas.plan import PlanConfirmRequest
-from app.models.documents import TripDocument
-from app.models.documents import PinDocument
 
 logger = logging.getLogger(__name__)
 
@@ -102,8 +100,8 @@ class TripBuilderService:
             travel_mode=req.travel_mode.value,
             preferences=[p.value for p in req.preferences],
             pins=pins,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
         )
 
         try:
@@ -132,7 +130,7 @@ class TripBuilderService:
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _build_pins(self, req: PlanConfirmRequest) -> List[PinDocument]:
+    def _build_pins(self, req: PlanConfirmRequest) -> list[PinDocument]:
         """
         Convert all confirmed stops across all days into PinDocument objects.
 
@@ -143,7 +141,7 @@ class TripBuilderService:
         Global `order` field increments monotonically across all days so
         the map view can reconstruct the full chronological sequence.
         """
-        pins: List[PinDocument] = []
+        pins: list[PinDocument] = []
         order = 0
 
         # Sort days by day number for deterministic ordering

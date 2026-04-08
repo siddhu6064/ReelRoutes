@@ -32,12 +32,11 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass
-from typing import Dict, List, Literal, Optional
+from typing import Literal
 
 import httpx
 
 from app.schemas.plan import ActivityStop, DayPlan, FoodStop, RestaurantOption
-from app.services.plan.haversine import haversine_km
 
 logger = logging.getLogger(__name__)
 
@@ -56,13 +55,13 @@ TIMEOUT_S = 10.0
 
 MealSlot = Literal["breakfast", "lunch", "dinner"]
 
-MEAL_KEYWORDS: Dict[str, str] = {
+MEAL_KEYWORDS: dict[str, str] = {
     "breakfast": "breakfast brunch cafe",
     "lunch":     "lunch bistro casual dining",
     "dinner":    "dinner restaurant fine dining",
 }
 
-MEAL_TYPES: Dict[str, str] = {
+MEAL_TYPES: dict[str, str] = {
     "breakfast": "cafe",
     "lunch":     "restaurant",
     "dinner":    "restaurant",
@@ -90,19 +89,19 @@ class FoodInjectorService:
     def __init__(
         self,
         api_key: str,
-        http_client: Optional[httpx.AsyncClient] = None,
+        http_client: httpx.AsyncClient | None = None,
     ) -> None:
         self._api_key = api_key
         self._http = http_client or httpx.AsyncClient(timeout=TIMEOUT_S)
 
-    async def inject(self, days: List[DayPlan], destination: str) -> List[DayPlan]:
+    async def inject(self, days: list[DayPlan], _destination: str) -> list[DayPlan]:
         day_semaphore = asyncio.Semaphore(MAX_CONCURRENT_DAYS)
         results = await asyncio.gather(
             *[self._inject_day(day, day_semaphore) for day in days],
             return_exceptions=True,
         )
-        enriched: List[DayPlan] = []
-        for day, result in zip(days, results):
+        enriched: list[DayPlan] = []
+        for day, result in zip(days, results, strict=False):
             if isinstance(result, DayPlan):
                 enriched.append(result)
             else:
@@ -135,14 +134,14 @@ class FoodInjectorService:
             }
 
             fetch_results = await asyncio.gather(*fetch_tasks.values(), return_exceptions=True)
-            food_by_key: Dict[str, FoodStop] = {}
-            for key, result in zip(fetch_tasks.keys(), fetch_results):
+            food_by_key: dict[str, FoodStop] = {}
+            for key, result in zip(fetch_tasks.keys(), fetch_results, strict=False):
                 if isinstance(result, FoodStop):
                     food_by_key[key] = result
                 else:
                     logger.warning("Day %d food fetch failed for key '%s': %s", day.day, key, result)
 
-            food_stops: Dict[MealSlot, FoodStop] = {}
+            food_stops: dict[MealSlot, FoodStop] = {}
             for anchor in anchors:
                 if anchor.anchor_key in food_by_key and anchor.meal not in food_stops:
                     raw = food_by_key[anchor.anchor_key]
@@ -154,9 +153,9 @@ class FoodInjectorService:
     # Anchor building
     # ------------------------------------------------------------------
 
-    def _build_meal_anchors(self, stops: List[ActivityStop]) -> List[MealAnchor]:
+    def _build_meal_anchors(self, stops: list[ActivityStop]) -> list[MealAnchor]:
         n = len(stops)
-        anchors: List[MealAnchor] = []
+        anchors: list[MealAnchor] = []
 
         # Breakfast: first stop
         b_lat, b_lng = stops[0].lat, stops[0].lng
@@ -186,9 +185,9 @@ class FoodInjectorService:
 
         return anchors
 
-    def _deduplicate_anchors(self, anchors: List[MealAnchor]) -> List[MealAnchor]:
+    def _deduplicate_anchors(self, anchors: list[MealAnchor]) -> list[MealAnchor]:
         seen: set[str] = set()
-        unique: List[MealAnchor] = []
+        unique: list[MealAnchor] = []
         for anchor in anchors:
             if anchor.anchor_key not in seen:
                 seen.add(anchor.anchor_key)
@@ -208,7 +207,7 @@ class FoodInjectorService:
         self, lat: float, lng: float, meal: MealSlot, semaphore: asyncio.Semaphore
     ) -> FoodStop:
         radius = INITIAL_RADIUS_M
-        last_options: List[RestaurantOption] = []
+        last_options: list[RestaurantOption] = []
 
         for attempt in range(MAX_RETRIES + 1):
             options = await self._search_nearby(lat, lng, meal, radius, semaphore)
@@ -231,7 +230,7 @@ class FoodInjectorService:
     async def _search_nearby(
         self, lat: float, lng: float, meal: MealSlot, radius: int,
         semaphore: asyncio.Semaphore,
-    ) -> List[RestaurantOption]:
+    ) -> list[RestaurantOption]:
         """
         Google Places Nearby Search.
         Initial (tight) search: rankby=distance, no radius param.
@@ -276,7 +275,7 @@ class FoodInjectorService:
     def _to_restaurant_option(self, result: dict) -> RestaurantOption:
         location = result.get("geometry", {}).get("location", {})
         photos = result.get("photos", [])
-        photo_url: Optional[str] = None
+        photo_url: str | None = None
         if photos:
             ref = photos[0].get("photo_reference")
             if ref:
@@ -309,8 +308,8 @@ class FoodInjectorService:
 
     def _interleave(
         self,
-        activity_stops: List[ActivityStop],
-        food_stops: Dict[MealSlot, FoodStop],
+        activity_stops: list[ActivityStop],
+        food_stops: dict[MealSlot, FoodStop],
     ) -> list:
         """
         Final stop order for a day:

@@ -15,8 +15,6 @@ export default function StepDays({ onBack, onNext }: Props) {
   const decrement = () => setDays(Math.max(MIN_DAYS, days - 1))
   const increment = () => setDays(Math.min(MAX_DAYS, days + 1))
 
-  const label = days === 1 ? '1 day' : `${days} days`
-
   // Quick select presets
   const PRESETS = [3, 5, 7, 10, 14]
 
