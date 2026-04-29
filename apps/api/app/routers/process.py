@@ -11,12 +11,13 @@ from __future__ import annotations
 
 import re
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 
 from app.middleware.rate_limit import check_rate_limit
 from app.models.documents import Platform
 from app.routers.schemas import ProcessRequest
 from app.services.job_service import JobService
+from app.utils.url_security import SSRFError, validate_import_url
 
 router = APIRouter(prefix="/api", tags=["process"])
 
@@ -49,6 +50,13 @@ async def process_video(body: ProcessRequest, request: Request) -> dict:
         return rate_limit_response  # type: ignore[return-value]
 
     url = str(body.url).strip()
+
+    # SSRF protection — block private IPs and non-platform URLs
+    try:
+        validate_import_url(url)
+    except SSRFError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
     platform = detect_platform(url)
 
     # Deduplication — don't re-queue an already-in-flight import

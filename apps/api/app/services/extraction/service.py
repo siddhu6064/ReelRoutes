@@ -217,6 +217,50 @@ async def _extract_chunked(
     )
 
 
+# ── GPT-4o consecutive failure tracking ───────────────────────
+# Module-level counter — resets on worker restart, which is fine.
+# The goal is catching sustained outages, not individual failures.
+_consecutive_gpt4o_failures = 0
+_GPT4O_ALERT_THRESHOLD = 3
+
+
+def _record_gpt4o_success() -> None:
+    global _consecutive_gpt4o_failures
+    _consecutive_gpt4o_failures = 0
+
+
+def _record_gpt4o_failure(reason: str) -> None:
+    global _consecutive_gpt4o_failures
+    _consecutive_gpt4o_failures += 1
+    logger.warning(
+        "gpt4o_failure_recorded",
+        consecutive=_consecutive_gpt4o_failures,
+        reason=reason,
+    )
+    if _consecutive_gpt4o_failures >= _GPT4O_ALERT_THRESHOLD:
+        _fire_sentry_alert(_consecutive_gpt4o_failures, reason)
+
+
+def _fire_sentry_alert(consecutive: int, reason: str) -> None:
+    """Send a Sentry capture_message so on-call is paged."""
+    try:
+        import sentry_sdk
+
+        sentry_sdk.capture_message(
+            f"GPT-4o has failed {consecutive} times in a row — reason: {reason}. "
+            "Check OpenAI status page and API key.",
+            level="fatal",
+        )
+        logger.error(
+            "gpt4o_sentry_alert_fired",
+            consecutive=consecutive,
+            reason=reason,
+        )
+    except Exception:
+        # Sentry not configured in dev/test — swallow silently
+        pass
+
+
 # ── GPT-4o API call with retry ────────────────────────────────
 
 
@@ -229,6 +273,7 @@ async def _call_gpt4o(
     """
     Call GPT-4o and return (raw_content, total_tokens).
     Retries on transient errors with exponential backoff.
+    Fires a Sentry alert after 3 consecutive failures across all jobs.
     """
     import asyncio
 
@@ -255,6 +300,7 @@ async def _call_gpt4o(
             # response_format=json_object wraps in {"locations": [...]} sometimes
             content = _unwrap_if_needed(content)
 
+            _record_gpt4o_success()
             return content, tokens
 
         except RateLimitError:
@@ -269,12 +315,15 @@ async def _call_gpt4o(
                 await asyncio.sleep(wait)
             else:
                 logger.error("gpt4o_api_error", error=str(exc))
+                _record_gpt4o_failure(f"APIStatusError {exc.status_code}")
                 return "[]", 0
 
         except Exception as exc:
             logger.error("gpt4o_unexpected_error", error=str(exc))
+            _record_gpt4o_failure(f"unexpected: {type(exc).__name__}")
             return "[]", 0
 
+    _record_gpt4o_failure("max_retries_exhausted")
     return "[]", 0
 
 

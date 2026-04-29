@@ -16,7 +16,7 @@ from pydantic import BaseModel
 
 from app.auth.authorization import claim_guest_trip
 from app.auth.clerk import RequiredUser
-from app.models.documents import UserDocument
+from app.models.documents import JobDocument, TripDocument, UserDocument
 from app.services.trip_service import TripService
 
 router = APIRouter(prefix="/api/users", tags=["users"])
@@ -152,8 +152,15 @@ async def clerk_webhook(request: Request) -> dict:
     event_type = body.get("type")
     data = body.get("data", {})
 
-    if event_type not in ("user.created", "user.updated"):
+    if event_type not in ("user.created", "user.updated", "user.deleted"):
         return {"ok": True, "data": {"ignored": True}}
+
+    # ── GDPR: purge all data for deleted users ─────────────────
+    if event_type == "user.deleted":
+        clerk_id = data.get("id")
+        if clerk_id:
+            await _purge_user_data(clerk_id)
+        return {"ok": True, "data": {"purged": True, "clerkId": clerk_id}}
 
     clerk_id = data.get("id")
     email = next(
@@ -206,6 +213,54 @@ async def clerk_webhook(request: Request) -> dict:
         await user.insert()
 
     return {"ok": True, "data": {"synced": True, "clerkId": clerk_id}}
+
+
+# ── GDPR: purge all user data on account deletion ─────────────
+
+
+async def _purge_user_data(clerk_id: str) -> None:
+    """
+    Hard-delete every piece of data owned by a deleted Clerk user.
+
+    Called by the user.deleted webhook. Removes:
+      - All TripDocuments where user_id == clerk_id
+      - The UserDocument itself
+      - Any JobDocuments queued/processing for this user
+
+    This satisfies GDPR Article 17 (right to erasure).
+    Errors are logged but not re-raised so the webhook still returns 200
+    (Clerk retries on non-200, which would cause duplicate purge attempts).
+    """
+    from app.config.logging import get_logger
+
+    log = get_logger(__name__)
+    log.info("gdpr_purge_started", clerk_id=clerk_id)
+
+    try:
+        # Delete all trips owned by this user
+        trip_result = await TripDocument.find(TripDocument.user_id == clerk_id).delete()
+        trips_deleted = trip_result.deleted_count if trip_result else 0
+
+        # Delete any pending / processing jobs for this user
+        job_result = await JobDocument.find(JobDocument.user_id == clerk_id).delete()
+        jobs_deleted = job_result.deleted_count if job_result else 0
+
+        # Delete the user document itself
+        user = await UserDocument.find_one(UserDocument.clerk_id == clerk_id)
+        user_deleted = False
+        if user:
+            await user.delete()
+            user_deleted = True
+
+        log.info(
+            "gdpr_purge_complete",
+            clerk_id=clerk_id,
+            trips_deleted=trips_deleted,
+            jobs_deleted=jobs_deleted,
+            user_deleted=user_deleted,
+        )
+    except Exception as exc:
+        log.error("gdpr_purge_failed", clerk_id=clerk_id, error=str(exc))
 
 
 # ── Helper ─────────────────────────────────────────────────────
