@@ -5,6 +5,7 @@ app/routers/trips.py — with input validation (schemas.py) and auth guards (Tas
 from __future__ import annotations
 
 from fastapi import APIRouter, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.middleware.error_handler import AppError, ForbiddenError
@@ -17,7 +18,7 @@ from app.routers.schemas import (
     UpdatePinRequest,
     UpdateTripRequest,
 )
-from app.services.chat_service import SUGGESTION_CHIPS, chat
+from app.services.chat_service import SUGGESTION_CHIPS, chat, chat_stream
 from app.services.expense_service import check_can_edit
 from app.services.trip_service import TripService
 
@@ -345,6 +346,44 @@ async def chat_with_trip(trip_id: str, body: ChatRequest) -> dict:
         history=[{"role": m.role, "content": m.content} for m in body.history],
     )
     return {"ok": True, "data": {"reply": reply, "suggestionChips": SUGGESTION_CHIPS}}
+
+
+@router.post("/{trip_id}/chat/stream", summary="AI travel assistant — streaming SSE")
+async def chat_with_trip_stream(trip_id: str, body: ChatRequest) -> StreamingResponse:
+    """
+    Streaming variant of the chat endpoint.
+
+    Returns a text/event-stream response where each chunk is:
+        data: {"token": "Hello"}\n\n
+
+    Terminated by:
+        data: [DONE]\n\n
+
+    The client reads chunks as they arrive and renders tokens progressively,
+    giving a much more responsive feel than waiting for the full reply.
+
+    Falls back gracefully to the mock response in local dev (no API key needed).
+    """
+    trip = await TripService.get(trip_id, user_id=body.user_id)
+
+    from app.config.analytics import track_chat_message_sent
+
+    track_chat_message_sent(body.user_id, trip_id)
+
+    return StreamingResponse(
+        chat_stream(
+            trip=trip,
+            message=body.message,
+            history=[{"role": m.role, "content": m.content} for m in body.history],
+        ),
+        media_type="text/event-stream",
+        headers={
+            # Prevent proxies / Vercel edge from buffering the stream
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
 
 
 # ── Unresolved places — "Did we miss anything?" ───────────────

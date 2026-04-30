@@ -204,6 +204,81 @@ export function useUpdatePin() {
 
 // ── Chat ───────────────────────────────────────────────────────
 
+export interface ChatStreamParams {
+  tripId: string;
+  message: string;
+  history: { role: string; content: string }[];
+  userId?: string;
+  onToken: (token: string) => void;
+  onDone: (fullReply: string) => void;
+  onError: (msg: string) => void;
+}
+
+/**
+ * Stream a chat reply token-by-token using fetch + ReadableStream.
+ * React Native 0.74 (Expo 51) supports ReadableStream natively.
+ * Returns an AbortController so the caller can cancel on unmount.
+ */
+export function streamChat(params: ChatStreamParams): AbortController {
+  const { tripId, message, history, userId, onToken, onDone, onError } = params;
+  const controller = new AbortController();
+
+  (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/trips/${tripId}/chat/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, history, user_id: userId ?? null }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok || !res.body) {
+        onError("Sorry, something went wrong. Please try again.");
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          const dataLine = line.startsWith("data: ") ? line.slice(6).trim() : null;
+          if (!dataLine) continue;
+          if (dataLine === "[DONE]") {
+            onDone(accumulated);
+            return;
+          }
+          try {
+            const parsed = JSON.parse(dataLine) as { token?: string; error?: string };
+            if (parsed.error) { onError(parsed.error); return; }
+            if (parsed.token) {
+              accumulated += parsed.token;
+              onToken(parsed.token);
+            }
+          } catch { /* skip malformed chunk */ }
+        }
+      }
+
+      if (accumulated) onDone(accumulated);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      onError("Connection lost. Please try again.");
+    }
+  })();
+
+  return controller;
+}
+
+/** Legacy non-streaming hook — kept for backward compat */
 export function useChat() {
   return useMutation({
     mutationFn: ({

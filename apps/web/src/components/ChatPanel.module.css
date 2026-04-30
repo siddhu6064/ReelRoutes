@@ -192,3 +192,17 @@
 .sendBtn:hover:not(:disabled) { background: var(--coral-dark); }
 .sendBtn:active:not(:disabled) { transform: scale(.93); }
 .sendBtn:disabled { opacity: .4; cursor: not-allowed; }
+
+
+/* Streaming cursor */
+.cursor {
+  display: inline-block;
+  margin-left: 1px;
+  color: inherit;
+  animation: blink 0.8s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}

@@ -4,7 +4,7 @@ import styles from "./ChatPanel.module.css";
 
 import type { ChatMessage } from "@/api/client";
 
-import { useChat } from "@/api/client";
+import { streamChat } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
 
 const DEFAULT_CHIPS = [
@@ -21,40 +21,80 @@ interface Props {
   onClose: () => void;
 }
 
+interface Message extends ChatMessage {
+  done?: boolean;
+}
+
 export default function ChatPanel({ tripId, onClose }: Props) {
   const { userId } = useAppStore();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [chips, setChips] = useState<string[]>(DEFAULT_CHIPS);
+  const [chips] = useState<string[]>(DEFAULT_CHIPS);
+  const [isStreaming, setIsStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { mutateAsync: sendChat, isPending } = useChat();
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isPending]);
+  }, [messages, isStreaming]);
 
-  async function send(text: string) {
-    if (!text.trim() || isPending) return;
-    const userMsg: ChatMessage = { role: "user", content: text.trim() };
-    setMessages((prev) => [...prev, userMsg]);
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
+
+  function send(text: string) {
+    if (!text.trim() || isStreaming) return;
+    const userMsg: Message = { role: "user", content: text.trim(), done: true };
+    const assistantPlaceholder: Message = { role: "assistant", content: "", done: false };
+
+    setMessages((prev) => [...prev, userMsg, assistantPlaceholder]);
     setInput("");
+    setIsStreaming(true);
 
-    try {
-      const { reply, suggestionChips } = await sendChat({
-        tripId,
-        message: userMsg.content,
-        history: messages,
-        ...(userId ? { userId } : {}),
-      });
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-      if (suggestionChips?.length) setChips(suggestionChips);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Sorry, something went wrong. Please try again." },
-      ]);
-    }
+    abortRef.current = streamChat({
+      tripId,
+      message: userMsg.content,
+      history: messages.filter((m) => m.done).map(({ role, content }) => ({ role, content })),
+      userId: userId ?? undefined,
+
+      onToken: (token) => {
+        setMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          if (last && last.role === "assistant" && !last.done) {
+            next[next.length - 1] = { ...last, content: last.content + token };
+          }
+          return next;
+        });
+      },
+
+      onDone: () => {
+        setMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          if (last && last.role === "assistant") {
+            next[next.length - 1] = { ...last, done: true };
+          }
+          return next;
+        });
+        setIsStreaming(false);
+        abortRef.current = null;
+      },
+
+      onError: (msg) => {
+        setMessages((prev) => {
+          const next = [...prev];
+          const last = next[next.length - 1];
+          if (last && last.role === "assistant") {
+            next[next.length - 1] = { role: "assistant", content: msg, done: true };
+          }
+          return next;
+        });
+        setIsStreaming(false);
+        abortRef.current = null;
+      },
+    });
   }
 
   function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -71,7 +111,7 @@ export default function ChatPanel({ tripId, onClose }: Props) {
           <div className={styles.avatar}>AI</div>
           <div>
             <div className={styles.name}>Travel Assistant</div>
-            <div className={styles.sub}>Powered by GPT-4o</div>
+            <div className={styles.sub}>Powered by GPT-4o · Streaming</div>
           </div>
         </div>
         <button className={styles.close} onClick={onClose} aria-label="Close chat">
@@ -86,38 +126,42 @@ export default function ChatPanel({ tripId, onClose }: Props) {
           </div>
         )}
 
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`${styles.bubble} ${msg.role === "user" ? styles.user : styles.assistant}`}
-          >
-            {msg.role === "assistant" && <div className={styles.bubbleAvatar}>AI</div>}
-            <div className={styles.bubbleText}>
-              {msg.content.split("\n").map((line, j) => (
-                <span key={j}>
-                  {line}
-                  {j < msg.content.split("\n").length - 1 && <br />}
-                </span>
-              ))}
+        {messages.map((msg, i) => {
+          const isLiveAssistant = msg.role === "assistant" && i === messages.length - 1 && !msg.done;
+          return (
+            <div
+              key={i}
+              className={`${styles.bubble} ${msg.role === "user" ? styles.user : styles.assistant}`}
+            >
+              {msg.role === "assistant" && <div className={styles.bubbleAvatar}>AI</div>}
+              <div className={styles.bubbleText}>
+                {msg.content === "" && !msg.done ? (
+                  <div className={styles.typing}>
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                ) : (
+                  <>
+                    {msg.content.split("\n").map((line, j, arr) => (
+                      <span key={j}>
+                        {line}
+                        {j < arr.length - 1 && <br />}
+                      </span>
+                    ))}
+                    {isLiveAssistant && (
+                      <span className={styles.cursor} aria-hidden="true">▋</span>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-
-        {isPending && (
-          <div className={`${styles.bubble} ${styles.assistant}`}>
-            <div className={styles.bubbleAvatar}>AI</div>
-            <div className={styles.typing}>
-              <span />
-              <span />
-              <span />
-            </div>
-          </div>
-        )}
+          );
+        })}
 
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggestion chips */}
       {messages.length === 0 && (
         <div className={styles.chips}>
           {chips.slice(0, 6).map((chip) => (
@@ -125,7 +169,7 @@ export default function ChatPanel({ tripId, onClose }: Props) {
               key={chip}
               className={styles.chip}
               onClick={() => send(chip)}
-              disabled={isPending}
+              disabled={isStreaming}
             >
               {chip}
             </button>
@@ -146,7 +190,7 @@ export default function ChatPanel({ tripId, onClose }: Props) {
         <button
           className={styles.sendBtn}
           onClick={() => send(input)}
-          disabled={!input.trim() || isPending}
+          disabled={!input.trim() || isStreaming}
           aria-label="Send message"
         >
           ↑

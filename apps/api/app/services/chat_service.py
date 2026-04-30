@@ -107,6 +107,77 @@ async def chat(
         return "Sorry, I'm having trouble connecting right now. Please try again in a moment."
 
 
+async def chat_stream(
+    trip: TripDocument,
+    message: str,
+    history: list[dict[str, str]],
+):
+    """
+    Async generator that yields Server-Sent Events for a GPT-4o streaming response.
+
+    Each yielded value is a complete SSE line ready to send over the wire:
+        data: {"token": "Hello"}\n\n
+        ...
+        data: [DONE]\n\n
+
+    The caller (FastAPI StreamingResponse) iterates this generator and flushes
+    each chunk to the client as it arrives from OpenAI.
+
+    Falls back to the mock response (yielded in one shot) when no API key is set.
+    """
+    import json
+
+    settings = get_settings()
+
+    if not settings.openai_api_key:
+        logger.warning("openai_api_key_not_set_streaming_mock")
+        mock = _mock_response(message, trip)
+        # Yield mock word-by-word so the UI still exercises the streaming path
+        for word in mock.split(" "):
+            yield f"data: {json.dumps({'token': word + ' '})}\n\n"
+        yield "data: [DONE]\n\n"
+        return
+
+    try:
+        from openai import AsyncOpenAI
+
+        client = AsyncOpenAI(api_key=settings.openai_api_key)
+
+        messages: list[dict] = [{"role": "system", "content": _build_system_prompt(trip)}]
+        messages.extend(history[-20:])
+        messages.append({"role": "user", "content": message})
+
+        stream = await client.chat.completions.create(
+            model=settings.openai_chat_model,
+            messages=messages,  # type: ignore[arg-type]
+            max_tokens=800,
+            temperature=0.7,
+            stream=True,  # ← the only change from the non-streaming call
+        )
+
+        total_tokens = 0
+        async for chunk in stream:
+            delta = chunk.choices[0].delta if chunk.choices else None
+            token = delta.content if delta else None
+            if token:
+                total_tokens += 1
+                yield f"data: {json.dumps({'token': token})}\n\n"
+
+        yield "data: [DONE]\n\n"
+        logger.info(
+            "chat_stream_completed",
+            trip_id=str(trip.id),
+            tokens=total_tokens,
+        )
+
+    except Exception as exc:
+        logger.error("chat_stream_error", error=str(exc))
+        import json as _json
+
+        yield f"data: {_json.dumps({'error': 'Connection error. Please try again.'})}\n\n"
+        yield "data: [DONE]\n\n"
+
+
 def _mock_response(message: str, trip: TripDocument) -> str:
     """Canned response used in local dev when no OpenAI key is set."""
     msg_lower = message.lower()
