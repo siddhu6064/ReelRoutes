@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import NavBar from "@/components/NavBar";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import StagingBanner from "@/components/StagingBanner";
 
 const ImportPage = lazy(() => import("@/pages/ImportPage"));
 const ProcessingPage = lazy(() => import("@/pages/ProcessingPage"));
@@ -41,6 +42,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <StagingBanner />
         <NavBar />
         <OfflineBanner />
         <Suspense fallback={<PageLoader />}>

@@ -1,0 +1,154 @@
+name: Deploy → Staging
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Triggers on every push to the siddhu6064 branch.
+# Pipeline:
+#   1. Run full Python test suite (must pass to proceed)
+#   2. Trigger Railway staging redeploy via webhook
+#   3. Wait for staging to come up (health check polling)
+#   4. Run smoke tests against live staging URL
+#
+# Required GitHub Secrets (Settings → Secrets → Actions):
+#   RAILWAY_STAGING_WEBHOOK   — Railway deploy webhook URL for staging project
+#                               (Railway → staging project → Settings → Deploy Hooks)
+#   STAGING_API_URL           — https://reelroutes-api-staging.railway.app
+#   STAGING_WEB_URL           — https://reelroutes-staging.vercel.app (optional)
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: ["siddhu6064"]
+  workflow_dispatch:        # allow manual trigger from GitHub Actions tab
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true  # if two pushes land close together, cancel the older
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # ── Job 1: Full test suite ─────────────────────────────────────────────────
+  test:
+    name: "✅ Tests — must pass before deploy"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    env:
+      ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - uses: actions/cache@v4
+        with:
+          path: apps/api/.venv
+          key: ${{ runner.os }}-py-${{ hashFiles('apps/api/poetry.lock') }}
+          restore-keys: ${{ runner.os }}-py-
+
+      - run: poetry install --no-interaction
+
+      - name: "ruff · format + lint"
+        run: |
+          poetry run ruff format --check .
+          poetry run ruff check . --output-format=github
+
+      - name: "pytest · full suite"
+        run: poetry run pytest tests/ -q --tb=short --ignore=tests/test_smoke.py
+
+  # ── Job 2: Deploy to Railway staging ──────────────────────────────────────
+  deploy:
+    name: "🚀 Deploy → Railway staging"
+    needs: test           # only runs if tests pass
+    runs-on: ubuntu-latest
+    environment: staging  # requires manual approval if configured in repo settings
+
+    steps:
+      - name: "Trigger Railway staging deploy"
+        run: |
+          echo "Triggering Railway staging webhook..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "${{ secrets.RAILWAY_STAGING_WEBHOOK }}")
+          echo "Webhook response: $STATUS"
+          if [[ "$STATUS" != "200" && "$STATUS" != "202" ]]; then
+            echo "❌ Railway webhook returned $STATUS"
+            exit 1
+          fi
+          echo "✅ Railway deploy triggered"
+
+      - name: "Wait for staging to become healthy (up to 3 min)"
+        env:
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+        run: |
+          echo "Polling $STAGING_API_URL/health ..."
+          for i in $(seq 1 36); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --max-time 10 "$STAGING_API_URL/health" 2>/dev/null || echo "000")
+            if [[ "$STATUS" == "200" ]]; then
+              echo "✅ Staging is healthy after $((i * 5))s"
+              exit 0
+            fi
+            echo "  Attempt $i/36 — got $STATUS — retrying in 5s..."
+            sleep 5
+          done
+          echo "❌ Staging did not become healthy within 3 minutes"
+          exit 1
+
+  # ── Job 3: Smoke tests against live staging ────────────────────────────────
+  smoke:
+    name: "🔍 Smoke tests → staging"
+    needs: deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - uses: actions/cache@v4
+        with:
+          path: apps/api/.venv
+          key: ${{ runner.os }}-py-${{ hashFiles('apps/api/poetry.lock') }}
+          restore-keys: ${{ runner.os }}-py-
+
+      - run: poetry install --no-interaction
+
+      - name: "Run smoke tests against live staging"
+        env:
+          ENV: test
+          SMOKE_TEST_URL: ${{ secrets.STAGING_API_URL }}
+          SMOKE_WEB_URL: ${{ secrets.STAGING_WEB_URL }}
+        run: |
+          poetry run pytest tests/test_smoke.py -v --tb=short
+
+      - name: "Post deploy summary"
+        if: always()
+        run: |
+          echo "## Staging Deploy Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| API URL | ${{ secrets.STAGING_API_URL }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deployed at | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,40 @@
+# railway.toml
+#
+# Railway service configuration for ReelRoutes API.
+# This file is used by BOTH the production and staging Railway projects.
+# Environment-specific values (secrets, DB URLs) are set in Railway → Variables.
+#
+# Railway docs: https://docs.railway.app/reference/config-as-code
+#
+# ── How environments work ─────────────────────────────────────────────────────
+#
+#   Production project:  github.com/siddhu6064/ReelRoutes → branch: main
+#   Staging project:     github.com/siddhu6064/ReelRoutes → branch: siddhu6064
+#
+#   Each project has two services:
+#     1. api    — FastAPI web server (Uvicorn)
+#     2. worker — ARQ background job processor
+#
+#   Shared plugins per project:
+#     - Redis  (set REDIS_URL automatically in project variables)
+#
+# ─────────────────────────────────────────────────────────────────────────────
+
+[build]
+builder = "nixpacks"
+buildCommand = "cd apps/api && pip install poetry && poetry install --no-dev"
+
+[deploy]
+# ── API service ───────────────────────────────────────────────────────────────
+# In Railway: create a service named "api", set startCommand below.
+startCommand = "cd apps/api && poetry run uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[environments.staging]
+# Variables set here are MERGED with the staging project's Variables tab.
+# Actual secrets must be set in Railway UI — never committed here.
+[environments.staging.deploy]
+startCommand = "cd apps/api && poetry run uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1"

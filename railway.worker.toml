@@ -1,0 +1,21 @@
+# railway.worker.toml
+#
+# Railway configuration for the ARQ background worker service.
+# In Railway: create a second service named "worker" and point it at this file
+# using the "Config as Code" option → custom config file path.
+#
+# The worker shares the same codebase and environment variables as the API
+# service — it just runs a different start command.
+#
+# Railway docs: https://docs.railway.app/guides/workers
+
+[build]
+builder = "nixpacks"
+buildCommand = "cd apps/api && pip install poetry && poetry install --no-dev"
+
+[deploy]
+startCommand = "cd apps/api && poetry run arq app.workers.job_worker.WorkerSettings"
+# Workers don't expose HTTP — no healthcheck path needed.
+# Railway monitors the process exit code instead.
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5

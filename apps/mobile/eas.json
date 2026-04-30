@@ -14,6 +14,25 @@
         "EXPO_PUBLIC_API_URL": "http://localhost:8000"
       }
     },
+    "staging": {
+      "distribution": "internal",
+      "channel": "staging",
+      "ios": {
+        "simulator": false,
+        "resourceClass": "m-medium",
+        "capabilities": {
+          "App Groups": true
+        }
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://reelroutes-api-staging.railway.app",
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_REPLACE_ME",
+        "EXPO_PUBLIC_ENV": "staging"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
