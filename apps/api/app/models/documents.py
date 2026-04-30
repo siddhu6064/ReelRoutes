@@ -296,6 +296,14 @@ class UserDocument(Document):
     push_token: str | None = None  # Expo push token for mobile notifications
     apple_id: str | None = None
 
+    # ── Billing / subscription ────────────────────────────────
+    # plan: "free" (default) or "pro" (active Stripe subscription)
+    plan: str = "free"
+    stripe_customer_id: str | None = None  # cus_... from Stripe
+    stripe_subscription_id: str | None = None  # sub_... from Stripe
+    # subscription_status mirrors Stripe: active | canceled | past_due | incomplete
+    subscription_status: str = "inactive"
+
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 

@@ -24,7 +24,13 @@ async def suggest_spots_for_trip(
     trip_id: str,
     user_id: str | None = Query(None),
 ) -> dict:
-    """Ask GPT-4o to suggest up to 5 nearby spots not already in the trip."""
+    """Ask GPT-4o to suggest up to 5 nearby spots not already in the trip. Pro only."""
+    # Pro feature gate
+    if user_id:
+        from app.services.billing_service import require_pro_or_raise
+
+        await require_pro_or_raise(user_id, "AI spot suggestions")
+
     trip = await TripService.get(trip_id, user_id=user_id)
 
     try:

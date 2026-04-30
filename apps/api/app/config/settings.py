@@ -59,10 +59,22 @@ class Settings(BaseSettings):
     posthog_api_key: str = ""
     posthog_host: str = "https://app.posthog.com"
 
+    # ── Stripe billing ────────────────────────────────────────
+    stripe_secret_key: str = ""  # sk_live_... or sk_test_...
+    stripe_webhook_secret: str = ""  # whsec_... from Stripe dashboard
+    stripe_pro_price_id: str = ""  # price_... monthly recurring price
+
+    # ── Billing limits ────────────────────────────────────────
+    free_tier_max_trips: int = 5  # max saved trips for free users
+
     # ── Computed helpers ──────────────────────────────────────
     @property
     def is_production(self) -> bool:
         return self.env == "production"
+
+    @property
+    def is_staging(self) -> bool:
+        return self.env == "staging"
 
     @property
     def is_test(self) -> bool:
@@ -71,6 +83,10 @@ class Settings(BaseSettings):
     @property
     def debug(self) -> bool:
         return self.env in ("local", "test")
+
+    @property
+    def has_stripe(self) -> bool:
+        return bool(self.stripe_secret_key and self.stripe_pro_price_id)
 
     @field_validator("cors_origins", mode="before")
     @classmethod

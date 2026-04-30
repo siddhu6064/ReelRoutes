@@ -57,6 +57,12 @@ async def process_video(body: ProcessRequest, request: Request) -> dict:
     except SSRFError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
+    # Billing: enforce free tier trip limit
+    if body.user_id:
+        from app.services.billing_service import check_trip_limit
+
+        await check_trip_limit(body.user_id)
+
     platform = detect_platform(url)
 
     # Deduplication — don't re-queue an already-in-flight import

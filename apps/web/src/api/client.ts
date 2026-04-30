@@ -1051,3 +1051,45 @@ export function useSemanticSearch(
     staleTime: 2 * 60 * 1000, // 2 min
   });
 }
+
+// ── Billing ───────────────────────────────────────────────────────────────────
+
+export interface PlanStatus {
+  plan: "free" | "pro";
+  subscription_status: string;
+  trip_count: number;
+  trip_limit: number | null;
+  trips_remaining: number | null;
+  features: string[];
+  upgrade_url: string | null;
+}
+
+export function usePlanStatus(userId?: string): UseQueryResult<PlanStatus> {
+  return useQuery({
+    queryKey: ["billing", "status"],
+    queryFn: () =>
+      apiFetch<PlanStatus>("/api/billing/status"),
+    enabled: !!userId,
+    staleTime: 60 * 1000, // 1 min
+  });
+}
+
+export function useCreateCheckout() {
+  return useMutation({
+    mutationFn: ({ successUrl, cancelUrl }: { successUrl: string; cancelUrl: string }) =>
+      apiFetch<{ checkout_url: string }>("/api/billing/checkout", {
+        method: "POST",
+        body: JSON.stringify({ success_url: successUrl, cancel_url: cancelUrl }),
+      }),
+  });
+}
+
+export function useCreatePortal() {
+  return useMutation({
+    mutationFn: ({ returnUrl }: { returnUrl: string }) =>
+      apiFetch<{ portal_url: string }>("/api/billing/portal", {
+        method: "POST",
+        body: JSON.stringify({ return_url: returnUrl }),
+      }),
+  });
+}

@@ -159,6 +159,13 @@ def create_app() -> FastAPI:
 
     app.include_router(plan_router)
 
+    # Billing / Stripe
+    from app.routers.billing import router as billing_router
+    from app.routers.billing import webhook_router as stripe_webhook_router
+
+    app.include_router(billing_router)
+    app.include_router(stripe_webhook_router)
+
     return app
 
 
