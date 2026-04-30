@@ -25,7 +25,7 @@ interface ReservationCardProps {
 function ReservationCard({ reservation, onDelete }: ReservationCardProps): React.ReactElement {
   const icon = TYPE_ICON[reservation.type] ?? "📄";
 
-  function fmt(iso: string | null): string {
+  function fmt(iso: string | null): string | null {
     if (!iso) return null;
     return new Date(iso).toLocaleDateString(undefined, {
       month: "short",

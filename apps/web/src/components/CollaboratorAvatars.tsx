@@ -23,7 +23,7 @@ function Avatar({ clerk_id, role }: Pick<Collaborator, "clerk_id" | "role">): Re
   );
 }
 
-export function CollaboratorAvatars({ tripId, userId, isOwner }: Props): React.ReactElement {
+export function CollaboratorAvatars({ tripId, userId, isOwner }: Props): React.ReactElement | null {
   const [showInvite, setShowInvite] = useState(false);
   const { data, isLoading } = useCollaborators(tripId, userId);
   const remove = useRemoveCollaborator();

@@ -13,7 +13,13 @@ interface Props {
   onClose: () => void;
 }
 
-function StarRating({ rating, total }: { rating: number; total?: number }): React.ReactElement {
+function StarRating({
+  rating,
+  total,
+}: {
+  rating: number;
+  total?: number;
+}): React.ReactElement | null {
   const full = Math.floor(rating);
   const half = rating - full >= 0.5;
   return (
@@ -29,7 +35,7 @@ function StarRating({ rating, total }: { rating: number; total?: number }): Reac
   );
 }
 
-function OpenBadge({ openNow }: { openNow: boolean | undefined }): React.ReactElement {
+function OpenBadge({ openNow }: { openNow: boolean | undefined }): React.ReactElement | null {
   if (openNow === undefined) return null;
   return (
     <span className={styles.openBadge} data-open={openNow}>
@@ -38,7 +44,7 @@ function OpenBadge({ openNow }: { openNow: boolean | undefined }): React.ReactEl
   );
 }
 
-export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.ReactElement {
+export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.ReactElement | null {
   const { userId } = useAppStore();
   const [notes, setNotes] = useState(pin.notes ?? "");
   const [tagInput, setTagInput] = useState("");
@@ -50,7 +56,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.R
   const { mutateAsync: updatePin } = useUpdatePin();
   const { mutateAsync: deletePin } = useDeletePin();
 
-  async function handleSave(): void {
+  async function handleSave(): Promise<void> {
     if (!userId) return;
     setSaving(true);
     try {
@@ -68,7 +74,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.R
     }
   }
 
-  async function handleDelete(): void {
+  async function handleDelete(): Promise<void> {
     if (!userId) return;
     await deletePin({ tripId, pinId: pin.id, userId });
     onClose();

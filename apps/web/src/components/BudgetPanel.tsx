@@ -38,7 +38,7 @@ function LimitBar({
   spent: number;
   budget: number | null;
   currency: string;
-}): React.ReactElement {
+}): React.ReactElement | null {
   if (budget === null) return null;
   const pct = Math.min((spent / budget) * 100, 100);
   const over = spent > budget;
@@ -73,7 +73,7 @@ function CategoryBreakdown({
   byCategory: Record<string, number>;
   total: number;
   currency: string;
-}): React.ReactElement {
+}): React.ReactElement | null {
   const entries = Object.entries(byCategory)
     .filter(([, v]) => v > 0)
     .sort(([, a], [, b]) => b - a);
@@ -318,7 +318,10 @@ interface BudgetPanelProps {
   userId?: string;
 }
 
-export default function BudgetPanel({ tripId, userId }: BudgetPanelProps): React.ReactElement {
+export default function BudgetPanel({
+  tripId,
+  userId,
+}: BudgetPanelProps): React.ReactElement | null {
   const expensesQuery = useExpenses(tripId, userId);
   const summaryQuery = useExpenseSummary(tripId, userId);
   const deleteMutation = useDeleteExpense();

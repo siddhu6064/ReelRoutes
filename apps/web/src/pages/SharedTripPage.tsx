@@ -13,7 +13,7 @@ export default function SharedTripPage(): React.ReactElement {
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
   const [copied, setCopied] = useState(false);
 
-  async function copyLink(): void {
+  async function copyLink(): Promise<void> {
     await navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

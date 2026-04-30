@@ -33,7 +33,7 @@ export function FlyoverButton({ tripId, userId }: Props): React.JSX.Element {
     onSuccess: (data) => setResult(data),
   });
 
-  async function handleCopy(): void {
+  async function handleCopy(): Promise<void> {
     if (!result?.flyover_url) return;
     await navigator.clipboard.writeText(result.flyover_url);
     setCopied(true);

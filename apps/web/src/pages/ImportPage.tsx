@@ -26,7 +26,7 @@ const PLATFORMS = [
   { id: "twitter", label: "X / Twitter", pattern: /twitter\.com|x\.com/, color: "#000", icon: "𝕏" },
 ];
 
-function detectPlatform(url: string): string | null {
+function detectPlatform(url: string): (typeof PLATFORMS)[number] | null {
   return PLATFORMS.find((p) => p.pattern.test(url)) ?? null;
 }
 
@@ -49,8 +49,7 @@ export default function ImportPage(): React.ReactElement {
   const detected = url ? detectPlatform(url) : null;
   const valid = url.trim() !== "" && isValidUrl(url.trim());
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
-    e.preventDefault();
+  async function handleSubmit(): Promise<void> {
     if (!valid) {
       setError("Please enter a valid video URL.");
       return;
@@ -84,7 +83,8 @@ export default function ImportPage(): React.ReactElement {
 
         <form
           className={styles.form}
-          onSubmit={() => {
+          onSubmit={(e: React.FormEvent) => {
+            e.preventDefault();
             void handleSubmit();
           }}
         >

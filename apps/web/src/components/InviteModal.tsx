@@ -29,7 +29,7 @@ export function InviteModal({ tripId, userId, onClose }: Props): React.ReactElem
     );
   }
 
-  async function handleCopy(): void {
+  async function handleCopy(): Promise<void> {
     if (!inviteUrl) return;
     await navigator.clipboard.writeText(inviteUrl);
     setCopied(true);
