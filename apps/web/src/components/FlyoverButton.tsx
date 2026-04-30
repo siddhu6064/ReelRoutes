@@ -33,7 +33,7 @@ export function FlyoverButton({ tripId, userId }: Props): React.JSX.Element {
     onSuccess: (data) => setResult(data),
   });
 
-  async function handleCopy() {
+  async function handleCopy(): void {
     if (!result?.flyover_url) return;
     await navigator.clipboard.writeText(result.flyover_url);
     setCopied(true);
@@ -61,7 +61,12 @@ export function FlyoverButton({ tripId, userId }: Props): React.JSX.Element {
             >
               ⬇ Download
             </a>
-            <button className={styles.copyBtn} onClick={handleCopy}>
+            <button
+              className={styles.copyBtn}
+              onClick={() => {
+                void handleCopy();
+              }}
+            >
               {copied ? "✓ Copied" : "🔗 Copy link"}
             </button>
           </div>

@@ -43,7 +43,7 @@ export default function ChatPanel({ tripId, onClose }: Props): React.ReactElemen
     return () => abortRef.current?.abort();
   }, []);
 
-  function send(text: string) {
+  function send(text: string): void {
     if (!text.trim() || isStreaming) return;
     const userMsg: Message = { role: "user", content: text.trim(), done: true };
     const assistantPlaceholder: Message = { role: "assistant", content: "", done: false };
@@ -97,7 +97,7 @@ export default function ChatPanel({ tripId, onClose }: Props): React.ReactElemen
     });
   }
 
-  function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>): void {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send(input);

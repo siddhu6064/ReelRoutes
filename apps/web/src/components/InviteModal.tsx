@@ -10,14 +10,14 @@ interface Props {
   onClose: () => void;
 }
 
-export function InviteModal({ tripId, userId, onClose }: Props) {
+export function InviteModal({ tripId, userId, onClose }: Props): React.ReactElement {
   const [role, setRole] = useState<"editor" | "viewer">("viewer");
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const createInvite = useCreateInvite();
 
-  function handleGenerate() {
+  function handleGenerate(): void {
     createInvite.mutate(
       { tripId, userId, role },
       {
@@ -29,7 +29,7 @@ export function InviteModal({ tripId, userId, onClose }: Props) {
     );
   }
 
-  async function handleCopy() {
+  async function handleCopy(): void {
     if (!inviteUrl) return;
     await navigator.clipboard.writeText(inviteUrl);
     setCopied(true);
@@ -84,7 +84,12 @@ export function InviteModal({ tripId, userId, onClose }: Props) {
 
             <div className={styles.linkBox}>
               <code className={styles.link}>{inviteUrl}</code>
-              <button className={styles.copyBtn} onClick={handleCopy}>
+              <button
+                className={styles.copyBtn}
+                onClick={() => {
+                  void handleCopy();
+                }}
+              >
                 {copied ? "✓ Copied" : "Copy"}
               </button>
             </div>

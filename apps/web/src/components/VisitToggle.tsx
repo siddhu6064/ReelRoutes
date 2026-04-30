@@ -29,7 +29,7 @@ export default function VisitToggle({
   const unvisitMutation = useUnvisitPin();
   const isPending = visitMutation.isPending || unvisitMutation.isPending;
 
-  function handleClick() {
+  function handleClick(): void {
     if (isVisited) {
       unvisitMutation.mutate({ tripId, pinId, ...(userId !== undefined ? { userId } : {}) });
     } else {
@@ -37,7 +37,7 @@ export default function VisitToggle({
     }
   }
 
-  function handleConfirm(entry: string) {
+  function handleConfirm(entry: string): void {
     visitMutation.mutate({
       tripId,
       pinId,
@@ -47,7 +47,7 @@ export default function VisitToggle({
     setShowModal(false);
   }
 
-  function handleSkip() {
+  function handleSkip(): void {
     visitMutation.mutate({ tripId, pinId, ...(userId !== undefined ? { userId } : {}) });
     setShowModal(false);
   }

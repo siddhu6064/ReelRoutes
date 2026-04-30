@@ -18,17 +18,17 @@ interface Props {
   onClick?: (tripId: string) => void;
 }
 
-export function TripCard({ trip, userId, onClick }: Props) {
+export function TripCard({ trip, userId, onClick }: Props): React.ReactElement {
   const [duplicated, setDuplicated] = useState(false);
   const incrementView = useIncrementView();
   const duplicate = useDuplicateTrip();
 
-  function handleClick() {
+  function handleClick(): void {
     incrementView.mutate(trip.id);
     onClick?.(trip.id);
   }
 
-  function handleDuplicate(e: React.MouseEvent) {
+  function handleDuplicate(e: React.MouseEvent): void {
     e.stopPropagation();
     duplicate.mutate({ tripId: trip.id, userId }, { onSuccess: () => setDuplicated(true) });
   }

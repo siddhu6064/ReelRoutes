@@ -11,7 +11,7 @@ interface Props {
   isOwner: boolean;
 }
 
-function Avatar({ clerk_id, role }: Pick<Collaborator, "clerk_id" | "role">) {
+function Avatar({ clerk_id, role }: Pick<Collaborator, "clerk_id" | "role">): React.ReactElement {
   const initials = (clerk_id ?? "??").slice(0, 2).toUpperCase();
   return (
     <div
@@ -23,7 +23,7 @@ function Avatar({ clerk_id, role }: Pick<Collaborator, "clerk_id" | "role">) {
   );
 }
 
-export function CollaboratorAvatars({ tripId, userId, isOwner }: Props) {
+export function CollaboratorAvatars({ tripId, userId, isOwner }: Props): React.ReactElement {
   const [showInvite, setShowInvite] = useState(false);
   const { data, isLoading } = useCollaborators(tripId, userId);
   const remove = useRemoveCollaborator();

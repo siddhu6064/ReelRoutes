@@ -23,7 +23,7 @@ const queryClient = new QueryClient({
   },
 });
 
-function PageLoader() {
+function PageLoader(): React.ReactElement {
   return (
     <div
       style={{

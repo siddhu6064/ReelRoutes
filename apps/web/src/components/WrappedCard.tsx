@@ -7,7 +7,7 @@ interface WrappedCardProps {
   userId?: string;
 }
 
-async function shareStats(stats: WrappedStats) {
+async function shareStats(stats: WrappedStats): Promise<void> {
   const text =
     `🗺️ ${stats.title} — Trip Wrapped\n` +
     `✅ ${stats.visitedPins}/${stats.totalPins} spots visited\n` +
@@ -22,7 +22,7 @@ async function shareStats(stats: WrappedStats) {
   }
 }
 
-function ProgressRing({ rate, size = 96 }: { rate: number; size?: number }) {
+function ProgressRing({ rate, size = 96 }: { rate: number; size?: number }): React.ReactElement {
   const r = (size - 12) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - rate);

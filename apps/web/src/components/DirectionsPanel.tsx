@@ -31,7 +31,7 @@ interface Props {
   userId?: string;
 }
 
-export function DirectionsPanel({ tripId, userId }: Props) {
+export function DirectionsPanel({ tripId, userId }: Props): React.ReactElement {
   const [mode, setMode] = useState<TravelMode>("driving");
 
   const params = new URLSearchParams({ mode });

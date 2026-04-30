@@ -76,30 +76,30 @@ export default function EditTripPage(): React.ReactElement {
     if (col) day.pinIds.forEach((id) => pinDayColour.set(id, col));
   });
 
-  async function handleSaveTitle() {
+  async function handleSaveTitle(): Promise<void> {
     if (!userId || !tripId || !title.trim()) return;
     await updateTrip({ tripId, user_id: userId, title: title.trim() });
     setTitleDirty(false);
   }
 
-  async function handleDelete() {
+  async function handleDelete(): Promise<void> {
     if (!userId || !tripId) return;
     if (!confirm("Delete this trip? This cannot be undone.")) return;
     await deleteTrip({ tripId, userId });
     navigate("/");
   }
 
-  function onDragStart(e: React.DragEvent, index: number) {
+  function onDragStart(e: React.DragEvent, index: number): void {
     setDragging(index);
     e.dataTransfer.effectAllowed = "move";
   }
 
-  function onDragOver(e: React.DragEvent, index: number) {
+  function onDragOver(e: React.DragEvent, index: number): void {
     e.preventDefault();
     setDragOver(index);
   }
 
-  async function onDrop(e: React.DragEvent, dropIndex: number) {
+  async function onDrop(e: React.DragEvent, dropIndex: number): Promise<void> {
     e.preventDefault();
     if (dragging === null || dragging === dropIndex || !userId || !tripId) return;
     const newOrder = [...sorted];
@@ -112,7 +112,7 @@ export default function EditTripPage(): React.ReactElement {
     await reorderPins({ tripId, user_id: userId, pin_ids: newOrder.map((p) => p.id) });
   }
 
-  async function handleAddPlace() {
+  async function handleAddPlace(): Promise<void> {
     if (!userId || !tripId || !newPlace.name || !newPlace.lat || !newPlace.lng) return;
     setAddingPlace(true);
     try {
@@ -131,28 +131,28 @@ export default function EditTripPage(): React.ReactElement {
     }
   }
 
-  async function handleOptimise() {
+  async function handleOptimise(): Promise<void> {
     if (!userId || !tripId) return;
     const result = await optimiseRoute({ tripId, user_id: userId });
     setOptimiseResult(result);
   }
 
-  async function handleGenerateItinerary() {
+  async function handleGenerateItinerary(): Promise<void> {
     if (!userId || !tripId) return;
     const result = await generateItinerary({ tripId, user_id: userId, trip_length_days: tripDays });
     setItinerary(result.days);
   }
 
-  function copyItineraryText() {
+  function copyItineraryText(): void {
     if (!itinerary) return;
     const lines = itinerary.map((day) => {
       const pins = day.pinIds.map((id) => sorted.find((p) => p.id === id)?.placeName ?? id);
       return `${day.label ?? `Day ${day.dayNumber}`}\n${pins.map((p, i) => `  ${i + 1}. ${p}`).join("\n")}${day.notes ? `\n  Note: ${day.notes}` : ""}`;
     });
-    navigator.clipboard.writeText(lines.join("\n\n"));
+    void navigator.clipboard.writeText(lines.join("\n\n"));
   }
 
-  function openDayInMaps(day: ItineraryDay) {
+  function openDayInMaps(day: ItineraryDay): void {
     const pins = day.pinIds.map((id) => sorted.find((p) => p.id === id)).filter(Boolean) as Pin[];
     const first = pins[0];
     const last = pins[pins.length - 1];
@@ -193,7 +193,13 @@ export default function EditTripPage(): React.ReactElement {
             placeholder="Name your trip"
           />
           {titleDirty && (
-            <button className={styles.saveBtn} onClick={handleSaveTitle} disabled={updatingTitle}>
+            <button
+              className={styles.saveBtn}
+              onClick={() => {
+                void handleSaveTitle();
+              }}
+              disabled={updatingTitle}
+            >
               {updatingTitle ? "Saving…" : "Save"}
             </button>
           )}
@@ -224,7 +230,9 @@ export default function EditTripPage(): React.ReactElement {
             </div>
             <button
               className={styles.actionBtn}
-              onClick={handleOptimise}
+              onClick={() => {
+                void handleOptimise();
+              }}
               disabled={optimising || !userId}
             >
               {optimising ? "Optimising…" : "⚡ Optimise route"}
@@ -274,7 +282,9 @@ export default function EditTripPage(): React.ReactElement {
               </div>
               <button
                 className={styles.actionBtn}
-                onClick={handleGenerateItinerary}
+                onClick={() => {
+                  void handleGenerateItinerary();
+                }}
                 disabled={generatingItinerary || !userId}
               >
                 {generatingItinerary ? "Planning…" : "✨ Generate plan"}
@@ -297,7 +307,9 @@ export default function EditTripPage(): React.ReactElement {
                           </span>
                           <button
                             className={styles.dayMapsBtn}
-                            onClick={() => openDayInMaps(day)}
+                            onClick={() => {
+                              void openDayInMaps(day);
+                            }}
                             title="Open day in Google Maps"
                           >
                             🗺 Maps
@@ -393,7 +405,13 @@ export default function EditTripPage(): React.ReactElement {
               />
             </div>
             <div className={styles.formActions}>
-              <button className={styles.saveBtn} onClick={handleAddPlace} disabled={addingPlace}>
+              <button
+                className={styles.saveBtn}
+                onClick={() => {
+                  void handleAddPlace();
+                }}
+                disabled={addingPlace}
+              >
                 {addingPlace ? "Adding…" : "Add stop"}
               </button>
               <button className={styles.cancelBtn} onClick={() => setShowAddPlace(false)}>
@@ -407,7 +425,13 @@ export default function EditTripPage(): React.ReactElement {
       {/* Danger */}
       <section className={`${styles.section} ${styles.danger}`}>
         <label className={styles.label}>Danger zone</label>
-        <button className={styles.deleteBtn} onClick={handleDelete} disabled={deleting}>
+        <button
+          className={styles.deleteBtn}
+          onClick={() => {
+            void handleDelete();
+          }}
+          disabled={deleting}
+        >
           {deleting ? "Deleting…" : "Delete this trip"}
         </button>
       </section>

@@ -36,7 +36,7 @@ export default function LowConfidenceSuggestions({ tripId, pins }: Props): React
 
   if (visible.length === 0) return null;
 
-  async function handleAdd(pin: Pin) {
+  async function handleAdd(pin: Pin): void {
     if (!userId) return;
     setAdding(pin.id);
     try {
@@ -54,7 +54,7 @@ export default function LowConfidenceSuggestions({ tripId, pins }: Props): React
     }
   }
 
-  function dismiss(pinId: string) {
+  function dismiss(pinId: string): void {
     setDismissed((prev) => new Set([...prev, pinId]));
   }
 

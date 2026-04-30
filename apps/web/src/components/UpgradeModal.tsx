@@ -146,7 +146,9 @@ export default function UpgradeModal({
         {/* Actions */}
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <button
-            onClick={handleUpgrade}
+            onClick={() => {
+              void handleUpgrade();
+            }}
             disabled={isPending}
             style={{
               padding: "14px 0",

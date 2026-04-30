@@ -26,11 +26,11 @@ const PLATFORMS = [
   { id: "twitter", label: "X / Twitter", pattern: /twitter\.com|x\.com/, color: "#000", icon: "𝕏" },
 ];
 
-function detectPlatform(url: string) {
+function detectPlatform(url: string): string | null {
   return PLATFORMS.find((p) => p.pattern.test(url)) ?? null;
 }
 
-function isValidUrl(url: string) {
+function isValidUrl(url: string): boolean {
   try {
     new URL(url);
     return true;
@@ -49,7 +49,7 @@ export default function ImportPage(): React.ReactElement {
   const detected = url ? detectPlatform(url) : null;
   const valid = url.trim() !== "" && isValidUrl(url.trim());
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     if (!valid) {
       setError("Please enter a valid video URL.");
@@ -82,7 +82,12 @@ export default function ImportPage(): React.ReactElement {
           your interactive map.
         </p>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form
+          className={styles.form}
+          onSubmit={() => {
+            void handleSubmit();
+          }}
+        >
           <div className={styles.inputWrap}>
             <span className={styles.inputIcon}>
               {detected ? <span style={{ color: detected.color }}>{detected.icon}</span> : "🔗"}

@@ -66,7 +66,7 @@ export function usePlacesAutocomplete(input: string): {
       });
     }, DEBOUNCE_MS);
 
-    return () => clearTimeout(timerRef.current);
+    return (): void => clearTimeout(timerRef.current);
   }, [input]);
 
   const clear = useCallback(() => setPredictions([]), []);

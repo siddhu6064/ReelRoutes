@@ -53,7 +53,7 @@ export default function DayAccordion({
     }),
   );
 
-  function handleDragEnd(event: DragEndEvent) {
+  function handleDragEnd(event: DragEndEvent): void {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 

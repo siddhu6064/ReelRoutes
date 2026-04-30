@@ -32,12 +32,12 @@ export default function SpotSuggestions({
   const suggestions = suggestMutation.data?.suggestions ?? [];
   const hasSuggestions = suggestMutation.isSuccess;
 
-  function handleFetch() {
+  function handleFetch(): void {
     setAddedNames(new Set());
     suggestMutation.mutate({ tripId, ...(userId !== undefined ? { userId } : {}) });
   }
 
-  function handleAdd(spot: SpotSuggestion) {
+  function handleAdd(spot: SpotSuggestion): void {
     addPinMutation.mutate({ tripId, spot, ...(userId !== undefined ? { userId } : {}) });
     setAddedNames((prev) => new Set(prev).add(spot.name));
   }

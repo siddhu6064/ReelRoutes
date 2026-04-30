@@ -22,10 +22,10 @@ interface ReservationCardProps {
   onDelete: () => void;
 }
 
-function ReservationCard({ reservation, onDelete }: ReservationCardProps) {
+function ReservationCard({ reservation, onDelete }: ReservationCardProps): React.ReactElement {
   const icon = TYPE_ICON[reservation.type] ?? "📄";
 
-  function fmt(iso: string | null) {
+  function fmt(iso: string | null): string {
     if (!iso) return null;
     return new Date(iso).toLocaleDateString(undefined, {
       month: "short",
@@ -70,7 +70,7 @@ interface Props {
   userId: string;
 }
 
-export function ReservationImport({ tripId, userId }: Props) {
+export function ReservationImport({ tripId, userId }: Props): React.ReactElement {
   const [emailText, setEmailText] = useState("");
   const [showImporter, setShowImporter] = useState(false);
 
@@ -80,7 +80,7 @@ export function ReservationImport({ tripId, userId }: Props) {
 
   const reservations = data?.reservations ?? [];
 
-  function handleImport() {
+  function handleImport(): void {
     if (!emailText.trim()) return;
     importRes.mutate(
       { tripId, userId, emailText },

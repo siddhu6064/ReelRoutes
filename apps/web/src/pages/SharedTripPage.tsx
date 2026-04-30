@@ -13,7 +13,7 @@ export default function SharedTripPage(): React.ReactElement {
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
   const [copied, setCopied] = useState(false);
 
-  async function copyLink() {
+  async function copyLink(): void {
     await navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -61,7 +61,12 @@ export default function SharedTripPage(): React.ReactElement {
           </div>
         </div>
         <div className={styles.headerRight}>
-          <button className={styles.copyBtn} onClick={copyLink}>
+          <button
+            className={styles.copyBtn}
+            onClick={() => {
+              void copyLink();
+            }}
+          >
             {copied ? "✓ Copied!" : "Copy link"}
           </button>
           <Link to="/" className={styles.importBtn}>

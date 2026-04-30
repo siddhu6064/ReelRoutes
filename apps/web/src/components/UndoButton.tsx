@@ -9,7 +9,7 @@ interface Props {
   userId: string;
 }
 
-export function UndoButton({ tripId, userId }: Props) {
+export function UndoButton({ tripId, userId }: Props): React.ReactElement {
   const [showHistory, setShowHistory] = useState(false);
   const [lastRestored, setLastRestored] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -19,7 +19,7 @@ export function UndoButton({ tripId, userId }: Props) {
 
   const canUndo = (historyData?.snapshots?.length ?? 0) > 0 && !undo.isPending;
 
-  function doUndo() {
+  function doUndo(): void {
     undo.mutate(
       { tripId, userId },
       {
@@ -36,7 +36,7 @@ export function UndoButton({ tripId, userId }: Props) {
 
   // Cmd+Z / Ctrl+Z keyboard shortcut
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+    function onKey(e: KeyboardEvent): void {
       if ((e.metaKey || e.ctrlKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
         if (canUndo) doUndo();
@@ -48,7 +48,7 @@ export function UndoButton({ tripId, userId }: Props) {
 
   // Close popover when clicking outside
   useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
+    function onClickOutside(e: MouseEvent): void {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setShowHistory(false);
       }

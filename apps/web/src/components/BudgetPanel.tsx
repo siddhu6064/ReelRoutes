@@ -38,7 +38,7 @@ function LimitBar({
   spent: number;
   budget: number | null;
   currency: string;
-}) {
+}): React.ReactElement {
   if (budget === null) return null;
   const pct = Math.min((spent / budget) * 100, 100);
   const over = spent > budget;
@@ -73,7 +73,7 @@ function CategoryBreakdown({
   byCategory: Record<string, number>;
   total: number;
   currency: string;
-}) {
+}): React.ReactElement {
   const entries = Object.entries(byCategory)
     .filter(([, v]) => v > 0)
     .sort(([, a], [, b]) => b - a);
@@ -148,7 +148,7 @@ function AddExpenseForm({
   tripId: string;
   userId?: string;
   currency: string;
-}) {
+}): React.ReactElement {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<ExpenseCategory>("other");
@@ -157,7 +157,7 @@ function AddExpenseForm({
 
   const addMutation = useAddExpense();
 
-  function handleSubmit() {
+  function handleSubmit(): void {
     const parsed = parseFloat(amount);
     if (!title.trim()) {
       setErr("Enter a description");
@@ -262,12 +262,12 @@ function SetBudgetRow({
   userId?: string;
   current: number | null;
   currency: string;
-}) {
+}): React.ReactElement {
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(current !== null ? String(current) : "");
   const setBudgetMutation = useSetBudget();
 
-  function handleSave() {
+  function handleSave(): void {
     const parsed = parseFloat(val);
     if (isNaN(parsed) || parsed <= 0) return;
     setBudgetMutation.mutate(

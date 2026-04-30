@@ -22,14 +22,14 @@ export default function StepOrigin({ onNext }: Props): React.ReactElement {
   const originAC = usePlacesAutocomplete(activeField === "origin" ? originInput : "");
   const destAC = usePlacesAutocomplete(activeField === "dest" ? destInput : "");
 
-  const selectOrigin = (p: PlacePrediction) => {
+  const selectOrigin = (p: PlacePrediction): void => {
     setOriginInput(p.description);
     setStartingPoint(p.description);
     originAC.clear();
     setActiveField(null);
   };
 
-  const selectDest = (p: PlacePrediction) => {
+  const selectDest = (p: PlacePrediction): void => {
     setDestInput(p.description);
     setDestination(p.description);
     destAC.clear();
@@ -38,12 +38,12 @@ export default function StepOrigin({ onNext }: Props): React.ReactElement {
 
   const canContinue = startingPoint.trim().length >= 2 && destination.trim().length >= 2;
 
-  const handleOriginBlur = () => {
+  const handleOriginBlur = (): void => {
     // Allow click on suggestion before clearing
     setTimeout(() => setActiveField(null), 150);
   };
 
-  const handleDestBlur = () => {
+  const handleDestBlur = (): void => {
     setTimeout(() => setActiveField(null), 150);
   };
 

@@ -89,7 +89,7 @@ export default function ActivityCard({
   );
 }
 
-function DragIcon() {
+function DragIcon(): React.ReactElement {
   return (
     <svg width="14" height="20" viewBox="0 0 14 20" fill="currentColor" aria-hidden="true">
       <circle cx="4" cy="4" r="1.5" />

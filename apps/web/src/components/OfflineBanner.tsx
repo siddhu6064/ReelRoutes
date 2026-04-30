@@ -10,10 +10,10 @@ export function OfflineBanner(): React.JSX.Element | null {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
-    function handleOnline() {
+    function handleOnline(): void {
       setIsOnline(true);
     }
-    function handleOffline() {
+    function handleOffline(): void {
       setIsOnline(false);
     }
 

@@ -13,7 +13,7 @@ interface Props {
   onClose: () => void;
 }
 
-function StarRating({ rating, total }: { rating: number; total?: number }) {
+function StarRating({ rating, total }: { rating: number; total?: number }): React.ReactElement {
   const full = Math.floor(rating);
   const half = rating - full >= 0.5;
   return (
@@ -29,7 +29,7 @@ function StarRating({ rating, total }: { rating: number; total?: number }) {
   );
 }
 
-function OpenBadge({ openNow }: { openNow: boolean | undefined }) {
+function OpenBadge({ openNow }: { openNow: boolean | undefined }): React.ReactElement {
   if (openNow === undefined) return null;
   return (
     <span className={styles.openBadge} data-open={openNow}>
@@ -50,7 +50,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.R
   const { mutateAsync: updatePin } = useUpdatePin();
   const { mutateAsync: deletePin } = useDeletePin();
 
-  async function handleSave() {
+  async function handleSave(): void {
     if (!userId) return;
     setSaving(true);
     try {
@@ -60,7 +60,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.R
     }
   }
 
-  function addTag(e: React.KeyboardEvent<HTMLInputElement>) {
+  function addTag(e: React.KeyboardEvent<HTMLInputElement>): void {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
       if (!tags.includes(tagInput.trim())) setTags([...tags, tagInput.trim()]);
@@ -68,7 +68,7 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.R
     }
   }
 
-  async function handleDelete() {
+  async function handleDelete(): void {
     if (!userId) return;
     await deletePin({ tripId, pinId: pin.id, userId });
     onClose();
@@ -210,7 +210,13 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.R
 
       <div className={styles.actions}>
         {userId && (
-          <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+          <button
+            className={styles.saveBtn}
+            onClick={() => {
+              void handleSave();
+            }}
+            disabled={saving}
+          >
             {saving ? "Saving…" : "Save changes"}
           </button>
         )}
@@ -221,7 +227,12 @@ export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.R
         ) : (
           <div className={styles.confirmRow}>
             <span className={styles.confirmText}>Remove this stop?</span>
-            <button className={styles.confirmYes} onClick={handleDelete}>
+            <button
+              className={styles.confirmYes}
+              onClick={() => {
+                void handleDelete();
+              }}
+            >
               Yes, remove
             </button>
             <button className={styles.confirmNo} onClick={() => setConfirmDelete(false)}>

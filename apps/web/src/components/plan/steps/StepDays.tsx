@@ -11,8 +11,8 @@ export default function StepDays({ onBack, onNext }: Props): React.ReactElement 
   const days = useScratchPlanStore((s) => s.days);
   const setDays = useScratchPlanStore((s) => s.setDays);
 
-  const decrement = () => setDays(Math.max(MIN_DAYS, days - 1));
-  const increment = () => setDays(Math.min(MAX_DAYS, days + 1));
+  const decrement = (): void => setDays(Math.max(MIN_DAYS, days - 1));
+  const increment = (): void => setDays(Math.min(MAX_DAYS, days + 1));
 
   // Quick select presets
   const PRESETS = [3, 5, 7, 10, 14];

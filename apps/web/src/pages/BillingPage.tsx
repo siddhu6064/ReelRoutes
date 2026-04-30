@@ -40,7 +40,7 @@ export default function BillingPage(): React.ReactElement {
     }
   }, [location.pathname, refetch]);
 
-  async function handleUpgrade() {
+  async function handleUpgrade(): Promise<void> {
     try {
       const result = await createCheckout({
         successUrl: `${window.location.origin}/billing/success`,
@@ -53,7 +53,7 @@ export default function BillingPage(): React.ReactElement {
     }
   }
 
-  async function handlePortal() {
+  async function handlePortal(): Promise<void> {
     try {
       const result = await createPortal({
         returnUrl: `${window.location.origin}/billing`,
@@ -278,7 +278,9 @@ export default function BillingPage(): React.ReactElement {
             </div>
 
             <button
-              onClick={handleUpgrade}
+              onClick={() => {
+                void handleUpgrade();
+              }}
               disabled={checkoutPending}
               style={{
                 width: "100%",
@@ -326,7 +328,9 @@ export default function BillingPage(): React.ReactElement {
               Update payment method, view invoices, or cancel your subscription.
             </p>
             <button
-              onClick={handlePortal}
+              onClick={() => {
+                void handlePortal();
+              }}
               disabled={portalPending}
               style={{
                 padding: "12px 20px",

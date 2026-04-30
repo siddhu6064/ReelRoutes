@@ -35,7 +35,7 @@ function makeMarkerLabel(n: number): google.maps.MarkerLabel {
 }
 
 /** Haversine distance in km between two pins */
-function distKm(a: Pin, b: Pin) {
+function distKm(a: Pin, b: Pin): number {
   const R = 6371;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;
   const dLng = ((b.lng - a.lng) * Math.PI) / 180;
@@ -46,7 +46,7 @@ function distKm(a: Pin, b: Pin) {
 }
 
 /** Build Google Maps URL with all pins as waypoints */
-function googleMapsUrl(pins: Pin[]) {
+function googleMapsUrl(pins: Pin[]): string {
   const first = pins[0];
   const last = pins[pins.length - 1];
   if (!first) return "#";
@@ -84,7 +84,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   other: "📍",
 };
 
-async function saveForOffline(trip: Trip) {
+async function saveForOffline(trip: Trip): Promise<void> {
   try {
     const db = await new Promise<IDBDatabase>((res, rej) => {
       const req = indexedDB.open("reelroutes-offline", 1);
@@ -125,7 +125,7 @@ export default function TripMapPage(): React.ReactElement {
 
   // Init map
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    const apiKey = import.meta.env["VITE_GOOGLE_MAPS_API_KEY"] as string | undefined;
     if (!mapRef.current || !apiKey) return;
     const loader = new Loader({ apiKey, version: "weekly", libraries: ["places"] });
     void loader.load().then(() => {
@@ -254,7 +254,7 @@ export default function TripMapPage(): React.ReactElement {
     mapInstance.current.fitBounds(bounds, 60);
   }, [sorted, activeIndex, showRoute, cityFilter]);
 
-  function selectPin(pin: Pin, index: number) {
+  function selectPin(pin: Pin, index: number): void {
     setSelectedPin(pin);
     setActiveIndex(index);
     const marker = markersRef.current[index];
@@ -264,7 +264,7 @@ export default function TripMapPage(): React.ReactElement {
     }
   }
 
-  function toggleCity(city: string) {
+  function toggleCity(city: string): void {
     setCollapsedCities((prev) => {
       const next = new Set(prev);
       if (next.has(city)) {

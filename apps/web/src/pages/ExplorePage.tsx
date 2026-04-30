@@ -11,7 +11,7 @@ interface Props {
   userId: string;
 }
 
-export function ExplorePage({ userId }: Props) {
+export function ExplorePage({ userId }: Props): React.ReactElement {
   const [destination, setDestination] = useState("");
   const [platform, setPlatform] = useState<string | undefined>(undefined);
   const [page, setPage] = useState(1);
@@ -32,12 +32,12 @@ export function ExplorePage({ userId }: Props) {
 
   const loading = showTrending ? trendingQuery.isLoading : exploreQuery.isLoading;
 
-  function handleDestinationChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleDestinationChange(e: React.ChangeEvent<HTMLInputElement>): void {
     setDestination(e.target.value);
     setPage(1);
   }
 
-  function handlePlatformToggle(p: string) {
+  function handlePlatformToggle(p: string): void {
     setPlatform((prev) => (prev === p ? undefined : p));
     setPage(1);
     setShowTrending(false);
