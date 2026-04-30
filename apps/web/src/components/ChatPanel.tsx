@@ -56,7 +56,7 @@ export default function ChatPanel({ tripId, onClose }: Props) {
       tripId,
       message: userMsg.content,
       history: messages.filter((m) => m.done).map(({ role, content }) => ({ role, content })),
-      userId: userId ?? undefined,
+      ...(userId ? { userId } : {}),
 
       onToken: (token) => {
         setMessages((prev) => {

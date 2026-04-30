@@ -36,11 +36,11 @@ export default function UpgradeModal({
 
   async function handleUpgrade() {
     try {
-      const { data } = await createCheckout({
+      const result = await createCheckout({
         successUrl: `${window.location.origin}/billing/success`,
         cancelUrl: window.location.href,
       });
-      window.location.href = (data as { checkout_url: string }).checkout_url;
+      window.location.href = (result as { checkout_url: string }).checkout_url;
     } catch {
       alert("Could not start checkout. Please try again.");
     }
