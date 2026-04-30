@@ -2,8 +2,7 @@
  * apps/mobile/components/ChatDrawer.tsx
  *
  * AI travel assistant — streaming SSE version.
- * Tokens arrive one-by-one from GPT-4o and render progressively,
- * giving a far more responsive feel than waiting for the full reply.
+ * Tokens arrive one-by-one from GPT-4o and render progressively.
  */
 import { useEffect, useRef, useState } from "react";
 import {
@@ -48,20 +47,6 @@ interface Props {
   onClose: () => void;
 }
 
-function TypingDots() {
-  return (
-    <View style={styles.bubble}>
-      <View style={styles.aiBubble}>
-        <View style={styles.dotsRow}>
-          {[0, 1, 2].map((i) => (
-            <View key={i} style={styles.dot} />
-          ))}
-        </View>
-      </View>
-    </View>
-  );
-}
-
 export default function ChatDrawer({ tripId, onClose }: Props) {
   const { userId } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -75,11 +60,11 @@ export default function ChatDrawer({ tripId, onClose }: Props) {
     return () => abortRef.current?.abort();
   }, []);
 
-  function scrollToEnd() {
+  function scrollToEnd(): void {
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 80);
   }
 
-  function send(text: string) {
+  function send(text: string): void {
     if (!text.trim() || isStreaming) return;
     const userMsg: Message = { role: "user", content: text.trim(), done: true };
     const placeholder: Message = { role: "assistant", content: "", done: false };
@@ -89,11 +74,14 @@ export default function ChatDrawer({ tripId, onClose }: Props) {
     setIsStreaming(true);
     scrollToEnd();
 
+    // exactOptionalPropertyTypes: only pass userId when it exists
     abortRef.current = streamChat({
       tripId,
       message: userMsg.content,
-      history: messages.filter((m) => m.done).map(({ role, content }) => ({ role, content })),
-      userId: userId ?? undefined,
+      history: messages
+        .filter((m) => m.done)
+        .map(({ role, content }) => ({ role, content })),
+      ...(userId ? { userId } : {}),
 
       onToken: (token) => {
         setMessages((prev) => {
@@ -135,7 +123,7 @@ export default function ChatDrawer({ tripId, onClose }: Props) {
     });
   }
 
-  function renderItem({ item, index }: { item: Message; index: number }) {
+  function renderItem({ item, index }: { item: Message; index: number }): React.ReactElement {
     const isUser = item.role === "user";
     const isLive = !isUser && index === messages.length - 1 && !item.done;
 
@@ -148,14 +136,12 @@ export default function ChatDrawer({ tripId, onClose }: Props) {
         )}
         <View style={isUser ? styles.userBubble : styles.aiBubble}>
           {item.content === "" && !item.done ? (
-            // First-token wait — show dots
             <View style={styles.dotsRow}>
               {[0, 1, 2].map((i) => <View key={i} style={styles.dot} />)}
             </View>
           ) : (
             <Text style={[styles.bubbleText, isUser && styles.userBubbleText]}>
-              {item.content}
-              {isLive ? "▋" : ""}
+              {item.content}{isLive ? "▋" : ""}
             </Text>
           )}
         </View>

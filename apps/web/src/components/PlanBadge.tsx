@@ -5,11 +5,13 @@
  * Clicking on Free opens the UpgradeModal.
  */
 import { useState } from "react";
+
 import { usePlanStatus } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
+
 import UpgradeModal from "./UpgradeModal";
 
-export default function PlanBadge() {
+export default function PlanBadge(): React.ReactElement | null {
   const { userId } = useAppStore();
   const { data } = usePlanStatus(userId ?? undefined);
   const [showUpgrade, setShowUpgrade] = useState(false);

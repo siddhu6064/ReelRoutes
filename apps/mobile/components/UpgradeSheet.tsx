@@ -14,13 +14,13 @@ import {
 } from "react-native";
 import { useCreateCheckout } from "@/api/client";
 
-const CORAL   = "#D85A30";
+
 const SURFACE = "#1a1a18";
 const BORDER  = "#2a2a28";
 const MUTED   = "#6b6b62";
 const TEXT    = "#f0ede8";
 const BLUE    = "#1A56DB";
-const GREEN   = "#0E9F6E";
+
 
 const PRO_FEATURES = [
   { icon: "♾", label: "Unlimited trip imports" },
@@ -68,7 +68,7 @@ export default function UpgradeSheet({
         successUrl: `${apiBaseUrl}/billing/success`,
         cancelUrl: `${apiBaseUrl}/billing`,
       });
-      const url = (result.data as { checkout_url: string }).checkout_url;
+      const url = (result as { checkout_url: string }).checkout_url;
       await Linking.openURL(url);
       onClose();
     } catch {

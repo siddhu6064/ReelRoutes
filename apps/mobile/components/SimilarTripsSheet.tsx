@@ -21,7 +21,7 @@ import { useSimilarTrips } from "@/api/client";
 
 const CORAL   = "#D85A30";
 const SURFACE = "#1a1a18";
-const SURFACE2 = "#232320";
+
 const BORDER  = "#2a2a28";
 const MUTED   = "#6b6b62";
 const TEXT    = "#f0ede8";
@@ -86,7 +86,7 @@ function TripRow({
 
 export default function SimilarTripsSheet({ tripId, onClose, onTripPress }: Props) {
   const { data, isLoading } = useSimilarTrips(tripId);
-  const trips: SimilarTrip[] = data?.data?.trips ?? [];
+  const trips: SimilarTrip[] = data?.trips ?? [];
 
   return (
     <View style={styles.sheet}>

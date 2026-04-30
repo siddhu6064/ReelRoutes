@@ -7,6 +7,7 @@
  */
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import { usePlanStatus, useCreateCheckout, useCreatePortal } from "@/api/client";
 import { useAppStore } from "@/stores/appStore";
 
@@ -45,7 +46,7 @@ export default function BillingPage() {
         successUrl: `${window.location.origin}/billing/success`,
         cancelUrl: `${window.location.origin}/billing`,
       });
-      const url = (result.data as { checkout_url: string }).checkout_url;
+      const url = (result as { checkout_url: string }).checkout_url;
       window.location.href = url;
     } catch {
       alert("Could not start checkout. Please try again.");
@@ -57,7 +58,7 @@ export default function BillingPage() {
       const result = await createPortal({
         returnUrl: `${window.location.origin}/billing`,
       });
-      const url = (result.data as { portal_url: string }).portal_url;
+      const url = (result as { portal_url: string }).portal_url;
       window.location.href = url;
     } catch {
       alert("Could not open billing portal. Please try again.");

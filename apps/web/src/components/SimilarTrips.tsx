@@ -4,14 +4,12 @@
  * Shows semantically similar trips below the current trip map.
  * Uses Atlas Vector Search via GET /api/trips/:id/similar.
  *
- * Renders nothing when:
- *   - The trip has no embedding yet (loading / newly created)
- *   - The cluster doesn't support vector search (M0/staging)
- *   - No similar trips found above the similarity threshold
+ * Renders nothing when the trip has no embedding, the cluster
+ * doesn't support vector search, or no similar trips are found.
  */
+import type { SimilarTrip } from "@/api/client";
 
 import { useSimilarTrips } from "@/api/client";
-import type { SimilarTrip } from "@/api/client";
 
 const PLATFORM_EMOJI: Record<string, string> = {
   youtube: "▶",
@@ -27,10 +25,9 @@ interface Props {
   onTripClick?: (tripId: string) => void;
 }
 
-function ScoreBadge({ score }: { score: number }) {
+function ScoreBadge({ score }: { score: number }): React.ReactElement {
   const pct = Math.round(score * 100);
-  const color =
-    pct >= 90 ? "#0E9F6E" : pct >= 80 ? "#1A56DB" : "#6B7280";
+  const color = pct >= 90 ? "#0E9F6E" : pct >= 80 ? "#1A56DB" : "#6B7280";
   return (
     <span
       style={{
@@ -48,7 +45,13 @@ function ScoreBadge({ score }: { score: number }) {
   );
 }
 
-function TripCard({ trip, onClick }: { trip: SimilarTrip; onClick: () => void }) {
+function TripCard({
+  trip,
+  onClick,
+}: {
+  trip: SimilarTrip;
+  onClick: () => void;
+}): React.ReactElement {
   const icon = PLATFORM_EMOJI[trip.platform] ?? "•";
 
   return (
@@ -69,8 +72,7 @@ function TripCard({ trip, onClick }: { trip: SimilarTrip; onClick: () => void })
         transition: "box-shadow 0.15s, transform 0.15s",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.boxShadow =
-          "0 4px 16px rgba(0,0,0,0.10)";
+        (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.10)";
         (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
       }}
       onMouseLeave={(e) => {
@@ -78,13 +80,7 @@ function TripCard({ trip, onClick }: { trip: SimilarTrip; onClick: () => void })
         (e.currentTarget as HTMLButtonElement).style.transform = "none";
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 13, color: "#9CA3AF" }}>
           {icon} {trip.platform}
         </span>
@@ -106,66 +102,34 @@ function TripCard({ trip, onClick }: { trip: SimilarTrip; onClick: () => void })
         {trip.title}
       </div>
 
-      <div
-        style={{ display: "flex", gap: 8, fontSize: 12, color: "#6B7280" }}
-      >
+      <div style={{ display: "flex", gap: 8, fontSize: 12, color: "#6B7280" }}>
         <span>📍 {trip.pin_count} stops</span>
         {trip.view_count > 0 && <span>· {trip.view_count} views</span>}
       </div>
 
       {trip.video_creator && (
-        <div style={{ fontSize: 11, color: "#9CA3AF" }}>
-          by {trip.video_creator}
-        </div>
+        <div style={{ fontSize: 11, color: "#9CA3AF" }}>by {trip.video_creator}</div>
       )}
     </button>
   );
 }
 
-export default function SimilarTrips({ tripId, onTripClick }: Props) {
+export default function SimilarTrips({ tripId, onTripClick }: Props): React.ReactElement | null {
   const { data, isLoading, isError } = useSimilarTrips(tripId);
 
-  // Don't show anything while loading or on error — keeps the UI clean
   if (isLoading || isError) return null;
 
-  const trips = data?.data?.trips ?? [];
+  const trips: SimilarTrip[] = (data?.trips) ?? [];
   if (trips.length === 0) return null;
 
   return (
-    <section
-      style={{
-        padding: "20px 0",
-        borderTop: "1px solid #F3F4F6",
-      }}
-    >
-      <div
-        style={{
-          padding: "0 20px 12px",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-        }}
-      >
+    <section style={{ padding: "20px 0", borderTop: "1px solid #F3F4F6" }}>
+      <div style={{ padding: "0 20px 12px", display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{ fontSize: 16 }}>✨</span>
-        <h3
-          style={{
-            margin: 0,
-            fontSize: 15,
-            fontWeight: 700,
-            color: "#111827",
-          }}
-        >
+        <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111827" }}>
           Similar trips
         </h3>
-        <span
-          style={{
-            fontSize: 12,
-            color: "#9CA3AF",
-            fontWeight: 400,
-          }}
-        >
-          Powered by AI
-        </span>
+        <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 400 }}>Powered by AI</span>
       </div>
 
       <div
