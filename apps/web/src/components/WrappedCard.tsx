@@ -141,7 +141,13 @@ export default function WrappedCard({ tripId, userId }: WrappedCardProps): React
         </div>
       )}
 
-      <button type="button" className={styles.shareBtn} onClick={() => shareStats(data)}>
+      <button
+        type="button"
+        className={styles.shareBtn}
+        onClick={() => {
+          void shareStats(data);
+        }}
+      >
         Share my stats 🔗
       </button>
     </section>

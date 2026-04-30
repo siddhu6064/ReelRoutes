@@ -355,7 +355,9 @@ export default function EditTripPage(): React.ReactElement {
                 draggable
                 onDragStart={(e) => onDragStart(e, i)}
                 onDragOver={(e) => onDragOver(e, i)}
-                onDrop={(e) => onDrop(e, i)}
+                onDrop={(e) => {
+                  void onDrop(e, i);
+                }}
                 onDragEnd={() => {
                   setDragging(null);
                   setDragOver(null);

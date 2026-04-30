@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import type { JobStatus } from "../api/client";
 import { useJobWebSocket } from "../hooks/useJobWebSocket";
 import { useAppStore } from "../stores/appStore";
 
 import styles from "./ProcessingPage.module.css";
+
+import type { JobStatus } from "../api/client";
 
 const STEPS = [
   { key: "fetching_video", label: "Fetching video" },

@@ -49,21 +49,24 @@ export function usePlacesAutocomplete(input: string): {
 
     setLoading(true);
     timerRef.current = setTimeout((): void => {
-      serviceRef.current!.getPlacePredictions({ input, types: ["(cities)"] }, (results, status) => {
-        setLoading(false);
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-          setPredictions(
-            results.map((r) => ({
-              place_id: r.place_id,
-              description: r.description,
-              main_text: r.structured_formatting.main_text,
-              secondary_text: r.structured_formatting.secondary_text,
-            })),
-          );
-        } else {
-          setPredictions([]);
-        }
-      });
+      void serviceRef.current!.getPlacePredictions(
+        { input, types: ["(cities)"] },
+        (results, status) => {
+          setLoading(false);
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+            setPredictions(
+              results.map((r) => ({
+                place_id: r.place_id,
+                description: r.description,
+                main_text: r.structured_formatting.main_text,
+                secondary_text: r.structured_formatting.secondary_text,
+              })),
+            );
+          } else {
+            setPredictions([]);
+          }
+        },
+      );
     }, DEBOUNCE_MS);
 
     return (): void => clearTimeout(timerRef.current);

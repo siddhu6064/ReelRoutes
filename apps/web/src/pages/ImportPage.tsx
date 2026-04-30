@@ -63,7 +63,7 @@ export default function ImportPage(): React.ReactElement {
         setGuestJob({ jobId: result.jobId, url: url.trim(), tripId: null });
       }
       navigate(`/processing/${result.jobId}`);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     }
   }

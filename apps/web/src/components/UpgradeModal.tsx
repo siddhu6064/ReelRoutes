@@ -34,7 +34,7 @@ export default function UpgradeModal({
 }: Props): React.ReactElement {
   const { mutateAsync: createCheckout, isPending } = useCreateCheckout();
 
-  async function handleUpgrade() {
+  async function handleUpgrade(): Promise<void> {
     try {
       const result = await createCheckout({
         successUrl: `${window.location.origin}/billing/success`,
