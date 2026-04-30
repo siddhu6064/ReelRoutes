@@ -830,10 +830,14 @@ class TestEmbeddingVectorSearch:
         from app.services.embedding_service import semantic_search_public
 
         with (
-            patch("app.services.embedding_service.generate_embedding",
-                  AsyncMock(return_value=[0.1] * 1536)),
-            patch("app.services.embedding_service._vector_search",
-                  AsyncMock(side_effect=Exception("vector search failed"))),
+            patch(
+                "app.services.embedding_service.generate_embedding",
+                AsyncMock(return_value=[0.1] * 1536),
+            ),
+            patch(
+                "app.services.embedding_service._vector_search",
+                AsyncMock(side_effect=Exception("vector search failed")),
+            ),
         ):
             result = await semantic_search_public("tokyo food tour")
 
