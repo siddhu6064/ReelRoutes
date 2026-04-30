@@ -259,12 +259,17 @@ export function streamChat(params: ChatStreamParams): AbortController {
           }
           try {
             const parsed = JSON.parse(dataLine) as { token?: string; error?: string };
-            if (parsed.error) { onError(parsed.error); return; }
+            if (parsed.error) {
+              onError(parsed.error);
+              return;
+            }
             if (parsed.token) {
               accumulated += parsed.token;
               onToken(parsed.token);
             }
-          } catch { /* skip malformed chunk */ }
+          } catch {
+            /* skip malformed chunk */
+          }
         }
       }
 
@@ -813,9 +818,7 @@ export function useSimilarTrips(tripId: string | null, enabled = true) {
   return useQuery({
     queryKey: ["similar", tripId],
     queryFn: () =>
-      apiFetch<{ trips: SimilarTrip[]; source_trip_id: string }>(
-        `/api/trips/${tripId}/similar`,
-      ),
+      apiFetch<{ trips: SimilarTrip[]; source_trip_id: string }>(`/api/trips/${tripId}/similar`),
     enabled: enabled && !!tripId,
     staleTime: 5 * 60 * 1000,
   });

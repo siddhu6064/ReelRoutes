@@ -7,16 +7,16 @@ Estimated time: **~45 minutes** (mostly waiting for Railway/Vercel to provision)
 
 ## What Staging Gives You
 
-| Concern | Production | Staging |
-|---------|-----------|---------|
-| Database | `reelroutes_production` (Atlas M10+) | `reelroutes_staging` (Atlas M0 free) |
-| Auth | Clerk **live** keys (`pk_live_`) | Clerk **dev** keys (`pk_test_`) |
-| Deploy trigger | Push to `main` | Push to `siddhu6064` |
-| Web URL | `https://reelroutes.app` | `https://reelroutes-staging.vercel.app` |
-| API URL | `https://api.reelroutes.app` | `https://reelroutes-api-staging.railway.app` |
-| Sentry tag | `production` | `staging` |
-| Import limit | 10/user/day | 50/user/day (for QA) |
-| Data durability | Permanent | **Can be wiped at any time** |
+| Concern         | Production                           | Staging                                      |
+| --------------- | ------------------------------------ | -------------------------------------------- |
+| Database        | `reelroutes_production` (Atlas M10+) | `reelroutes_staging` (Atlas M0 free)         |
+| Auth            | Clerk **live** keys (`pk_live_`)     | Clerk **dev** keys (`pk_test_`)              |
+| Deploy trigger  | Push to `main`                       | Push to `siddhu6064`                         |
+| Web URL         | `https://reelroutes.app`             | `https://reelroutes-staging.vercel.app`      |
+| API URL         | `https://api.reelroutes.app`         | `https://reelroutes-api-staging.railway.app` |
+| Sentry tag      | `production`                         | `staging`                                    |
+| Import limit    | 10/user/day                          | 50/user/day (for QA)                         |
+| Data durability | Permanent                            | **Can be wiped at any time**                 |
 
 ---
 
@@ -35,8 +35,8 @@ Estimated time: **~45 minutes** (mostly waiting for Railway/Vercel to provision)
 2. Create a new application named **"ReelRoutes Staging"**
 3. Enable: Email/Password + Google OAuth + Apple Sign-In
 4. From **API Keys**, copy:
-   - `CLERK_SECRET_KEY` (sk_test_...)
-   - `CLERK_PUBLISHABLE_KEY` (pk_test_...)
+   - `CLERK_SECRET_KEY` (sk*test*...)
+   - `CLERK_PUBLISHABLE_KEY` (pk*test*...)
 5. From **Webhooks → Add Endpoint**:
    - URL: `https://reelroutes-api-staging.railway.app/api/webhooks/clerk`
    - Events: `user.created`, `user.updated`, `user.deleted`
@@ -82,11 +82,11 @@ Go to `github.com/siddhu6064/ReelRoutes` → **Settings → Secrets → Actions*
 
 Add these secrets:
 
-| Secret | Value |
-|--------|-------|
+| Secret                    | Value                                                  |
+| ------------------------- | ------------------------------------------------------ |
 | `RAILWAY_STAGING_WEBHOOK` | From Railway staging project → Settings → Deploy Hooks |
-| `STAGING_API_URL` | `https://reelroutes-api-staging.railway.app` |
-| `STAGING_WEB_URL` | `https://reelroutes-staging.vercel.app` |
+| `STAGING_API_URL`         | `https://reelroutes-api-staging.railway.app`           |
+| `STAGING_WEB_URL`         | `https://reelroutes-staging.vercel.app`                |
 
 ---
 
@@ -119,12 +119,12 @@ SMOKE_TEST_URL=https://reelroutes-api-staging.railway.app \
 
 ## Ongoing workflow
 
-| Action | What happens |
-|--------|-------------|
-| Push to `siddhu6064` | CI tests → Railway staging redeploys → smoke tests run |
-| Push to `main` | CI tests only (production deploy is manual via Railway dashboard) |
-| Wipe staging DB | `mongosh <staging-url> --eval "db.dropDatabase()"` then re-seed |
-| Mobile staging build | `cd apps/mobile && eas build --platform ios --profile staging` |
+| Action               | What happens                                                      |
+| -------------------- | ----------------------------------------------------------------- |
+| Push to `siddhu6064` | CI tests → Railway staging redeploys → smoke tests run            |
+| Push to `main`       | CI tests only (production deploy is manual via Railway dashboard) |
+| Wipe staging DB      | `mongosh <staging-url> --eval "db.dropDatabase()"` then re-seed   |
+| Mobile staging build | `cd apps/mobile && eas build --platform ios --profile staging`    |
 
 ---
 

@@ -18,11 +18,11 @@ name: Deploy → Staging
 on:
   push:
     branches: ["siddhu6064"]
-  workflow_dispatch:        # allow manual trigger from GitHub Actions tab
+  workflow_dispatch: # allow manual trigger from GitHub Actions tab
 
 concurrency:
   group: deploy-staging
-  cancel-in-progress: true  # if two pushes land close together, cancel the older
+  cancel-in-progress: true # if two pushes land close together, cancel the older
 
 env:
   PYTHON_VERSION: "3.12"
@@ -69,9 +69,9 @@ jobs:
   # ── Job 2: Deploy to Railway staging ──────────────────────────────────────
   deploy:
     name: "🚀 Deploy → Railway staging"
-    needs: test           # only runs if tests pass
+    needs: test # only runs if tests pass
     runs-on: ubuntu-latest
-    environment: staging  # requires manual approval if configured in repo settings
+    environment: staging # requires manual approval if configured in repo settings
 
     steps:
       - name: "Trigger Railway staging deploy"

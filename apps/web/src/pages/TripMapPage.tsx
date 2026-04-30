@@ -506,10 +506,7 @@ export default function TripMapPage() {
       </main>
 
       {/* ── Similar trips (AI-powered) ── */}
-      <SimilarTrips
-        tripId={trip.id}
-        onTripClick={(id) => navigate(`/trips/${id}`)}
-      />
+      <SimilarTrips tripId={trip.id} onTripClick={(id) => navigate(`/trips/${id}`)} />
 
       {/* ── Right panel ── */}
       {chatOpen ? (

@@ -4,23 +4,14 @@
  * Bottom sheet shown when a free user hits the trip limit or a Pro feature.
  * Opens Stripe Checkout via in-app browser (expo-web-browser).
  */
-import {
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useCreateCheckout } from "@/api/client";
 
-
 const SURFACE = "#1a1a18";
-const BORDER  = "#2a2a28";
-const MUTED   = "#6b6b62";
-const TEXT    = "#f0ede8";
-const BLUE    = "#1A56DB";
-
+const BORDER = "#2a2a28";
+const MUTED = "#6b6b62";
+const TEXT = "#f0ede8";
+const BLUE = "#1A56DB";
 
 const PRO_FEATURES = [
   { icon: "♾", label: "Unlimited trip imports" },
@@ -94,10 +85,7 @@ export default function UpgradeSheet({
       </View>
 
       {/* Feature grid */}
-      <ScrollView
-        style={styles.featureScroll}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.featureScroll} showsVerticalScrollIndicator={false}>
         <View style={styles.featureGrid}>
           {PRO_FEATURES.map((f) => (
             <View key={f.label} style={styles.featureRow}>

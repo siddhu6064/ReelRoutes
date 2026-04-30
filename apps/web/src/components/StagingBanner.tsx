@@ -20,7 +20,8 @@ export default function StagingBanner() {
         left: 0,
         right: 0,
         zIndex: 99999,
-        background: "repeating-linear-gradient(45deg, #f59e0b, #f59e0b 10px, #fbbf24 10px, #fbbf24 20px)",
+        background:
+          "repeating-linear-gradient(45deg, #f59e0b, #f59e0b 10px, #fbbf24 10px, #fbbf24 20px)",
         color: "#1c1917",
         textAlign: "center",
         fontSize: "12px",

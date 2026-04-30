@@ -198,8 +198,7 @@ export default function BillingPage() {
                   style={{
                     height: "100%",
                     width: `${Math.min(100, ((plan.trip_count ?? 0) / (plan.trip_limit ?? 5)) * 100)}%`,
-                    background:
-                      (plan.trips_remaining ?? 1) === 0 ? "#DC2626" : "#1A56DB",
+                    background: (plan.trips_remaining ?? 1) === 0 ? "#DC2626" : "#1A56DB",
                     borderRadius: 4,
                     transition: "width 0.4s ease",
                   }}
@@ -258,9 +257,7 @@ export default function BillingPage() {
                 marginBottom: 20,
               }}
             >
-              <span style={{ fontSize: 32, fontWeight: 800, color: "#111827" }}>
-                $9.99
-              </span>
+              <span style={{ fontSize: 32, fontWeight: 800, color: "#111827" }}>$9.99</span>
               <span style={{ fontSize: 14, color: "#6B7280" }}>/ month</span>
             </div>
 
@@ -273,10 +270,7 @@ export default function BillingPage() {
               }}
             >
               {PRO_FEATURES.map((f) => (
-                <div
-                  key={f.label}
-                  style={{ display: "flex", alignItems: "center", gap: 8 }}
-                >
+                <div key={f.label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 18 }}>{f.icon}</span>
                   <span style={{ fontSize: 13, color: "#374151" }}>{f.label}</span>
                 </div>

@@ -1029,9 +1029,7 @@ export function useSimilarTrips(
   return useQuery({
     queryKey: ["similar", tripId],
     queryFn: () =>
-      apiFetch<{ trips: SimilarTrip[]; source_trip_id: string }>(
-        `/api/trips/${tripId}/similar`,
-      ),
+      apiFetch<{ trips: SimilarTrip[]; source_trip_id: string }>(`/api/trips/${tripId}/similar`),
     enabled,
     staleTime: 5 * 60 * 1000, // 5 min — similarity doesn't change often
   });
@@ -1067,8 +1065,7 @@ export interface PlanStatus {
 export function usePlanStatus(userId?: string): UseQueryResult<PlanStatus> {
   return useQuery({
     queryKey: ["billing", "status"],
-    queryFn: () =>
-      apiFetch<PlanStatus>("/api/billing/status"),
+    queryFn: () => apiFetch<PlanStatus>("/api/billing/status"),
     enabled: !!userId,
     staleTime: 60 * 1000, // 1 min
   });

@@ -7,26 +7,19 @@
  *
  * Renders nothing when vector search is unavailable (M0 cluster / no embedding).
  */
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { SimilarTrip } from "@/api/client";
 import { useSimilarTrips } from "@/api/client";
 
-const CORAL   = "#D85A30";
+const CORAL = "#D85A30";
 const SURFACE = "#1a1a18";
 
-const BORDER  = "#2a2a28";
-const MUTED   = "#6b6b62";
-const TEXT    = "#f0ede8";
-const GREEN   = "#0E9F6E";
-const BLUE    = "#1A56DB";
+const BORDER = "#2a2a28";
+const MUTED = "#6b6b62";
+const TEXT = "#f0ede8";
+const GREEN = "#0E9F6E";
+const BLUE = "#1A56DB";
 
 const PLATFORM_ICON: Record<string, string> = {
   youtube: "▶",
@@ -53,13 +46,7 @@ function ScorePill({ score }: { score: number }) {
   );
 }
 
-function TripRow({
-  trip,
-  onPress,
-}: {
-  trip: SimilarTrip;
-  onPress: () => void;
-}) {
+function TripRow({ trip, onPress }: { trip: SimilarTrip; onPress: () => void }) {
   const icon = PLATFORM_ICON[trip.platform] ?? "•";
   return (
     <Pressable style={styles.row} onPress={onPress}>
@@ -118,17 +105,15 @@ export default function SimilarTripsSheet({ tripId, onClose, onTripPress }: Prop
           <Text style={styles.emptyIcon}>🗺</Text>
           <Text style={styles.emptyTitle}>No similar trips yet</Text>
           <Text style={styles.emptyBody}>
-            This trip doesn't have a semantic embedding yet, or no similar
-            public trips exist. Check back after more trips are imported.
+            This trip doesn't have a semantic embedding yet, or no similar public trips exist. Check
+            back after more trips are imported.
           </Text>
         </View>
       ) : (
         <FlatList
           data={trips}
           keyExtractor={(t) => t.id}
-          renderItem={({ item }) => (
-            <TripRow trip={item} onPress={() => onTripPress(item.id)} />
-          )}
+          renderItem={({ item }) => <TripRow trip={item} onPress={() => onTripPress(item.id)} />}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           showsVerticalScrollIndicator={false}
@@ -216,5 +201,4 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     maxWidth: 280,
   },
-
 });

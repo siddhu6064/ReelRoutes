@@ -127,7 +127,8 @@ export default function ChatPanel({ tripId, onClose }: Props) {
         )}
 
         {messages.map((msg, i) => {
-          const isLiveAssistant = msg.role === "assistant" && i === messages.length - 1 && !msg.done;
+          const isLiveAssistant =
+            msg.role === "assistant" && i === messages.length - 1 && !msg.done;
           return (
             <div
               key={i}
@@ -150,7 +151,9 @@ export default function ChatPanel({ tripId, onClose }: Props) {
                       </span>
                     ))}
                     {isLiveAssistant && (
-                      <span className={styles.cursor} aria-hidden="true">▋</span>
+                      <span className={styles.cursor} aria-hidden="true">
+                        ▋
+                      </span>
                     )}
                   </>
                 )}

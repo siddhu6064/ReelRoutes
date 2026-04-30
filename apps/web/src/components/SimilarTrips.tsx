@@ -119,7 +119,7 @@ export default function SimilarTrips({ tripId, onTripClick }: Props): React.Reac
 
   if (isLoading || isError) return null;
 
-  const trips: SimilarTrip[] = (data?.trips) ?? [];
+  const trips: SimilarTrip[] = data?.trips ?? [];
   if (trips.length === 0) return null;
 
   return (
@@ -142,11 +142,7 @@ export default function SimilarTrips({ tripId, onTripClick }: Props): React.Reac
         }}
       >
         {trips.map((trip) => (
-          <TripCard
-            key={trip.id}
-            trip={trip}
-            onClick={() => onTripClick?.(trip.id)}
-          />
+          <TripCard key={trip.id} trip={trip} onClick={() => onTripClick?.(trip.id)} />
         ))}
       </div>
     </section>
