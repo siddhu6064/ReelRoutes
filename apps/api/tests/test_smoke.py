@@ -45,6 +45,7 @@ def client():
 
 # ── 1. Core health ────────────────────────────────────────────────────────────
 
+
 class TestHealth:
     def test_health_returns_200(self, client):
         resp = client.get("/health")
@@ -62,6 +63,7 @@ class TestHealth:
 
     def test_response_time_under_2s(self, client):
         import time
+
         start = time.perf_counter()
         client.get("/health")
         elapsed = time.perf_counter() - start
@@ -70,12 +72,14 @@ class TestHealth:
 
 # ── 2. Auth guards ────────────────────────────────────────────────────────────
 
+
 class TestAuthGuards:
     def test_list_trips_without_auth_returns_4xx(self, client):
         resp = client.get("/api/trips")
-        assert resp.status_code in (401, 422), (
-            f"Expected 401/422 without auth, got {resp.status_code}"
-        )
+        assert resp.status_code in (
+            401,
+            422,
+        ), f"Expected 401/422 without auth, got {resp.status_code}"
 
     def test_create_trip_without_auth_returns_4xx(self, client):
         resp = client.post("/api/trips", json={"source_url": "https://youtu.be/abc"})
@@ -87,6 +91,7 @@ class TestAuthGuards:
 
 
 # ── 3. Input validation ───────────────────────────────────────────────────────
+
 
 class TestInputValidation:
     def test_process_with_no_body_returns_422(self, client):
@@ -122,6 +127,7 @@ class TestInputValidation:
 
 # ── 4. Public endpoints (no auth needed) ─────────────────────────────────────
 
+
 class TestPublicEndpoints:
     def test_explore_feed_returns_200(self, client):
         resp = client.get("/api/explore")
@@ -144,11 +150,13 @@ class TestPublicEndpoints:
 
 # ── 5. Security headers ───────────────────────────────────────────────────────
 
+
 class TestSecurityHeaders:
     """
     These checks hit the Vercel-hosted web app (SMOKE_WEB_URL), not the API.
     Skipped if SMOKE_WEB_URL is not set.
     """
+
     WEB_URL = os.environ.get("SMOKE_WEB_URL", "")
 
     @pytest.mark.skipif(not os.environ.get("SMOKE_WEB_URL"), reason="SMOKE_WEB_URL not set")
@@ -170,12 +178,15 @@ class TestSecurityHeaders:
 
 # ── 6. CORS ───────────────────────────────────────────────────────────────────
 
+
 class TestCors:
     def test_staging_origin_allowed(self, client):
         resp = client.options(
             "/health",
-            headers={"Origin": "https://reelroutes-staging.vercel.app",
-                     "Access-Control-Request-Method": "GET"},
+            headers={
+                "Origin": "https://reelroutes-staging.vercel.app",
+                "Access-Control-Request-Method": "GET",
+            },
         )
         # 200 or 204 — as long as the origin isn't rejected
         assert resp.status_code in (200, 204)

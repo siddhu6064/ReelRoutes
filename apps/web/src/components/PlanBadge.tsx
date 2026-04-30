@@ -6,10 +6,9 @@
  */
 import { useState } from "react";
 
-import { usePlanStatus } from "@/api/client";
-import { useAppStore } from "@/stores/appStore";
-
 import UpgradeModal from "./UpgradeModal";
+import { usePlanStatus } from "../api/client";
+import { useAppStore } from "../stores/appStore";
 
 export default function PlanBadge(): React.ReactElement | null {
   const { userId } = useAppStore();
