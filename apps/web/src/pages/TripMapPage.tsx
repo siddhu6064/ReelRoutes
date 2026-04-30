@@ -7,6 +7,7 @@ import styles from "./TripMapPage.module.css";
 import { type Pin, type Trip, useTrip } from "@/api/client";
 import ChatPanel from "@/components/ChatPanel";
 import PinDetailPanel from "@/components/PinDetailPanel";
+import SimilarTrips from "@/components/SimilarTrips";
 import { useAppStore } from "@/stores/appStore";
 
 const CORAL = "#D85A30";
@@ -503,6 +504,12 @@ export default function TripMapPage() {
           </div>
         )}
       </main>
+
+      {/* ── Similar trips (AI-powered) ── */}
+      <SimilarTrips
+        tripId={trip.id}
+        onTripClick={(id) => navigate(`/trips/${id}`)}
+      />
 
       {/* ── Right panel ── */}
       {chatOpen ? (

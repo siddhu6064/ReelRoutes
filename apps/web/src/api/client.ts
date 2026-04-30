@@ -1007,3 +1007,47 @@ export function useDeleteReservation(): UseMutationResult<
     },
   });
 }
+
+// ── Vector Search ─────────────────────────────────────────────────────────────
+
+export interface SimilarTrip {
+  id: string;
+  title: string;
+  platform: string;
+  pin_count: number;
+  view_count: number;
+  video_creator: string | null;
+  video_channel: string | null;
+  created_at: string;
+  similarity_score: number;
+}
+
+export function useSimilarTrips(
+  tripId: string,
+  enabled = true,
+): UseQueryResult<{ trips: SimilarTrip[]; source_trip_id: string }> {
+  return useQuery({
+    queryKey: ["similar", tripId],
+    queryFn: () =>
+      apiFetch<{ trips: SimilarTrip[]; source_trip_id: string }>(
+        `/api/trips/${tripId}/similar`,
+      ),
+    enabled,
+    staleTime: 5 * 60 * 1000, // 5 min — similarity doesn't change often
+  });
+}
+
+export function useSemanticSearch(
+  query: string,
+  enabled = true,
+): UseQueryResult<{ trips: SimilarTrip[]; query: string; semantic: boolean }> {
+  return useQuery({
+    queryKey: ["semantic-search", query],
+    queryFn: () =>
+      apiFetch<{ trips: SimilarTrip[]; query: string; semantic: boolean }>(
+        `/api/explore/semantic?q=${encodeURIComponent(query)}`,
+      ),
+    enabled: enabled && query.trim().length >= 2,
+    staleTime: 2 * 60 * 1000, // 2 min
+  });
+}

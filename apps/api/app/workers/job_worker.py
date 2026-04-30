@@ -156,6 +156,21 @@ async def process_video(ctx: dict[str, Any], job_id: str) -> dict:  # noqa: ARG0
             raw_locations=raw_locations,
         )
 
+        # ── Step 6: Generate semantic embedding (non-blocking) ─
+        # Fire-and-forget — embedding failure must never fail the job.
+        # The trip is fully usable without an embedding; vector search
+        # just won't return it until the embedding is generated.
+        try:
+            from app.services.embedding_service import embed_trip
+
+            await embed_trip(trip)
+        except Exception as emb_exc:
+            logger.warning(
+                "worker_embedding_failed",
+                trip_id=str(trip.id),
+                error=str(emb_exc),
+            )
+
         # Fix 3 — push notification: let the user know their trip is ready
         from app.services.push_notifications import send_trip_ready
 

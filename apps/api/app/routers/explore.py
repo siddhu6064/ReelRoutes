@@ -160,3 +160,68 @@ async def set_visibility(
     trip.updated_at = datetime.now(UTC)
     await trip.save()
     return {"ok": True, "data": {"is_public": trip.is_public}}
+
+
+# ── Vector Search endpoints ──────────────────────────────────────────
+
+
+@router.get("/trips/{trip_id}/similar")
+async def get_similar_trips(
+    trip_id: str,
+    user_id: str | None = Query(None),
+    limit: int = Query(6, ge=1, le=20),
+) -> dict:
+    """
+    Return trips semantically similar to the given trip.
+
+    Uses Atlas Vector Search ($vectorSearch) on the trip's embedding.
+    Falls back to an empty list when:
+      - The trip has no embedding yet (newly created)
+      - The cluster tier doesn't support vector search (M0/M2/M5)
+
+    Results are sorted by cosine similarity descending.
+    Only public trips are returned (unless the requester is the owner,
+    in which case their own trips are also included).
+    """
+    from app.services.embedding_service import find_similar_trips
+
+    trip = await TripService.get(trip_id, user_id=user_id)
+    similar = await find_similar_trips(
+        trip=trip,
+        public_only=True,
+        limit=limit,
+    )
+    return {"ok": True, "data": {"trips": similar, "source_trip_id": trip_id}}
+
+
+@router.get("/explore/semantic")
+async def semantic_search(
+    q: str = Query(..., min_length=2, max_length=500, description="Natural language query"),
+    limit: int = Query(10, ge=1, le=30),
+) -> dict:
+    """
+    Semantic search across public trips using natural language.
+
+    Examples:
+      - "street food tour in Asia"
+      - "temples and mountains Japan"
+      - "solo travel budget Europe"
+
+    Embeds the query with text-embedding-3-small then runs kNN
+    against the trips_embedding_index. Returns results scored by
+    cosine similarity.
+
+    Falls back to an empty list on any vector-search error (M0 clusters,
+    index not yet created, OpenAI key not set).
+    """
+    from app.services.embedding_service import semantic_search_public
+
+    results = await semantic_search_public(query=q, limit=limit)
+    return {
+        "ok": True,
+        "data": {
+            "trips": results,
+            "query": q,
+            "semantic": True,
+        },
+    }

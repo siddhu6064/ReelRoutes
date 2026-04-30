@@ -369,6 +369,11 @@ class TripDocument(Document):
 
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    # ── Semantic embedding (Atlas Vector Search) ───────────────
+    # 1536-dim vector from text-embedding-3-small.
+    # None until first embed_trip() call completes.
+    embedding: list[float] | None = None
+    embedding_hash: str | None = None  # SHA-256[:16] of trip text fingerprint
 
     class Settings:
         name: ClassVar[str] = "trips"

@@ -795,3 +795,40 @@ export function useUnresolvedPlaces(tripId: string | null, userId?: string) {
     enabled: !!tripId,
   });
 }
+
+// ── Vector Search ─────────────────────────────────────────────────────────────
+
+export interface SimilarTrip {
+  id: string;
+  title: string;
+  platform: string;
+  pin_count: number;
+  view_count: number;
+  video_creator: string | null;
+  created_at: string;
+  similarity_score: number;
+}
+
+export function useSimilarTrips(tripId: string | null, enabled = true) {
+  return useQuery({
+    queryKey: ["similar", tripId],
+    queryFn: () =>
+      apiFetch<{ trips: SimilarTrip[]; source_trip_id: string }>(
+        `/api/trips/${tripId}/similar`,
+      ),
+    enabled: enabled && !!tripId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useSemanticSearch(query: string, enabled = true) {
+  return useQuery({
+    queryKey: ["semantic-search", query],
+    queryFn: () =>
+      apiFetch<{ trips: SimilarTrip[]; query: string }>(
+        `/api/explore/semantic?q=${encodeURIComponent(query)}`,
+      ),
+    enabled: enabled && query.trim().length >= 2,
+    staleTime: 2 * 60 * 1000,
+  });
+}
