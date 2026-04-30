@@ -30,7 +30,7 @@ const DAY_COLOURS = [
   "#B07D3A",
 ];
 
-export default function EditTripPage() {
+export default function EditTripPage(): React.ReactElement {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const { userId } = useAppStore();

@@ -21,7 +21,7 @@ const MEAL_LABELS: Record<MealSlot, { icon: string; label: string }> = {
   dinner: { icon: "🌆", label: "Dinner" },
 };
 
-export default function FoodSlot({ slot, choice, onChoose, onSkip }: Props) {
+export default function FoodSlot({ slot, choice, onChoose, onSkip }: Props): React.ReactElement {
   const { icon, label } = MEAL_LABELS[slot.meal];
   const isSkipped = choice?.chosen === null;
   const hasOptions = slot.options.length > 0;

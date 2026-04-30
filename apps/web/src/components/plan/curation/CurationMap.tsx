@@ -16,7 +16,7 @@ import {
  *   Blue markers  — activity stops
  *   Orange markers — chosen food stops
  */
-export default function CurationMap() {
+export default function CurationMap(): React.ReactElement {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);

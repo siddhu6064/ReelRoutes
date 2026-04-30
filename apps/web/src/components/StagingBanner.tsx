@@ -9,7 +9,7 @@
 
 const IS_STAGING = import.meta.env.VITE_ENV === "staging";
 
-export default function StagingBanner() {
+export default function StagingBanner(): React.ReactElement {
   if (!IS_STAGING) return null;
 
   return (

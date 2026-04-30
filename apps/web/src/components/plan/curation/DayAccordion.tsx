@@ -35,7 +35,12 @@ interface Props {
   onToggle: () => void;
 }
 
-export default function DayAccordion({ curatedDay, dayIndex, isOpen, onToggle }: Props) {
+export default function DayAccordion({
+  curatedDay,
+  dayIndex,
+  isOpen,
+  onToggle,
+}: Props): React.ReactElement {
   const removeActivityStop = useScratchPlanStore((s) => s.removeActivityStop);
   const reorderActivityStops = useScratchPlanStore((s) => s.reorderActivityStops);
   const chooseFoodOption = useScratchPlanStore((s) => s.chooseFoodOption);

@@ -18,7 +18,7 @@ interface Props {
  * Shows up to 3 pins with confidence < 0.6 that weren't geocoded,
  * letting the user tap to confirm and add them to the trip, or dismiss.
  */
-export default function LowConfidenceSuggestions({ tripId, pins }: Props) {
+export default function LowConfidenceSuggestions({ tripId, pins }: Props): React.ReactElement {
   const { userId } = useAppStore();
   const { mutateAsync: addPin } = useAddPin();
 

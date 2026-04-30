@@ -6,7 +6,7 @@ interface Props {
   onSelect: () => void;
 }
 
-export default function RestaurantCard({ option, selected, onSelect }: Props) {
+export default function RestaurantCard({ option, selected, onSelect }: Props): React.ReactElement {
   const priceLabel =
     option.price_level != null
       ? (["Free", "$", "$$", "$$$", "$$$$"][option.price_level] ?? "")

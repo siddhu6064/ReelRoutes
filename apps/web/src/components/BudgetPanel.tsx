@@ -318,7 +318,7 @@ interface BudgetPanelProps {
   userId?: string;
 }
 
-export default function BudgetPanel({ tripId, userId }: BudgetPanelProps) {
+export default function BudgetPanel({ tripId, userId }: BudgetPanelProps): React.ReactElement {
   const expensesQuery = useExpenses(tripId, userId);
   const summaryQuery = useExpenseSummary(tripId, userId);
   const deleteMutation = useDeleteExpense();

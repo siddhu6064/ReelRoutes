@@ -21,7 +21,10 @@ interface SpotSuggestionsProps {
   userId?: string;
 }
 
-export default function SpotSuggestions({ tripId, userId }: SpotSuggestionsProps) {
+export default function SpotSuggestions({
+  tripId,
+  userId,
+}: SpotSuggestionsProps): React.ReactElement {
   const suggestMutation = useSuggestSpots();
   const addPinMutation = useAddSuggestedPin();
   const [addedNames, setAddedNames] = useState<Set<string>>(new Set());

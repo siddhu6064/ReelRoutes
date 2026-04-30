@@ -3,8 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import styles from "./ProcessingPage.module.css";
 
-import { useJobWebSocket } from "@/hooks/useJobWebSocket";
-import { useAppStore } from "@/stores/appStore";
+import { useJobWebSocket } from "../hooks/useJobWebSocket";
+import type { JobStatus } from "../api/client";
+import { useAppStore } from "../stores/appStore";
 
 const STEPS = [
   { key: "fetching_video", label: "Fetching video" },
@@ -19,7 +20,7 @@ function stepIndex(stepKey: string | undefined) {
   return STEPS.findIndex((s) => s.key === stepKey);
 }
 
-export default function ProcessingPage() {
+export default function ProcessingPage(): React.ReactElement {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const { status, wsState } = useJobWebSocket(jobId ?? null);
@@ -29,7 +30,7 @@ export default function ProcessingPage() {
   useEffect(() => {
     if (status?.status === "completed") {
       // In Phase 3 the worker will return a tripId; for now navigate to demo
-      const tripId = (status as any).tripId ?? "demo";
+      const tripId = (status as JobStatus & { tripId?: string }).tripId ?? "demo";
       if (guestJob) setGuestJob({ ...guestJob, tripId });
       setTimeout(() => navigate(`/trips/${tripId}`), 600);
     }

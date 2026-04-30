@@ -23,7 +23,7 @@ const PREFERENCES: Array<{ value: TripPreference; label: string; emoji: string; 
   },
 ];
 
-export default function StepPreferences({ onBack, onGenerate, error }: Props) {
+export default function StepPreferences({ onBack, onGenerate, error }: Props): React.ReactElement {
   const preferences = useScratchPlanStore((s) => s.preferences);
   const togglePreference = useScratchPlanStore((s) => s.togglePreference);
   const destination = useScratchPlanStore((s) => s.destination);

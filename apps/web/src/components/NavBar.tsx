@@ -4,7 +4,7 @@ import styles from "./NavBar.module.css";
 
 import { useAppStore } from "@/stores/appStore";
 
-export default function NavBar() {
+export default function NavBar(): React.ReactElement {
   const { userId } = useAppStore();
   const navigate = useNavigate();
 

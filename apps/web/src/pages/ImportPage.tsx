@@ -39,7 +39,7 @@ function isValidUrl(url: string) {
   }
 }
 
-export default function ImportPage() {
+export default function ImportPage(): React.ReactElement {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();

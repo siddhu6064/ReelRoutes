@@ -20,7 +20,7 @@ import PlanFromScratch from "../components/plan/PlanFromScratch";
 
 type CreationMode = "choose" | "video" | "scratch";
 
-export default function NewTripScreen() {
+export default function NewTripScreen(): React.ReactElement {
   const [mode, setMode] = useState<CreationMode>("choose");
 
   // ── Mode selector ─────────────────────────────────────────────────────────

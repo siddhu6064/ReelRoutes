@@ -25,7 +25,7 @@ interface Message extends ChatMessage {
   done?: boolean;
 }
 
-export default function ChatPanel({ tripId, onClose }: Props) {
+export default function ChatPanel({ tripId, onClose }: Props): React.ReactElement {
   const { userId } = useAppStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");

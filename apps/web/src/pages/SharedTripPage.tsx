@@ -7,7 +7,7 @@ import type { Pin } from "@/api/client";
 
 import { useSharedTrip } from "@/api/client";
 
-export default function SharedTripPage() {
+export default function SharedTripPage(): React.ReactElement {
   const { shareToken } = useParams<{ shareToken: string }>();
   const { data: trip, isLoading, error } = useSharedTrip(shareToken ?? null);
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);

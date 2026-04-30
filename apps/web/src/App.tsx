@@ -39,7 +39,7 @@ function PageLoader() {
   );
 }
 
-export default function App() {
+export default function App(): React.ReactElement {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

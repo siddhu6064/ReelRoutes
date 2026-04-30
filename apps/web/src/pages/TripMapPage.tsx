@@ -90,20 +90,20 @@ async function saveForOffline(trip: Trip) {
       const req = indexedDB.open("reelroutes-offline", 1);
       req.onupgradeneeded = () => req.result.createObjectStore("trips", { keyPath: "id" });
       req.onsuccess = () => res(req.result);
-      req.onerror = () => rej(req.error);
+      req.onerror = () => rej(new Error(req.error?.message ?? "IDB open failed"));
     });
     await new Promise<void>((res, rej) => {
       const tx = db.transaction("trips", "readwrite");
       tx.objectStore("trips").put({ ...trip, _savedAt: Date.now() });
       tx.oncomplete = () => res();
-      tx.onerror = () => rej(tx.error);
+      tx.onerror = () => rej(new Error(tx.error?.message ?? "IDB write failed"));
     });
   } catch (e) {
     console.warn("Offline save failed:", e);
   }
 }
 
-export default function TripMapPage() {
+export default function TripMapPage(): React.ReactElement {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const { userId, chatOpen, setChatOpen } = useAppStore();
@@ -128,7 +128,7 @@ export default function TripMapPage() {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!mapRef.current || !apiKey) return;
     const loader = new Loader({ apiKey, version: "weekly", libraries: ["places"] });
-    loader.load().then(() => {
+    void loader.load().then(() => {
       if (!mapRef.current) return;
       mapInstance.current = new google.maps.Map(mapRef.current, {
         zoom: 5,
@@ -430,9 +430,11 @@ export default function TripMapPage() {
         {trip && (
           <button
             className={`${styles.offlineBtn} ${offlineSaved ? styles.offlineBtnSaved : ""}`}
-            onClick={async () => {
-              await saveForOffline(trip);
-              setOfflineSaved(true);
+            onClick={() => {
+              void (async () => {
+                await saveForOffline(trip);
+                setOfflineSaved(true);
+              })();
             }}
           >
             {offlineSaved ? "✓ Saved offline" : "⬇ Save for offline"}

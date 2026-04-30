@@ -31,7 +31,7 @@ export default function UpgradeModal({
   tripCount,
   tripLimit,
   onClose,
-}: Props) {
+}: Props): React.ReactElement {
   const { mutateAsync: createCheckout, isPending } = useCreateCheckout();
 
   async function handleUpgrade() {

@@ -21,7 +21,7 @@ export default function VisitToggle({
   visitedAt,
   diaryEntry,
   placeName,
-}: VisitToggleProps) {
+}: VisitToggleProps): React.ReactElement {
   const [showModal, setShowModal] = useState(false);
   const isVisited = !!visitedAt;
 

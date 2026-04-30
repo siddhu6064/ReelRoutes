@@ -6,18 +6,24 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+const API_BASE: string = (import.meta.env["VITE_API_URL"] as string | undefined) ?? "";
 
 // ── Core fetch ────────────────────────────────────────────────
+
+interface ApiEnvelope<T> {
+  ok: boolean;
+  data: T;
+  error?: string;
+}
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json", ...init?.headers },
     ...init,
   });
-  const json = await res.json();
-  if (!json.ok) throw new Error(json.error?.message ?? "Request failed");
-  return json.data as T;
+  const json = (await res.json()) as ApiEnvelope<T>;
+  if (!json.ok) throw new Error(json.error ?? "Request failed");
+  return json.data;
 }
 
 // ── Types (local, matches backend shape) ──────────────────────
@@ -162,7 +168,7 @@ export function useCreateTrip() {
     mutationFn: (body: Partial<Trip> & { user_id?: string }) =>
       apiFetch<Trip>("/api/trips", { method: "POST", body: JSON.stringify(body) }),
     onSuccess: (_, vars) => {
-      if (vars.user_id) qc.invalidateQueries({ queryKey: ["trips", vars.user_id] });
+      if (vars.user_id) void qc.invalidateQueries({ queryKey: ["trips", vars.user_id] });
     },
   });
 }
@@ -174,7 +180,7 @@ export function useUpdateTrip() {
       apiFetch<Trip>(`/api/trips/${tripId}`, { method: "PUT", body: JSON.stringify(body) }),
     onSuccess: (data) => {
       qc.setQueryData(["trip", data.id], data);
-      qc.invalidateQueries({ queryKey: ["trips", data.userId] });
+      void qc.invalidateQueries({ queryKey: ["trips", data.userId] });
     },
   });
 }
@@ -185,7 +191,7 @@ export function useDeleteTrip() {
     mutationFn: ({ tripId, userId }: { tripId: string; userId: string }) =>
       fetch(`${API_BASE}/api/trips/${tripId}?user_id=${userId}`, { method: "DELETE" }),
     onSuccess: (_data, { userId }) => {
-      qc.invalidateQueries({ queryKey: ["trips", userId] });
+      void qc.invalidateQueries({ queryKey: ["trips", userId] });
     },
   });
 }
@@ -198,7 +204,7 @@ export function useShareTrip() {
         `/api/trips/${tripId}/share?user_id=${userId}`,
         { method: "POST" },
       ),
-    onSuccess: (_d, { tripId }) => qc.invalidateQueries({ queryKey: ["trip", tripId] }),
+    onSuccess: (_d, { tripId }) => void qc.invalidateQueries({ queryKey: ["trip", tripId] }),
   });
 }
 
@@ -279,7 +285,7 @@ export function streamChat(params: ChatStreamParams): AbortController {
   const { tripId, message, history, userId, onToken, onDone, onError } = params;
   const controller = new AbortController();
 
-  (async () => {
+  void (async () => {
     try {
       const res = await fetch(`${API_BASE}/api/trips/${tripId}/chat/stream`, {
         method: "POST",
@@ -390,7 +396,7 @@ export function useOptimiseRoute() {
         method: "POST",
         body: JSON.stringify({ user_id, start_lat, start_lng }),
       }),
-    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+    onSuccess: (_data, vars) => void qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }
 
@@ -410,7 +416,7 @@ export function useGenerateItinerary() {
         method: "POST",
         body: JSON.stringify({ user_id, trip_length_days }),
       }),
-    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+    onSuccess: (_data, vars) => void qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }
 
@@ -443,7 +449,7 @@ export function useVisitPin() {
           ...(diaryEntry !== undefined ? { diary_entry: diaryEntry } : {}),
         }),
       }),
-    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+    onSuccess: (_data, vars) => void qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }
 
@@ -455,7 +461,7 @@ export function useUnvisitPin() {
         `/api/trips/${tripId}/pins/${pinId}/visit${userId ? `?user_id=${userId}` : ""}`,
         { method: "DELETE" },
       ),
-    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+    onSuccess: (_data, vars) => void qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }
 
@@ -515,7 +521,7 @@ export function useSuggestSpots() {
         `/api/trips/${tripId}/suggest-spots${userId ? `?user_id=${userId}` : ""}`,
         { method: "POST" },
       ),
-    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
+    onSuccess: (_data, vars) => void qc.invalidateQueries({ queryKey: ["trip", vars.tripId] }),
   });
 }
 
@@ -654,8 +660,8 @@ export function useAddExpense() {
         }),
       }),
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
-      qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });
+      void qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
+      void qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });
     },
   });
 }
@@ -677,8 +683,8 @@ export function useDeleteExpense() {
         { method: "DELETE" },
       ),
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
-      qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });
+      void qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
+      void qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });
     },
   });
 }
@@ -706,8 +712,8 @@ export function useSetBudget() {
         }),
       }),
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
-      qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });
+      void qc.invalidateQueries({ queryKey: ["expenses", vars.tripId] });
+      void qc.invalidateQueries({ queryKey: ["expense-summary", vars.tripId] });
     },
   });
 }

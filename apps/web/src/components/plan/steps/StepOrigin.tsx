@@ -9,7 +9,7 @@ interface Props {
   onNext: () => void;
 }
 
-export default function StepOrigin({ onNext }: Props) {
+export default function StepOrigin({ onNext }: Props): React.ReactElement {
   const startingPoint = useScratchPlanStore((s) => s.startingPoint);
   const destination = useScratchPlanStore((s) => s.destination);
   const setStartingPoint = useScratchPlanStore((s) => s.setStartingPoint);

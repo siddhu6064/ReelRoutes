@@ -63,7 +63,7 @@ function ProgressRing({ rate, size = 96 }: { rate: number; size?: number }) {
   );
 }
 
-export default function WrappedCard({ tripId, userId }: WrappedCardProps) {
+export default function WrappedCard({ tripId, userId }: WrappedCardProps): React.ReactElement {
   const { data, isLoading, isError } = useWrapped(tripId, userId);
 
   if (isLoading) {

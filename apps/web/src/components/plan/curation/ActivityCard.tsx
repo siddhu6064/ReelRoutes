@@ -16,7 +16,7 @@ export default function ActivityCard({
   onRemove,
   dragHandleProps,
   isDragging,
-}: Props) {
+}: Props): React.ReactElement {
   const priceLabel =
     stop.price_level != null ? (["Free", "$", "$$", "$$$", "$$$$"][stop.price_level] ?? "") : null;
 

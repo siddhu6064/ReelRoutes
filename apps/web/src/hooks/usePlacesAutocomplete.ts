@@ -17,7 +17,11 @@ const DEBOUNCE_MS = 300;
  *
  * Falls back gracefully if the API is not loaded.
  */
-export function usePlacesAutocomplete(input: string) {
+export function usePlacesAutocomplete(input: string): {
+  predictions: PlacePrediction[];
+  loading: boolean;
+  clear: () => void;
+} {
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [loading, setLoading] = useState(false);
   const serviceRef = useRef<google.maps.places.AutocompleteService | null>(null);
@@ -44,7 +48,7 @@ export function usePlacesAutocomplete(input: string) {
     }
 
     setLoading(true);
-    timerRef.current = setTimeout(() => {
+    timerRef.current = setTimeout((): void => {
       serviceRef.current!.getPlacePredictions({ input, types: ["(cities)"] }, (results, status) => {
         setLoading(false);
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {

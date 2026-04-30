@@ -1,15 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { JobStatus } from "@/api/client";
+import type { JobStatus } from "../api/client";
 
 type WsState = "connecting" | "open" | "closed" | "error";
+
+interface WsMessage {
+  ok: boolean;
+  data: JobStatus;
+}
 
 interface UseJobWebSocketResult {
   status: JobStatus | null;
   wsState: WsState;
 }
 
-const WS_BASE = import.meta.env.VITE_WS_URL ?? `ws://${window.location.host}`;
+const WS_BASE: string =
+  (import.meta.env["VITE_WS_URL"] as string | undefined) ?? `ws://${window.location.host}`;
 
 /**
  * Connects to ws/jobs/:jobId for real-time job progress.
@@ -22,29 +28,32 @@ export function useJobWebSocket(jobId: string | null): UseJobWebSocketResult {
   const wsRef = useRef<WebSocket | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const isTerminal = (s: JobStatus | null) => s?.status === "completed" || s?.status === "failed";
+  const isTerminal = (s: JobStatus | null): boolean =>
+    s?.status === "completed" || s?.status === "failed";
 
-  const startPolling = useCallback((id: string) => {
+  const startPolling = useCallback((id: string): void => {
     if (pollRef.current) clearInterval(pollRef.current);
-    pollRef.current = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/jobs/${id}`);
-        const json = await res.json();
-        if (json.ok) {
-          setStatus(json.data);
-          if (isTerminal(json.data)) {
-            clearInterval(pollRef.current!);
-            pollRef.current = null;
+    pollRef.current = setInterval(() => {
+      void (async () => {
+        try {
+          const res = await fetch(`/api/jobs/${id}`);
+          const json = (await res.json()) as WsMessage;
+          if (json.ok) {
+            setStatus(json.data);
+            if (isTerminal(json.data)) {
+              clearInterval(pollRef.current!);
+              pollRef.current = null;
+            }
           }
+        } catch {
+          // network error — keep polling
         }
-      } catch {
-        // network error — keep polling
-      }
+      })();
     }, 3000);
   }, []);
 
-  useEffect(() => {
-    if (!jobId) return;
+  useEffect((): (() => void) => {
+    if (!jobId) return () => undefined;
 
     let ws: WebSocket;
     let usedPolling = false;
@@ -54,18 +63,18 @@ export function useJobWebSocket(jobId: string | null): UseJobWebSocketResult {
       wsRef.current = ws;
       setWsState("connecting");
 
-      ws.onopen = () => setWsState("open");
+      ws.onopen = (): void => setWsState("open");
 
-      ws.onmessage = (evt) => {
+      ws.onmessage = (evt: MessageEvent): void => {
         try {
-          const msg = JSON.parse(evt.data as string);
-          if (msg.ok) setStatus(msg.data as JobStatus);
+          const msg = JSON.parse(evt.data as string) as WsMessage;
+          if (msg.ok) setStatus(msg.data);
         } catch {
           /* ignore malformed messages */
         }
       };
 
-      ws.onerror = () => {
+      ws.onerror = (): void => {
         setWsState("error");
         if (!usedPolling) {
           usedPolling = true;
@@ -73,9 +82,8 @@ export function useJobWebSocket(jobId: string | null): UseJobWebSocketResult {
         }
       };
 
-      ws.onclose = () => {
+      ws.onclose = (): void => {
         setWsState("closed");
-        // If closed before terminal state, fall back to polling
         setStatus((prev) => {
           if (!isTerminal(prev) && !usedPolling) {
             usedPolling = true;
@@ -89,7 +97,7 @@ export function useJobWebSocket(jobId: string | null): UseJobWebSocketResult {
       startPolling(jobId);
     }
 
-    return () => {
+    return (): void => {
       wsRef.current?.close();
       wsRef.current = null;
       if (pollRef.current) {

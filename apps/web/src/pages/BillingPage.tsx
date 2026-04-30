@@ -22,7 +22,7 @@ const PRO_FEATURES = [
   { icon: "📖", label: "Travel book PDF export" },
 ];
 
-export default function BillingPage() {
+export default function BillingPage(): React.ReactElement {
   const { userId } = useAppStore();
   const navigate = useNavigate();
   const location = useLocation();

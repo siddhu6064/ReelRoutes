@@ -7,7 +7,7 @@ interface Props {
 const MIN_DAYS = 1;
 const MAX_DAYS = 14;
 
-export default function StepDays({ onBack, onNext }: Props) {
+export default function StepDays({ onBack, onNext }: Props): React.ReactElement {
   const days = useScratchPlanStore((s) => s.days);
   const setDays = useScratchPlanStore((s) => s.setDays);
 

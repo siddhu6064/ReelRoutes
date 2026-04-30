@@ -18,7 +18,7 @@ export default function DiaryModal({
   onConfirm,
   onSkip,
   onClose,
-}: DiaryModalProps) {
+}: DiaryModalProps): React.ReactElement {
   const [entry, setEntry] = useState(initialEntry);
   const ref = useRef<HTMLTextAreaElement>(null);
 

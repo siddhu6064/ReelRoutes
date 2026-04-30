@@ -38,7 +38,7 @@ function OpenBadge({ openNow }: { openNow: boolean | undefined }) {
   );
 }
 
-export default function PinDetailPanel({ pin, tripId, onClose }: Props) {
+export default function PinDetailPanel({ pin, tripId, onClose }: Props): React.ReactElement {
   const { userId } = useAppStore();
   const [notes, setNotes] = useState(pin.notes ?? "");
   const [tagInput, setTagInput] = useState("");

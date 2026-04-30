@@ -12,7 +12,7 @@ const STAGES = [
 
 const STAGE_INTERVAL_MS = 3200;
 
-export default function StepLoading() {
+export default function StepLoading(): React.ReactElement {
   const destination = useScratchPlanStore((s) => s.destination);
   const days = useScratchPlanStore((s) => s.days);
 
