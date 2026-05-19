@@ -1,0 +1,113 @@
+{
+  "theme": "light",
+  "archetype": "1 (Organic & Earthy)",
+  "vibe": "Trust, Growth, Calm, Grounded",
+  "typography": {
+    "heading_font": "Manrope",
+    "body_font": "Inter",
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl tracking-tight leading-tight",
+      "h2": "text-2xl sm:text-3xl tracking-tight leading-snug",
+      "h3": "text-xl sm:text-2xl tracking-tight",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed",
+      "small_label": "text-xs tracking-[0.2em] uppercase font-semibold text-muted-foreground",
+      "data_numbers": "text-2xl font-semibold tabular-nums tracking-tight"
+    }
+  },
+  "colors": {
+    "background": {
+      "page": "#F9F8F6",
+      "surface": "#FFFFFF",
+      "surface_hover": "#F2EFEB"
+    },
+    "text": {
+      "primary": "#2B2A28",
+      "secondary": "#73716D",
+      "inverse": "#FFFFFF",
+      "hover": "#1F1E1D"
+    },
+    "brand": {
+      "primary": "#4A6D5C",
+      "primary_hover": "#3D594B",
+      "accent": "#E07A5F"
+    },
+    "semantic": {
+      "income": "#3D8B61",
+      "income_bg": "#E9F5EF",
+      "expense": "#E63946",
+      "expense_bg": "#FBEAEC",
+      "transfer": "#457B9D",
+      "transfer_bg": "#EAF2F6",
+      "warning": "#F4A261",
+      "border": "#E5E2DC"
+    }
+  },
+  "layout_and_spacing": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "spacing_scale": "Generous spacing. p-6 or p-8 inside cards, gap-6 between dashboard widgets.",
+    "grid_strategy": "Control Room Grid (Dense, Scannable)",
+    "dashboard_grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+    "widget_spans": {
+      "summary_cards": "col-span-1",
+      "main_chart": "col-span-2 row-span-2 lg:col-span-3",
+      "recent_transactions": "col-span-1 lg:col-span-1 row-span-2"
+    }
+  },
+  "surfaces_and_borders": {
+    "dashboard_cards": {
+      "default": "bg-white border border-[#E5E2DC] rounded-xl shadow-sm",
+      "hover": "hover:shadow-md hover:border-[#D1CCC2] transition-all duration-200 ease-in-out hover:-translate-y-0.5",
+      "padding": "p-6"
+    },
+    "header": {
+      "style": "sticky top-0 z-50 bg-[#F9F8F6]/80 backdrop-blur-xl border-b border-[#E5E2DC]",
+      "nav_links": "text-[#73716D] hover:text-[#2B2A28] transition-colors"
+    },
+    "radius": {
+      "card": "rounded-2xl",
+      "button": "rounded-full",
+      "input": "rounded-lg"
+    }
+  },
+  "motion_and_interactions": {
+    "hover_states": "All buttons and interactive cards must have scale-up or shadow changes.",
+    "page_transitions": "Fade in from bottom with opacity.",
+    "list_animations": "Staggered entrance for transaction lists (framer-motion).",
+    "chart_animations": "Smooth drawing transitions on load."
+  },
+  "components_strategy": {
+    "buttons": "Shadcn based. Primary buttons use #4A6D5C background with white text. Rounded full.",
+    "inputs": "Shadcn based. bg-white border-[#E5E2DC] focus:ring-2 focus:ring-[#4A6D5C]/20 focus:border-[#4A6D5C].",
+    "tables": "Go cardless for raw data rows or use a clean border-bottom for each row. Use Shadcn Table.",
+    "charts": "Shadcn charts or Recharts. Use brand and semantic colors (Income: #3D8B61, Expense: #E63946).",
+    "dialogs": "Shadcn dialogs for Add Transaction, rounded-2xl with p-6.",
+    "badges": "For categories. Soft backgrounds with solid text (e.g., bg-[#E9F5EF] text-[#3D8B61])."
+  },
+  "icons": {
+    "library": "lucide-react",
+    "style": "Clean, line-based, 2px stroke width. Contextual colors (red for expenses, green for income)."
+  },
+  "testing": {
+    "attributes": "All interactive elements MUST have data-testid (e.g., data-testid='add-transaction-button', data-testid='submit-transaction', data-testid='profile-switch')."
+  },
+  "media": {
+    "image_urls": {
+      "auth_background": {
+        "url": "https://images.unsplash.com/photo-1766486457306-fffb5aa65c8b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTV8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGxpZ2h0JTIwcGFwZXIlMjB0ZXh0dXJlfGVufDB8fHx8MTc3NDU3MzEzMXww&ixlib=rb-4.1.0&q=85",
+        "description": "Warm crumpled paper lantern lighting, used as a subtle background for the Login/Register page.",
+        "usage": "Auth page background"
+      },
+      "default_avatar": {
+        "url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTV8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzQ1NzMxMzF8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Professional user portrait to be used as default avatar in header and profile section.",
+        "usage": "User profile avatar"
+      }
+    }
+  },
+  "instructions_to_main_agent": {
+    "setup": "Use Vite + React + Tailwind + Shadcn. Initialize Shadcn components: table, card, button, input, dialog, select, dropdown-menu, tabs, chart.",
+    "features": "1. Build an Auth page with the auth_background image. 2. Build a Dashboard layout with a sidebar or sticky header. 3. Implement widgets: Balance, Income, Expenses, Savings. 4. Implement a Main Chart (Area or Bar) for cash flow. 5. Implement Recent Transactions list with category icons. 6. Build the 'Add Transaction' flow with AI receipt scanning UI placeholder.",
+    "design_rules": "Respect the organic & earthy color palette. Use ample padding (p-6, p-8) to make it feel premium. Follow the 'Control Room Grid' for the dashboard layout. Do not use generic blue SaaS colors. Every interactive element must include a data-testid."
+  }
+}
