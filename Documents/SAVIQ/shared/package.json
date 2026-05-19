@@ -1,0 +1,12 @@
+{
+  "name": "@expense-tracker/shared",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types/index.ts",
+    "./constants": "./constants/index.ts",
+    "./utils": "./utils/index.ts"
+  }
+}
